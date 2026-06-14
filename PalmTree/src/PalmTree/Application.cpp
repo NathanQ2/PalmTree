@@ -94,7 +94,13 @@ namespace PalmTree {
         KeyboardMovementController cameraController = KeyboardMovementController(cursorPos);
 
         auto currentTime = std::chrono::high_resolution_clock::now();
-
+        
+        for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
+            Layer* layer = *it;
+            if (layer->IsEnabled())
+                layer->OnStart();
+        }
+        
         while (m_Running) {
             m_Window->OnUpdate();
             
@@ -119,6 +125,11 @@ namespace PalmTree {
                 };
 
                 // Update
+                for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
+                    Layer* layer = *it;
+                    if (layer->IsEnabled())
+                        layer->OnUpdate(frameTime);
+                }
                 GlobalUBO ubo{};
                 ubo.Projection = camera.GetProjection();
                 ubo.View = camera.GetView();
@@ -135,6 +146,12 @@ namespace PalmTree {
                 m_Renderer->EndFrame();
             }
         }
+        
+        for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
+            Layer* layer = *it;
+            if (layer->IsEnabled())
+                layer->OnEnd();
+        }
 
         vkDeviceWaitIdle(m_Device->GetDevice());
     }
@@ -142,10 +159,42 @@ namespace PalmTree {
     void Application::OnEvent(Event& event) {
         EventDispatcher dispatcher(event);
         dispatcher.Dispatch<WindowClosedEvent>(BIND_EVENT_FN(Application::OnWindowClosed));
+
+        for (auto it = m_LayerStack.End(); it != m_LayerStack.Begin(); ) {
+            Layer* layer = *--it;
+            if (layer->IsEnabled()) {
+                bool handled = layer->OnEvent(event);
+                if (handled) break;
+            }
+        }
         
-        
-        PT_CORE_TRACE("EVENT: {0}", event.ToString());
+        // PT_CORE_TRACE("EVENT: {0}", event.ToString());
     }
+
+#ifdef PT_DEBUG
+    void Application::DebugPrintLayerStack() {
+        std::stringstream ss;
+        
+        for (auto it = m_LayerStack.End(); it != m_LayerStack.Begin(); ) {
+            const std::string& name = (*--it)->GetName();
+            if (it + 1 == m_LayerStack.End()) {
+                ss << "TOP    " << name;
+            }
+            else if (it == m_LayerStack.Begin()) {
+                ss << "BOTTOM " << name;
+            }
+            else {
+                ss << "       " << name;
+            }
+            
+            ss << "\n";
+        }
+        
+        PT_CORE_TRACE("LayerStack:\n{}", ss.str());
+    }
+#else
+    void Application::PrintLayerStack() {}
+#endif
 
     void Application::LoadGameObjects() {
         // Flat Vase
