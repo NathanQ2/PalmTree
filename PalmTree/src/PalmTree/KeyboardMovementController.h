@@ -22,9 +22,7 @@ namespace PalmTree {
             int LeftButton = GLFW_MOUSE_BUTTON_LEFT;
         };
 
-        explicit KeyboardMovementController(const glm::f64vec2 initialCursorPos) : m_PreviousCursorPosition(
-            initialCursorPos
-        ) {}
+        explicit KeyboardMovementController(const glm::f64vec2 initialCursorPos, bool shouldCaptureMouse = true) : m_PreviousCursorPosition(initialCursorPos), m_ShouldCaptureMouse(shouldCaptureMouse) {}
 
         void MoveInPlaneXZ(GLFWwindow* window, float dt, GameObject& gameObject);
 
@@ -32,9 +30,11 @@ namespace PalmTree {
         KeyMappings m_Keys{};
         float m_MoveSpeed = 3.0f;
         float m_KeyboardLookSpeed = 1.5f;
-        float m_MouseLookSpeed = 0.015f;
+        float m_MouseLookSpeed = 0.03f;
 
         glm::f64vec2 m_PreviousCursorPosition;
+        
+        bool m_ShouldCaptureMouse;
         
         bool m_Enabled = false;
     };

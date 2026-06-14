@@ -3,22 +3,24 @@
 class GameLayer : public PalmTree::Layer {
 public:
     GameLayer() : Layer("GameLayer") {}
-
-    bool OnEvent(PalmTree::Event& event) override {
-        PT_TRACE("Event: {}", event.ToString());
-        
-        return false;
-    }
     
     void OnStart() override {}
     void OnEnd() override {}
     void OnUpdate(float deltaTime) override {}
+    
+    bool OnEvent(PalmTree::Event& event) override {
+        // PT_TRACE("Event: {}", event.ToString());
+        
+        return false;
+    }
 };
 
 class Sandbox : public PalmTree::Application {
 public:
     Sandbox() {
         PushLayer<GameLayer>();
+        
+        PushOverlay<PalmTree::ImGuiLayer>(*std::static_pointer_cast<PalmTree::MacWindow>(m_Window), *m_Device, *m_Renderer);
     }
 };
 

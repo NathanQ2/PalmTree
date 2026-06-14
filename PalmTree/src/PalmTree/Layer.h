@@ -14,10 +14,16 @@ namespace PalmTree {
 #endif
         virtual ~Layer() {}
         
-        virtual bool OnEvent(Event& event) { return false; }
+        virtual void OnAttach()  {}
+        virtual void OnDetach() {}
+        
         virtual void OnStart() {}
         virtual void OnEnd() {}
+        
         virtual void OnUpdate(float deltaTime) {}
+        virtual void OnRender(float deltaTime) {}
+        
+        virtual bool OnEvent(Event& event) { return false; }
         
         void SetEnabled(bool enable) { m_Enabled = enable; }
         bool IsEnabled() const { return m_Enabled; }

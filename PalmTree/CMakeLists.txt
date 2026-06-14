@@ -9,16 +9,32 @@ find_package(glm REQUIRED)
 
 file(GLOB_RECURSE SOURCES src/**.cpp src/**.h)
 
+# ImGui
+file(GLOB IMGUI_SOURCES 
+    vendor/imgui/*.cpp 
+    vendor/imgui/*.h
+    vendor/imgui/backends/imgui_impl_glfw.cpp
+    vendor/imgui/backends/imgui_impl_glfw.h
+    vendor/imgui/backends/imgui_impl_vulkan.cpp
+    vendor/imgui/backends/imgui_impl_vulkan.h
+)
+
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-add_library(PalmTree SHARED ${SOURCES})
+add_library(PalmTree SHARED ${SOURCES} ${IMGUI_SOURCES})
 
 target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES} Vulkan::Vulkan glm::glm)
+
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 target_include_directories(${PROJECT_NAME} PRIVATE vendor/tinyobjloader)
+target_include_directories(${PROJECT_NAME} PRIVATE IMGUI_INCLUDE)
 target_include_directories(${PROJECT_NAME} PUBLIC vendor/spdlog/include)
+target_include_directories(${PROJECT_NAME} PUBLIC vendor/imgui/ vendor/imgui/backends)
+
 target_compile_definitions(PalmTree PRIVATE $<$<CONFIG:Debug>:PT_ENABLE_ASSERTS>)
 target_compile_definitions(PalmTree PUBLIC $<$<CONFIG:Debug>:PT_DEBUG>)
 target_compile_definitions(PalmTree PUBLIC $<$<CONFIG:Release>:PT_RELEASE>)
+target_compile_definitions(PalmTree PUBLIC VK_ENABLE_BETA_EXTENSIONS)
+
 target_precompile_headers(PalmTree PUBLIC src/ptpch.h)
 
 file(GLOB shaders shaders/*.vert shaders/*.frag)

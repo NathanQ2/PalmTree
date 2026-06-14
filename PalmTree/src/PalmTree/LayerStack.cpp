@@ -21,6 +21,8 @@ namespace PalmTree {
         
         m_Layers.erase(it);
         
+        layer->OnDetach();
+        
         delete layer;
     }
 }

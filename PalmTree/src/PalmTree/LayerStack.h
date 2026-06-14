@@ -15,6 +15,8 @@ namespace PalmTree {
             Layer* layer = new T(std::forward<Args>(args)...);
             m_Layers.emplace(m_Layers.end() - m_NumOverlays, layer);
             
+            layer->OnAttach();
+            
             return layer;
         }
         
@@ -23,6 +25,8 @@ namespace PalmTree {
             Layer* layer = new T(std::forward<Args>(args)...);
             m_Layers.emplace_back(layer);
             m_NumOverlays++;
+            
+            layer->OnAttach();
             
             return layer;
         }

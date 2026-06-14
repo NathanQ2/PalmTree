@@ -77,7 +77,8 @@ namespace PalmTree {
         void FreeDescriptors(std::vector<VkDescriptorSet>& descriptors) const;
 
         void ResetPool();
-
+        
+        VkDescriptorPool GetDescriptorPool() const { return m_DescriptorPool; }
     private:
         Device& m_Device;
         VkDescriptorPool m_DescriptorPool;

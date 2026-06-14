@@ -1,6 +1,5 @@
 #pragma once
 
-#define VK_ENABLE_BETA_EXTENSIONS
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 

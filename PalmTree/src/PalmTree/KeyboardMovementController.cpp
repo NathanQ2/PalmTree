@@ -5,9 +5,11 @@
 namespace PalmTree {
     void KeyboardMovementController::MoveInPlaneXZ(GLFWwindow* window, float dt, GameObject& gameObject) {
         if (glfwGetMouseButton(window, m_Keys.LeftButton) == GLFW_PRESS) {
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            if (glfwRawMouseMotionSupported())
-                glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+            if (m_ShouldCaptureMouse) {
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                if (glfwRawMouseMotionSupported())
+                    glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+            }
             
             m_Enabled = true;
             

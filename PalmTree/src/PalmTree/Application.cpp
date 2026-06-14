@@ -21,7 +21,11 @@
 #define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
 
 namespace PalmTree {
+    Application* Application::s_Instance = nullptr;
+    
     Application::Application() {
+        PT_CORE_ASSERT(s_Instance == nullptr, "Application already exists!");
+        
         m_Window = std::shared_ptr<Window>(Window::Create());
         m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
         
@@ -91,7 +95,7 @@ namespace PalmTree {
         
         glm::f64vec2 cursorPos = glm::f64vec2(0);
         glfwGetCursorPos(glfwWindow, &cursorPos.x, &cursorPos.y);
-        KeyboardMovementController cameraController = KeyboardMovementController(cursorPos);
+        KeyboardMovementController cameraController = KeyboardMovementController(cursorPos, false);
 
         auto currentTime = std::chrono::high_resolution_clock::now();
         
@@ -125,16 +129,16 @@ namespace PalmTree {
                 };
 
                 // Update
-                for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
-                    Layer* layer = *it;
-                    if (layer->IsEnabled())
-                        layer->OnUpdate(frameTime);
-                }
                 GlobalUBO ubo{};
                 ubo.Projection = camera.GetProjection();
                 ubo.View = camera.GetView();
                 ubo.InverseView = camera.GetInverseView();
                 pointLightSystem->Update(frameInfo, ubo);
+                for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
+                    Layer* layer = *it;
+                    if (layer->IsEnabled())
+                        layer->OnUpdate(frameTime);
+                }
                 uboBuffers[frameIndex]->WriteToBuffer(&ubo);
                 uboBuffers[frameIndex]->Flush();
 
@@ -142,6 +146,11 @@ namespace PalmTree {
                 m_Renderer->BeginSwapChainRenderPass(commandBuffer);
                 simpleRenderSystem->RenderGameObjects(frameInfo);
                 pointLightSystem->Render(frameInfo);
+                for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
+                    Layer* layer = *it;
+                    if (layer->IsEnabled())
+                        layer->OnRender(frameTime);
+                }
                 m_Renderer->EndSwapChainRenderPass(commandBuffer);
                 m_Renderer->EndFrame();
             }

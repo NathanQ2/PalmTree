@@ -13,6 +13,8 @@
 namespace PalmTree {
     class Application {
     public:
+        static Application& Get() { return *s_Instance; }
+        
         Application();
         ~Application() = default;
 
@@ -37,7 +39,8 @@ namespace PalmTree {
         Layer* GetLayer(int index) { return m_LayerStack.GetLayer(index); }
         
         void DebugPrintLayerStack();
-    private:
+    protected:
+        
         void LoadGameObjects();
         
         bool OnWindowClosed(WindowClosedEvent& event);
@@ -54,6 +57,8 @@ namespace PalmTree {
         LayerStack m_LayerStack{};
         
         bool m_Running = true;
+    private:
+        static Application* s_Instance;
     };
 
     Application* CreateApplication();

@@ -35,6 +35,8 @@ namespace PalmTree {
         Device(Device&&) = delete;
         Device& operator=(Device&&) = delete;
 
+        VkInstance GetInstance() { return m_Instance; }
+        VkPhysicalDevice GetPhysicalDevice() { return m_PhysicalDevice; }
         VkCommandPool GetCommandPool() { return m_CommandPool; }
         VkDevice GetDevice() { return m_Device; }
         VkSurfaceKHR Surface() { return m_Surface; }

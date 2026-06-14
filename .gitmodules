@@ -1,3 +1,6 @@
 [submodule "PalmTree/vendor/spdlog"]
 	path = PalmTree/vendor/spdlog
 	url = https://github.com/gabime/spdlog
+[submodule "PalmTree/vendor/imgui"]
+	path = PalmTree/vendor/imgui
+	url = https://github.com/NathanQ2/imgui_cmake
