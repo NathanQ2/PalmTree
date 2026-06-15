@@ -49,7 +49,7 @@ namespace PalmTree {
         VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
 
         if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to create command buffer!");
+            throw std::runtime_error("Failed to end command buffer!");
         }
 
         auto result = m_SwapChain->SubmitCommandBuffers(&commandBuffer, &m_CurrentImageIndex);

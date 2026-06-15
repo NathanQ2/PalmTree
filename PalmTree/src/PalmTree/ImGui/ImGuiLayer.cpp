@@ -9,6 +9,14 @@
 #include <GLFW/glfw3.h>
 
 namespace PalmTree {
+    ImGuiLayer::ImGuiLayer(const MacWindow& window, Device& device, Renderer& renderer): Layer("ImGui"), m_Window(window), m_Device(device), m_Renderer(renderer) {}
+
+    ImGuiLayer::~ImGuiLayer() {
+        ImGui_ImplVulkan_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
+    }
+
     void ImGuiLayer::OnStart() {
         float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
         
@@ -79,12 +87,6 @@ namespace PalmTree {
         bool show_demo_window = true;
         bool show_another_window = false;
         ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-    }
-
-    void ImGuiLayer::OnEnd() {
-        ImGui_ImplVulkan_Shutdown();
-        ImGui_ImplGlfw_Shutdown();
-        ImGui::DestroyContext();
     }
 
     void ImGuiLayer::OnRender(float deltaTime) {

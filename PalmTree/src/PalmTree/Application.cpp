@@ -144,6 +144,7 @@ namespace PalmTree {
 
                 // Render
                 m_Renderer->BeginSwapChainRenderPass(commandBuffer);
+                
                 simpleRenderSystem->RenderGameObjects(frameInfo);
                 pointLightSystem->Render(frameInfo);
                 for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
@@ -151,6 +152,7 @@ namespace PalmTree {
                     if (layer->IsEnabled())
                         layer->OnRender(frameTime);
                 }
+                
                 m_Renderer->EndSwapChainRenderPass(commandBuffer);
                 m_Renderer->EndFrame();
             }

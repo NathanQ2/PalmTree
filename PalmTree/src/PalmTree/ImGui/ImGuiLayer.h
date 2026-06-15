@@ -11,10 +11,10 @@
 namespace PalmTree {
     class ImGuiLayer : public Layer {
     public:
-        ImGuiLayer(const MacWindow& window, Device& device, Renderer& renderer) : Layer("ImGui"), m_Window(window), m_Device(device), m_Renderer(renderer) {}
+        ImGuiLayer(const MacWindow& window, Device& device, Renderer& renderer);
+        ~ImGuiLayer() override;
         
         void OnStart() override;
-        void OnEnd() override;
         void OnRender(float deltaTime) override;
     private:
         const MacWindow& m_Window;
