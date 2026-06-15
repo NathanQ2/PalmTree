@@ -17,7 +17,6 @@ namespace PalmTree {
                 uint32_t count = 1
             );
             std::unique_ptr<DescriptorSetLayout> Build() const;
-
         private:
             Device& m_Device;
             std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_Bindings{};
@@ -32,7 +31,6 @@ namespace PalmTree {
         DescriptorSetLayout& operator=(const DescriptorSetLayout&) = delete;
 
         VkDescriptorSetLayout GetDescriptorSetLayout() const { return m_DescriptorSetLayout; }
-
     private:
         Device& m_Device;
         VkDescriptorSetLayout m_DescriptorSetLayout;
@@ -51,7 +49,6 @@ namespace PalmTree {
             Builder& SetPoolFlags(VkDescriptorPoolCreateFlags flags);
             Builder& SetMaxSets(uint32_t count);
             std::unique_ptr<DescriptorPool> Build() const;
-
         private:
             Device& m_Device;
             std::vector<VkDescriptorPoolSize> m_PoolSizes{};
@@ -77,7 +74,7 @@ namespace PalmTree {
         void FreeDescriptors(std::vector<VkDescriptorSet>& descriptors) const;
 
         void ResetPool();
-        
+
         VkDescriptorPool GetDescriptorPool() const { return m_DescriptorPool; }
     private:
         Device& m_Device;
@@ -95,7 +92,6 @@ namespace PalmTree {
 
         bool Build(VkDescriptorSet& set);
         void Overwrite(VkDescriptorSet& set);
-
     private:
         DescriptorSetLayout& m_SetLayout;
         DescriptorPool& m_Pool;

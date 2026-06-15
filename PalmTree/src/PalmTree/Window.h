@@ -11,14 +11,14 @@ namespace PalmTree {
         int Height = 720;
         std::string Title = "PalmTree Window";
     };
-    
+
     class Window {
     public:
         using EventCallbackFn = std::function<void(Event&)>;
-        
+
         static Window* Create(WindowProps props = WindowProps());
-        
-        virtual ~Window() {};
+
+        virtual ~Window() {}
 
         // Window(const Window&) = delete;
         // Window& operator=(const Window&) = delete;
@@ -36,7 +36,7 @@ namespace PalmTree {
 
         [[nodiscard]] virtual int GetWidth() = 0;
         [[nodiscard]] virtual int GetHeight() = 0;
-        
+
         virtual void SetEventCallback(EventCallbackFn callback) = 0;
     };
 }

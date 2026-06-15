@@ -9,7 +9,10 @@ namespace PalmTree {
     public:
         static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
-        SwapChain(const std::shared_ptr<Window>& window, const std::shared_ptr<Device>& device) : m_Window{window}, m_Device{device} { Init(); }
+        SwapChain(
+            const std::shared_ptr<Window>& window,
+            const std::shared_ptr<Device>& device
+        ) : m_Window{window}, m_Device{device} { Init(); }
 
         ~SwapChain() {
             CleanupSwapChain();
@@ -42,7 +45,6 @@ namespace PalmTree {
         bool CompareSwapFormats(VkFormat otherDepthFormat, VkFormat otherImageFormat) const {
             return otherDepthFormat == m_SwapChainDepthFormat && otherImageFormat == m_SwapChainImageFormat;
         }
-
     private:
         void Init();
         void CleanupSyncObjects();

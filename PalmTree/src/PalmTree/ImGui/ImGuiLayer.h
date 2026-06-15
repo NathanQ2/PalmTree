@@ -13,14 +13,14 @@ namespace PalmTree {
     public:
         ImGuiLayer(const MacWindow& window, Device& device, Renderer& renderer);
         ~ImGuiLayer() override;
-        
+
         void OnStart() override;
         void OnRender(float deltaTime) override;
     private:
         const MacWindow& m_Window;
         Device& m_Device;
         Renderer& m_Renderer;
-        
+
         std::unique_ptr<DescriptorPool> m_DescriptorPool;
     };
 }

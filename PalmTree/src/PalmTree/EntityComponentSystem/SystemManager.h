@@ -7,7 +7,7 @@
 namespace PalmTree {
     class SystemManager {
     public:
-        template <typename T>
+        template<typename T>
         void RegisterSystem(std::shared_ptr<T> system, Signature signature, EntityComponentSystem* ecs) {
             const char* name = typeid(T).name();
 
@@ -26,7 +26,7 @@ namespace PalmTree {
          * @param id The id of the object to add (if their signatures match)
          * @param objSignature The signature of the object
          */
-        template <typename T>
+        template<typename T>
         void InitSystemWithObject(Id id, Signature objSignature) {
             const char* name = typeid(T).name();
 
@@ -51,7 +51,6 @@ namespace PalmTree {
                 }
             }
         }
-
     private:
         std::unordered_map<const char*, std::shared_ptr<System>> m_Systems{};
         std::unordered_map<const char*, Signature> m_Signatures{};

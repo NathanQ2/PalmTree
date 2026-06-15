@@ -21,7 +21,6 @@ namespace PalmTree {
 
         float GetMouseX() const { return m_MouseX; }
         float GetMouseY() const { return m_MouseY; }
-
     private:
         float m_MouseX, m_MouseY;
     };
@@ -39,7 +38,6 @@ namespace PalmTree {
         std::string ToString() const override {
             return std::format("MouseScrolledEvent: Scroll=(%d, %d)", m_ScrollX, m_ScrollY);
         }
-
     private:
         float m_ScrollX, m_ScrollY;
     };
@@ -55,7 +53,6 @@ namespace PalmTree {
         |
         EventCategoryMouseButton
         )
-
     protected:
         MouseButtonEvent(int button) : m_Button(button) {}
 

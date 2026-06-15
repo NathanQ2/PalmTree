@@ -19,7 +19,6 @@ namespace PalmTree {
 
         [[nodiscard]] const Signature& GetSignature(Id id) const { return m_Signatures[id]; }
         [[nodiscard]] size_t GetGameObjectsCount() const { return m_GameObjectsCount; }
-
     private:
         std::queue<Id> m_AvailableGameObjects;
 

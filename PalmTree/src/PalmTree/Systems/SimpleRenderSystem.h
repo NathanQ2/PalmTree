@@ -15,7 +15,6 @@ namespace PalmTree {
         SimpleRenderSystem& operator=(const SimpleRenderSystem&) = delete;
 
         void RenderGameObjects(FrameInfo& fameInfo);
-
     private:
         void CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout);
         void CreatePipeline(VkRenderPass renderPass);

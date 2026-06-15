@@ -17,7 +17,6 @@ namespace PalmTree {
 
         int GetWidth() const { return m_Width; }
         int GetHeight() const { return m_Height; }
-
     private:
         unsigned int m_Width, m_Height;
     };

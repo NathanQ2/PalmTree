@@ -10,7 +10,6 @@ namespace PalmTree {
     class System {
     public:
         friend class SystemManager;
-
     protected:
         std::set<Id> m_Ids;
 

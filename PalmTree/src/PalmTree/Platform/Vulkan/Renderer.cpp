@@ -5,7 +5,10 @@
 #include "../../Log.h"
 
 namespace PalmTree {
-    Renderer::Renderer(const std::shared_ptr<Window>& window, const std::shared_ptr<Device>& device) : m_Window(window), m_Device(device) {
+    Renderer::Renderer(
+        const std::shared_ptr<Window>& window,
+        const std::shared_ptr<Device>& device
+    ) : m_Window(window), m_Device(device) {
         RecreateSwapChain();
         CreateCommandBuffers();
     }

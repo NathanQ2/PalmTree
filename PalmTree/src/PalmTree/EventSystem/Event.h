@@ -25,7 +25,6 @@ namespace PalmTree {
 
     class Event {
         friend class EventDispatcher;
-
     public:
         virtual ~Event() = default;
 
@@ -38,7 +37,6 @@ namespace PalmTree {
         bool IsInCategory(EventCategory category) const {
             return GetEventCategory() & category;
         }
-
     private:
         bool m_Handled = false;
     };
@@ -50,13 +48,12 @@ namespace PalmTree {
     std::string_view GetName() const override { return #type; }
 
     class EventDispatcher {
-        template <typename T>
+        template<typename T>
         using EventFn = std::function<bool(T&)>;
-
     public:
         EventDispatcher(Event& event) : m_Event(event) {}
 
-        template <typename T>
+        template<typename T>
         bool Dispatch(EventFn<T> func) {
             if (m_Event.GetType() == T::GetStaticType()) {
                 m_Event.m_Handled = func(*(T*)(&m_Event));
@@ -66,7 +63,6 @@ namespace PalmTree {
 
             return false;
         }
-
     private:
         Event& m_Event;
     };

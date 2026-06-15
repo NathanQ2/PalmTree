@@ -12,7 +12,6 @@ namespace PalmTree {
         )
 
         int GetKeyCode() const { return m_KeyCode; }
-
     protected:
         KeyEvent(int keyCode) : m_KeyCode(keyCode) {}
 
@@ -31,7 +30,6 @@ namespace PalmTree {
 
         int GetRepeatCount() const { return m_RepeatCount; }
         bool IsRepeating() const { return m_RepeatCount > 0; }
-
     private:
         int m_RepeatCount;
     };

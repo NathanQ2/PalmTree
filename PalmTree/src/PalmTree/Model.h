@@ -42,7 +42,6 @@ namespace PalmTree {
 
         void Bind(VkCommandBuffer commandBuffer);
         void Draw(VkCommandBuffer commandBuffer);
-
     private:
         void CreateVertexBuffers(const std::vector<Vertex>& vertices);
         void CreateIndexBuffers(const std::vector<uint32_t>& indices);

@@ -22,16 +22,16 @@
 
 namespace PalmTree {
     Application* Application::s_Instance = nullptr;
-    
+
     Application::Application() {
         PT_CORE_ASSERT(s_Instance == nullptr, "Application already exists!");
-        
+
         m_Window = std::shared_ptr<Window>(Window::Create());
         m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
-        
+
         m_Device = std::make_shared<Device>(m_Window);
         m_Renderer = std::make_unique<Renderer>(m_Window, m_Device);
-        
+
         m_GlobalPool = DescriptorPool::Builder(*m_Device)
             .SetMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
             .AddPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
@@ -92,22 +92,22 @@ namespace PalmTree {
         viewerObject.GetTransform().Translation.z = -2.5f;
 
         GLFWwindow* glfwWindow = std::static_pointer_cast<MacWindow>(m_Window)->GetGLFWWindow();
-        
+
         glm::f64vec2 cursorPos = glm::f64vec2(0);
         glfwGetCursorPos(glfwWindow, &cursorPos.x, &cursorPos.y);
         KeyboardMovementController cameraController = KeyboardMovementController(cursorPos, false);
 
         auto currentTime = std::chrono::high_resolution_clock::now();
-        
+
         for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
             Layer* layer = *it;
             if (layer->IsEnabled())
                 layer->OnStart();
         }
-        
+
         while (m_Running) {
             m_Window->OnUpdate();
-            
+
             auto newTime = std::chrono::high_resolution_clock::now();
             float frameTime = std::chrono::duration<float>(newTime - currentTime).count();
             currentTime = newTime;
@@ -144,7 +144,7 @@ namespace PalmTree {
 
                 // Render
                 m_Renderer->BeginSwapChainRenderPass(commandBuffer);
-                
+
                 simpleRenderSystem->RenderGameObjects(frameInfo);
                 pointLightSystem->Render(frameInfo);
                 for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
@@ -152,12 +152,12 @@ namespace PalmTree {
                     if (layer->IsEnabled())
                         layer->OnRender(frameTime);
                 }
-                
+
                 m_Renderer->EndSwapChainRenderPass(commandBuffer);
                 m_Renderer->EndFrame();
             }
         }
-        
+
         for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
             Layer* layer = *it;
             if (layer->IsEnabled())
@@ -171,22 +171,22 @@ namespace PalmTree {
         EventDispatcher dispatcher(event);
         dispatcher.Dispatch<WindowClosedEvent>(BIND_EVENT_FN(Application::OnWindowClosed));
 
-        for (auto it = m_LayerStack.End(); it != m_LayerStack.Begin(); ) {
+        for (auto it = m_LayerStack.End(); it != m_LayerStack.Begin();) {
             Layer* layer = *--it;
             if (layer->IsEnabled()) {
                 bool handled = layer->OnEvent(event);
                 if (handled) break;
             }
         }
-        
+
         // PT_CORE_TRACE("EVENT: {0}", event.ToString());
     }
 
 #ifdef PT_DEBUG
     void Application::DebugPrintLayerStack() {
         std::stringstream ss;
-        
-        for (auto it = m_LayerStack.End(); it != m_LayerStack.Begin(); ) {
+
+        for (auto it = m_LayerStack.End(); it != m_LayerStack.Begin();) {
             const std::string& name = (*--it)->GetName();
             if (it + 1 == m_LayerStack.End()) {
                 ss << "TOP    " << name;
@@ -197,10 +197,10 @@ namespace PalmTree {
             else {
                 ss << "       " << name;
             }
-            
+
             ss << "\n";
         }
-        
+
         PT_CORE_TRACE("LayerStack:\n{}", ss.str());
     }
 #else
@@ -266,7 +266,7 @@ namespace PalmTree {
 
     bool Application::OnWindowClosed(WindowClosedEvent&) {
         m_Running = false;
-        
+
         return true;
     }
 }

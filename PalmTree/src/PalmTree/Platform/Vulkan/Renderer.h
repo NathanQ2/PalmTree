@@ -34,7 +34,7 @@ namespace PalmTree {
 
             return m_CurrentFrameIndex;
         }
-        
+
         uint32_t GetImageCount() { return m_SwapChain->ImageCount(); }
     private:
         void CreateCommandBuffers();

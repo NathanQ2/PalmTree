@@ -79,7 +79,6 @@ namespace PalmTree {
         );
 
         VkPhysicalDeviceProperties m_Properties;
-
     private:
         void CreateInstance();
         void SetupDebugMessenger();

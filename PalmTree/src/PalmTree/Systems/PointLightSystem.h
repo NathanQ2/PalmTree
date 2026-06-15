@@ -18,7 +18,6 @@ namespace PalmTree {
 
         void Update(FrameInfo& frameInfo, GlobalUBO& ubo);
         void Render(FrameInfo& fameInfo);
-
     private:
         void CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout);
         void CreatePipeline(VkRenderPass renderPass);

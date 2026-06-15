@@ -43,7 +43,6 @@ namespace PalmTree {
         static void EnableAlphaBlending(PipelineConfig& config);
 
         void Bind(VkCommandBuffer commandBuffer);
-
     private:
         static std::vector<char> ReadFile(const std::string& path);
 

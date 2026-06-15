@@ -26,16 +26,15 @@ namespace PalmTree {
 
 
         // Implemented in EntityComponentSystem.h
-        template <typename T>
+        template<typename T>
         T& GetComponent();
 
         // Implemented in EntityComponentSystem.h
-        template <typename T>
+        template<typename T>
         void AddComponent(T component);
 
         // Implemented in EntityComponentSystem.h
         TransformComponent& GetTransform();
-
     private:
         Id m_Id;
         const Signature& m_Signature;

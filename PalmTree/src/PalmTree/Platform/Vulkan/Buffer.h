@@ -41,7 +41,6 @@ namespace PalmTree {
         VkBufferUsageFlags GetUsageFlags() const { return m_UsageFlags; }
         VkMemoryPropertyFlags GetMemoryPropertyFlags() const { return m_MemoryPropertyFlags; }
         VkDeviceSize GetBufferSize() const { return m_BufferSize; }
-
     private:
         static VkDeviceSize GetAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment);
 

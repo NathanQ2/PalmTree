@@ -9,7 +9,7 @@
 namespace PalmTree {
     class ComponentManager {
     public:
-        template <typename T>
+        template<typename T>
         void RegisterComponent() {
             const char* name = typeid(T).name();
 
@@ -23,22 +23,22 @@ namespace PalmTree {
             m_ComponentArrays[type] = std::make_shared<ComponentArray<T>>();
         }
 
-        template <typename T>
+        template<typename T>
         void AddComponent(Id id, const T& component) {
             GetComponentArray<T>()->AddComponent(id, component);
         }
 
-        template <typename T>
+        template<typename T>
         void RemoveComponent(Id id) {
             GetComponentArray<T>()->RemoveComponent(id);
         }
 
-        template <typename T>
+        template<typename T>
         T& GetComponent(Id id) {
             return GetComponentArray<T>()->GetComponent(id);
         }
 
-        template <typename T>
+        template<typename T>
         ComponentType GetComponentType() {
             const char* name = typeid(T).name();
 
@@ -46,14 +46,13 @@ namespace PalmTree {
 
             return m_ComponentTypes[name];
         }
-
     private:
         std::unordered_map<std::string_view, ComponentType> m_ComponentTypes{};
         ComponentType m_NextComponentType = 0;
 
         std::unordered_map<ComponentType, std::shared_ptr<IComponentArray>> m_ComponentArrays{};
 
-        template <typename T>
+        template<typename T>
         std::shared_ptr<ComponentArray<T>> GetComponentArray() {
             ComponentType type = GetComponentType<T>();
 
@@ -63,21 +62,21 @@ namespace PalmTree {
         }
     };
 
-    template <typename... Ts>
+    template<typename... Ts>
     class SignatureBuilder {
     public:
         SignatureBuilder(ComponentManager& cm) : m_Cm(cm) {
             (Add<Ts>(), ...);
         }
 
-        template <typename U>
+        template<typename U>
         SignatureBuilder& Add() {
             m_Signature.set(m_Cm.GetComponentType<U>(), true);
 
             return *this;
         }
 
-        template <typename U>
+        template<typename U>
         SignatureBuilder& Remove() {
             m_Signature.set(m_Cm.GetComponentType<U>(), false);
 
@@ -87,7 +86,6 @@ namespace PalmTree {
         [[nodiscard]] Signature Build() const {
             return m_Signature;
         }
-
     private:
         Signature m_Signature{};
 

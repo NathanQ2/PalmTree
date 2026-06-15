@@ -12,7 +12,7 @@
 
 
 namespace std {
-    template <>
+    template<>
     struct hash<PalmTree::Model::Vertex> {
         size_t operator()(PalmTree::Model::Vertex const& vertex) const {
             size_t seed = 0;

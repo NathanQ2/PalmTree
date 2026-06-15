@@ -13,21 +13,21 @@ namespace PalmTree {
         explicit Layer(const std::string&) {}
 #endif
         virtual ~Layer() {}
-        
-        virtual void OnAttach()  {}
+       
+        virtual void OnAttach() {}
         virtual void OnDetach() {}
-        
+
         virtual void OnStart() {}
         virtual void OnEnd() {}
-        
+
         virtual void OnUpdate(float deltaTime) {}
         virtual void OnRender(float deltaTime) {}
-        
+
         virtual bool OnEvent(Event& event) { return false; }
-        
+
         void SetEnabled(bool enable) { m_Enabled = enable; }
         bool IsEnabled() const { return m_Enabled; }
-        
+
 #ifdef PT_DEBUG
         const std::string& GetName() const { return m_Name; }
 #endif
@@ -35,7 +35,7 @@ namespace PalmTree {
 #ifdef PT_DEBUG
         std::string m_Name;
 #endif
-        
+
         bool m_Enabled = true;
     };
 }

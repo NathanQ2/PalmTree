@@ -9,7 +9,8 @@
 #include <GLFW/glfw3.h>
 
 namespace PalmTree {
-    ImGuiLayer::ImGuiLayer(const MacWindow& window, Device& device, Renderer& renderer): Layer("ImGui"), m_Window(window), m_Device(device), m_Renderer(renderer) {}
+    ImGuiLayer::ImGuiLayer(const MacWindow& window, Device& device, Renderer& renderer) : Layer("ImGui"),
+        m_Window(window), m_Device(device), m_Renderer(renderer) {}
 
     ImGuiLayer::~ImGuiLayer() {
         ImGui_ImplVulkan_Shutdown();
@@ -19,7 +20,7 @@ namespace PalmTree {
 
     void ImGuiLayer::OnStart() {
         float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
-        
+
 
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
@@ -47,7 +48,7 @@ namespace PalmTree {
             .AddPoolSize(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, IMGUI_IMPL_VULKAN_MINIMUM_SAMPLED_IMAGE_POOL_SIZE)
             .AddPoolSize(VK_DESCRIPTOR_TYPE_SAMPLER, IMGUI_IMPL_VULKAN_MINIMUM_SAMPLER_POOL_SIZE)
             .Build();
-        
+
         ImGui_ImplVulkan_InitInfo initInfo{};
         initInfo.ApiVersion = VK_HEADER_VERSION_COMPLETE;
         initInfo.Instance = m_Device.GetInstance();
@@ -117,7 +118,7 @@ namespace PalmTree {
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        
+
         bool show_demo_window = true;
         bool show_another_window = false;
 
