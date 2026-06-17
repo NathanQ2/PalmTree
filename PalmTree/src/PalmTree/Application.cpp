@@ -18,8 +18,6 @@
 
 #include "Platform/Mac/MacWindow.h"
 
-#define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
-
 namespace PalmTree {
     Application* Application::s_Instance = nullptr;
 
@@ -27,7 +25,7 @@ namespace PalmTree {
         PT_CORE_ASSERT(s_Instance == nullptr, "Application already exists!");
 
         m_Window = std::shared_ptr<Window>(Window::Create());
-        m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
+        m_Window->SetEventCallback(PT_BIND_EVENT_FN(Application::OnEvent));
 
         m_Device = std::make_shared<Device>(m_Window);
         m_Renderer = std::make_unique<Renderer>(m_Window, m_Device);
@@ -169,7 +167,7 @@ namespace PalmTree {
 
     void Application::OnEvent(Event& event) {
         EventDispatcher dispatcher(event);
-        dispatcher.Dispatch<WindowClosedEvent>(BIND_EVENT_FN(Application::OnWindowClosed));
+        dispatcher.Dispatch<WindowClosedEvent>(PT_BIND_EVENT_FN(Application::OnWindowClosed));
 
         for (auto it = m_LayerStack.End(); it != m_LayerStack.Begin();) {
             Layer* layer = *--it;

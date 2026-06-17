@@ -44,4 +44,20 @@ namespace PalmTree {
             return std::format("KeyReleasedEvent: KeyCode={}", m_KeyCode);
         }
     };
+    
+    class KeyTypedEvent : public Event {
+    public:
+        explicit KeyTypedEvent(unsigned int c) : m_char (c) {}
+        
+        EVENT_CLASS_IMPL_CATEGORY(EventCategoryKeyboard)
+        EVENT_CLASS_IMPL_TYPE(EventType::KeyTyped)
+        
+        std::string ToString() const override {
+            return std::format("KeyTypedEvent: Char={}", static_cast<char>(m_char));
+        }
+        
+        unsigned int GetChar() const { return m_char; }
+    private:
+        unsigned int m_char;
+    };
 }

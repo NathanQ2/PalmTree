@@ -10,7 +10,7 @@ namespace PalmTree {
         None = 0,
         WindowClosed, WindowResized,
         MouseMoved, MouseScrolled, MouseButtonPressed, MouseButtonReleased,
-        KeyPressed, KeyReleased
+        KeyPressed, KeyReleased, KeyTyped
     };
 
     enum EventCategory {

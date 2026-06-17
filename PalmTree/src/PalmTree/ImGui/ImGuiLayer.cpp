@@ -8,6 +8,9 @@
 #include <imgui_impl_vulkan.h>
 #include <GLFW/glfw3.h>
 
+// Defined in imgui_impl_glfw.cpp
+ImGuiKey ImGui_ImplGlfw_KeyToImGuiKey(int keycode, int scancode);
+
 namespace PalmTree {
     ImGuiLayer::ImGuiLayer(const MacWindow& window, Device& device, Renderer& renderer) : Layer("ImGui"),
         m_Window(window), m_Device(device), m_Renderer(renderer) {}
@@ -20,7 +23,6 @@ namespace PalmTree {
 
     void ImGuiLayer::OnStart() {
         float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
-
 
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
@@ -42,7 +44,7 @@ namespace PalmTree {
         // Set initial font scale. (in docking branch: using io.ConfigDpiScaleFonts=true automatically overrides this for every window depending on the current monitor)
 
         // Setup Platform/Renderer backends
-        ImGui_ImplGlfw_InitForVulkan(m_Window.GetGLFWWindow(), true);
+        ImGui_ImplGlfw_InitForVulkan(m_Window.GetGLFWWindow(), false);
         m_DescriptorPool = DescriptorPool::Builder(m_Device)
             .SetMaxSets(IMGUI_IMPL_VULKAN_MINIMUM_SAMPLED_IMAGE_POOL_SIZE + IMGUI_IMPL_VULKAN_MINIMUM_SAMPLER_POOL_SIZE)
             .AddPoolSize(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, IMGUI_IMPL_VULKAN_MINIMUM_SAMPLED_IMAGE_POOL_SIZE)
@@ -172,5 +174,85 @@ namespace PalmTree {
         //     FrameRender(wd, draw_data);
         //     FramePresent(wd);
         // }
+    }
+
+    bool ImGuiLayer::OnEvent(Event& e) {
+        EventDispatcher dispatcher(e);
+        dispatcher.Dispatch<MouseButtonPressedEvent>(PT_BIND_EVENT_FN(ImGuiLayer::OnMouseButtonPressed));
+        dispatcher.Dispatch<MouseButtonReleasedEvent>(PT_BIND_EVENT_FN(ImGuiLayer::OnMouseButtonReleased));
+        dispatcher.Dispatch<MouseMovedEvent>(PT_BIND_EVENT_FN(ImGuiLayer::OnMouseMoved));
+        dispatcher.Dispatch<MouseScrolledEvent>(PT_BIND_EVENT_FN(ImGuiLayer::OnMouseScrolled));
+        dispatcher.Dispatch<WindowResizedEvent>(PT_BIND_EVENT_FN(ImGuiLayer::OnWindowResized));
+        dispatcher.Dispatch<KeyReleasedEvent>(PT_BIND_EVENT_FN(ImGuiLayer::OnKeyReleased));
+        dispatcher.Dispatch<KeyPressedEvent>(PT_BIND_EVENT_FN(ImGuiLayer::OnKeyPressed));
+        dispatcher.Dispatch<KeyTypedEvent>(PT_BIND_EVENT_FN(ImGuiLayer::OnKeyTyped));
+        
+        return false;
+    }
+
+    bool ImGuiLayer::OnMouseButtonPressed(const MouseButtonPressedEvent& e) {
+        ImGui::GetIO().MouseDown[e.GetMouseButton()] = true;
+        
+        return false;
+    }
+    
+    bool ImGuiLayer::OnMouseButtonReleased(const MouseButtonReleasedEvent& e) {
+        ImGui::GetIO().MouseDown[e.GetMouseButton()] = false;
+        
+        return false;
+    }
+    
+    bool ImGuiLayer::OnMouseMoved(const MouseMovedEvent& e) {
+        ImGui::GetIO().MousePos = ImVec2(e.GetMouseX(), e.GetMouseY());
+        
+        return false;
+    }
+    
+    bool ImGuiLayer::OnMouseScrolled(const MouseScrolledEvent& e) {
+        ImGuiIO& io = ImGui::GetIO();
+        
+        io.MouseWheel = e.GetScrollX();
+        io.MouseWheelH = e.GetScrollY();
+        
+        return false;
+    }
+    
+    bool ImGuiLayer::OnWindowResized(const WindowResizedEvent& e) {
+        ImGuiIO& io = ImGui::GetIO();
+        
+        io.DisplaySize = ImVec2(e.GetWidth(), e.GetHeight());
+        io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
+        
+        return false;
+    }
+    
+    bool ImGuiLayer::OnKeyReleased(const KeyReleasedEvent& e) {
+        ImGuiIO& io = ImGui::GetIO();
+        ImGuiKey key = ImGui_ImplGlfw_KeyToImGuiKey(e.GetKeyCode(), 0);
+        
+        io.KeysData[key - ImGuiKey_NamedKey_BEGIN].Down = false;
+        
+        return false;
+    }
+    
+    bool ImGuiLayer::OnKeyPressed(const KeyPressedEvent& e) {
+        ImGuiIO& io = ImGui::GetIO();
+        ImGuiKey key = ImGui_ImplGlfw_KeyToImGuiKey(e.GetKeyCode(), 0);
+        
+        io.KeysData[key - ImGuiKey_NamedKey_BEGIN].Down = true;
+        
+        io.KeyCtrl = io.KeysData[ImGuiKey_LeftCtrl - ImGuiKey_NamedKey_BEGIN].Down || io.KeysData[ImGuiKey_RightCtrl - ImGuiKey_NamedKey_BEGIN].Down;
+        io.KeyAlt = io.KeysData[ImGuiKey_LeftAlt - ImGuiKey_NamedKey_BEGIN].Down || io.KeysData[ImGuiKey_RightAlt - ImGuiKey_NamedKey_BEGIN].Down;
+        io.KeyShift = io.KeysData[ImGuiKey_LeftShift - ImGuiKey_NamedKey_BEGIN].Down || io.KeysData[ImGuiKey_RightShift - ImGuiKey_NamedKey_BEGIN].Down;
+        io.KeySuper = io.KeysData[ImGuiKey_LeftSuper - ImGuiKey_NamedKey_BEGIN].Down || io.KeysData[ImGuiKey_RightSuper - ImGuiKey_NamedKey_BEGIN].Down;
+        
+        return false;
+    }
+
+    bool ImGuiLayer::OnKeyTyped(const KeyTypedEvent& e) {
+        ImGuiIO& io = ImGui::GetIO();
+        io.AddInputCharacter(e.GetChar());
+        
+        return false;
     }
 }

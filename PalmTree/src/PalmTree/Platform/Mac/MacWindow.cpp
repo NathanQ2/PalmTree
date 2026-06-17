@@ -95,6 +95,13 @@ namespace PalmTree {
                 }
             }
         );
+        
+        glfwSetCharCallback(m_WindowHandle, [](GLFWwindow* window, unsigned int c) {
+            WindowData* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
+            
+            KeyTypedEvent event{c};
+            data->EventCallback(event);
+        });
 
         glfwSetMouseButtonCallback(
             m_WindowHandle,

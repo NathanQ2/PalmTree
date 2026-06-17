@@ -36,8 +36,11 @@ namespace PalmTree {
         EVENT_CLASS_IMPL_TYPE (EventType::MouseScrolled)
 
         std::string ToString() const override {
-            return std::format("MouseScrolledEvent: Scroll=(%d, %d)", m_ScrollX, m_ScrollY);
+            return std::format("MouseScrolledEvent: Scroll=({}, {})", m_ScrollX, m_ScrollY);
         }
+        
+        float GetScrollX() const { return m_ScrollX; }
+        float GetScrollY() const { return m_ScrollY; }
     private:
         float m_ScrollX, m_ScrollY;
     };
