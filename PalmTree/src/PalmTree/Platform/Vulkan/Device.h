@@ -26,7 +26,7 @@ namespace PalmTree {
         const bool EnableValidationLayers = true;
 #endif
 
-        Device(const std::shared_ptr<Window>& window);
+        Device(Window& window);
         ~Device();
 
         // Not copyable or movable
@@ -100,7 +100,7 @@ namespace PalmTree {
         VkInstance m_Instance;
         VkDebugUtilsMessengerEXT m_DebugMessenger;
         VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
-        std::shared_ptr<Window> m_Window;
+        Window& m_Window;
         VkCommandPool m_CommandPool;
 
         VkDevice m_Device;

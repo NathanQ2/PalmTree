@@ -19,7 +19,7 @@ public:
     Sandbox() {
         PushLayer<GameLayer>();
         
-        PushOverlay<PalmTree::ImGuiLayer>(*std::static_pointer_cast<PalmTree::MacWindow>(m_Window), *m_Device, *m_Renderer);
+        PushOverlay<PalmTree::ImGuiLayer>(dynamic_cast<PalmTree::MacWindow&>(*m_Window), *m_Device, *m_Renderer);
     }
 };
 

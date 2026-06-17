@@ -6,8 +6,8 @@
 
 namespace PalmTree {
     Renderer::Renderer(
-        const std::shared_ptr<Window>& window,
-        const std::shared_ptr<Device>& device
+        Window& window,
+        Device& device
     ) : m_Window(window), m_Device(device) {
         RecreateSwapChain();
         CreateCommandBuffers();
@@ -123,18 +123,18 @@ namespace PalmTree {
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandPool = m_Device->GetCommandPool();
+        allocInfo.commandPool = m_Device.GetCommandPool();
         allocInfo.commandBufferCount = static_cast<uint32_t>(m_CommandBuffers.size());
 
-        if (vkAllocateCommandBuffers(m_Device->GetDevice(), &allocInfo, m_CommandBuffers.data()) != VK_SUCCESS) {
+        if (vkAllocateCommandBuffers(m_Device.GetDevice(), &allocInfo, m_CommandBuffers.data()) != VK_SUCCESS) {
             throw std::runtime_error("Failed to allocate command buffers!");
         }
     }
 
     void Renderer::FreeCommandBuffers() {
         vkFreeCommandBuffers(
-            m_Device->GetDevice(),
-            m_Device->GetCommandPool(),
+            m_Device.GetDevice(),
+            m_Device.GetCommandPool(),
             static_cast<uint32_t>(m_CommandBuffers.size()),
             m_CommandBuffers.data()
         );

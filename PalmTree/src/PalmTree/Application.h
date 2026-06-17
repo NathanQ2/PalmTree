@@ -46,8 +46,8 @@ namespace PalmTree {
 
         bool OnWindowClosed(WindowClosedEvent& event);
 
-        std::shared_ptr<Window> m_Window;
-        std::shared_ptr<Device> m_Device;
+        std::unique_ptr<Window> m_Window;
+        std::unique_ptr<Device> m_Device;
         std::unique_ptr<Renderer> m_Renderer;
 
         // NOTE: Must be initialized after Device

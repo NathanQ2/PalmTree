@@ -10,8 +10,8 @@ namespace PalmTree {
         static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
         SwapChain(
-            const std::shared_ptr<Window>& window,
-            const std::shared_ptr<Device>& device
+            Window& window,
+            Device& device
         ) : m_Window{window}, m_Device{device} { Init(); }
 
         ~SwapChain() {
@@ -77,8 +77,8 @@ namespace PalmTree {
         std::vector<VkImage> m_SwapChainImages;
         std::vector<VkImageView> m_SwapChainImageViews;
 
-        std::shared_ptr<Window> m_Window;
-        std::shared_ptr<Device> m_Device;
+        Window& m_Window;
+        Device& m_Device;
 
         VkSwapchainKHR m_SwapChain = VK_NULL_HANDLE;
 

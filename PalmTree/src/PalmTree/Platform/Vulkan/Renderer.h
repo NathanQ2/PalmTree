@@ -9,7 +9,7 @@
 namespace PalmTree {
     class Renderer {
     public:
-        Renderer(const std::shared_ptr<Window>& window, const std::shared_ptr<Device>& device);
+        Renderer(Window& window, Device& device);
         ~Renderer();
 
         Renderer(const Renderer&) = delete;
@@ -41,8 +41,8 @@ namespace PalmTree {
         void FreeCommandBuffers();
         void RecreateSwapChain();
 
-        std::shared_ptr<Window> m_Window;
-        std::shared_ptr<Device> m_Device;
+        Window& m_Window;
+        Device& m_Device;
         std::unique_ptr<SwapChain> m_SwapChain = std::make_unique<SwapChain>(m_Window, m_Device);
         std::vector<VkCommandBuffer> m_CommandBuffers;
 

@@ -25,11 +25,11 @@ namespace PalmTree {
         PT_CORE_ASSERT(s_Instance == nullptr, "Application already exists!");
         s_Instance = this;
 
-        m_Window = std::shared_ptr<Window>(Window::Create());
+        m_Window = std::unique_ptr<Window>(Window::Create());
         m_Window->SetEventCallback(PT_BIND_EVENT_FN(Application::OnEvent));
 
-        m_Device = std::make_shared<Device>(m_Window);
-        m_Renderer = std::make_unique<Renderer>(m_Window, m_Device);
+        m_Device = std::make_unique<Device>(*m_Window);
+        m_Renderer = std::make_unique<Renderer>(*m_Window, *m_Device);
 
         m_GlobalPool = DescriptorPool::Builder(*m_Device)
             .SetMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
@@ -90,7 +90,7 @@ namespace PalmTree {
         GameObject& viewerObject = m_Ecs.CreateGameObject();
         viewerObject.GetTransform().Translation.z = -2.5f;
 
-        GLFWwindow* glfwWindow = std::static_pointer_cast<MacWindow>(m_Window)->GetGLFWWindow();
+        GLFWwindow* glfwWindow = dynamic_cast<MacWindow&>(*m_Window).GetGLFWWindow();
 
         glm::f64vec2 cursorPos = glm::f64vec2(0);
         glfwGetCursorPos(glfwWindow, &cursorPos.x, &cursorPos.y);
