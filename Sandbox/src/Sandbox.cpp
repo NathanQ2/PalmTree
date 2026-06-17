@@ -6,11 +6,10 @@ public:
     
     void OnStart() override {}
     void OnEnd() override {}
-    void OnUpdate(float deltaTime) override {}
+    void OnUpdate(float deltaTime) override {
+    }
     
     bool OnEvent(PalmTree::Event& event) override {
-        // PT_TRACE("Event: {}", event.ToString());
-        
         return false;
     }
 };

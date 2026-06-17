@@ -39,6 +39,8 @@ namespace PalmTree {
         Layer* GetLayer(int index) { return m_LayerStack.GetLayer(index); }
 
         void DebugPrintLayerStack();
+        
+        Window& GetWindow() const { return *m_Window; }
     protected:
         void LoadGameObjects();
 

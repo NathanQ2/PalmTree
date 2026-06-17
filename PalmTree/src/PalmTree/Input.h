@@ -1,0 +1,27 @@
+#pragma once
+
+#include <glm/glm.hpp>
+
+namespace PalmTree {
+    class Input {
+    public:
+        static void Init();
+        
+        static bool IsKeyPressed(int keycode) { return s_Instance->IsKeyPressedImpl(keycode); }
+        static bool IsMouseButtonPressed(int button) { return s_Instance->IsMouseButtonPressedImpl(button); }
+        
+        static glm::vec2 GetMousePosition() { return s_Instance->GetMousePositionImpl(); }
+        static float GetMousePositionX() { return s_Instance->GetMousePositionXImpl(); }
+        static float GetMousePositionY() { return s_Instance->GetMousePositionYImpl(); }
+        
+        virtual ~Input() = default;
+    protected:
+        virtual bool IsKeyPressedImpl(int keycode) = 0;
+        virtual bool IsMouseButtonPressedImpl(int button) = 0;
+        virtual glm::vec2 GetMousePositionImpl() = 0;
+        virtual float GetMousePositionXImpl() = 0;
+        virtual float GetMousePositionYImpl() = 0;
+    private:
+        static Input* s_Instance;
+    };
+}

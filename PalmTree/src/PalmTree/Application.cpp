@@ -23,6 +23,7 @@ namespace PalmTree {
 
     Application::Application() {
         PT_CORE_ASSERT(s_Instance == nullptr, "Application already exists!");
+        s_Instance = this;
 
         m_Window = std::shared_ptr<Window>(Window::Create());
         m_Window->SetEventCallback(PT_BIND_EVENT_FN(Application::OnEvent));
