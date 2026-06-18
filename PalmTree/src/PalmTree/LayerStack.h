@@ -11,8 +11,8 @@ namespace PalmTree {
         ~LayerStack();
 
         template<class T, typename... Args>
-        Layer* PushLayer(Args&&... args) {
-            Layer* layer = new T(std::forward<Args>(args)...);
+        T* PushLayer(Args&&... args) {
+            T* layer = new T(std::forward<Args>(args)...);
             m_Layers.emplace(m_Layers.end() - m_NumOverlays, layer);
 
             layer->OnAttach();
@@ -21,8 +21,8 @@ namespace PalmTree {
         }
 
         template<class T, typename... Args>
-        Layer* PushOverlay(Args&&... args) {
-            Layer* layer = new T(std::forward<Args>(args)...);
+        T* PushOverlay(Args&&... args) {
+            T* layer = new T(std::forward<Args>(args)...);
             m_Layers.emplace_back(layer);
             m_NumOverlays++;
 

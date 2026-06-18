@@ -12,7 +12,7 @@ namespace PalmTree {
 #else
         explicit Layer(const std::string&) {}
 #endif
-        virtual ~Layer() {}
+        virtual ~Layer() = default;
        
         virtual void OnAttach() {}
         virtual void OnDetach() {}
@@ -24,6 +24,8 @@ namespace PalmTree {
         virtual void OnRender(float deltaTime) {}
 
         virtual bool OnEvent(Event& event) { return false; }
+        
+        virtual void OnImGuiRender() {}
 
         void SetEnabled(bool enable) { m_Enabled = enable; }
         bool IsEnabled() const { return m_Enabled; }

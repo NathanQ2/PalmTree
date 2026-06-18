@@ -18,8 +18,6 @@ class Sandbox : public PalmTree::Application {
 public:
     Sandbox() {
         PushLayer<GameLayer>();
-        
-        PushOverlay<PalmTree::ImGuiLayer>(dynamic_cast<PalmTree::MacWindow&>(*m_Window), *m_Device, *m_Renderer);
     }
 };
 

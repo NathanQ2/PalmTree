@@ -19,7 +19,10 @@ namespace PalmTree {
         ~ImGuiLayer() override;
 
         void OnStart() override;
-        void OnRender(float deltaTime) override;
+        
+        void Begin();
+        void OnImGuiRender() override;
+        void End();
         
         bool OnEvent(Event& e) override;
     private:

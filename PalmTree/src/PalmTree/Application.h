@@ -8,6 +8,7 @@
 #include "Platform/Vulkan/Renderer.h"
 #include "Window.h"
 #include "EventSystem/ApplicationEvents.h"
+#include "ImGui/ImGuiLayer.h"
 
 
 namespace PalmTree {
@@ -26,12 +27,12 @@ namespace PalmTree {
         void OnEvent(Event& event);
 
         template<typename T, typename... Args>
-        Layer* PushLayer(Args&&... args) {
+        T* PushLayer(Args&&... args) {
             return m_LayerStack.PushLayer<T>(std::forward<Args>(args)...);
         }
 
         template<typename T, typename... Args>
-        Layer* PushOverlay(Args&&... args) {
+        T* PushOverlay(Args&&... args) {
             return m_LayerStack.PushOverlay<T>(std::forward<Args>(args)...);
         }
 
@@ -41,7 +42,9 @@ namespace PalmTree {
         void DebugPrintLayerStack();
         
         Window& GetWindow() const { return *m_Window; }
-    protected:
+    private:
+        static Application* s_Instance;
+        
         void LoadGameObjects();
 
         bool OnWindowClosed(WindowClosedEvent& event);
@@ -52,14 +55,15 @@ namespace PalmTree {
 
         // NOTE: Must be initialized after Device
         std::unique_ptr<DescriptorPool> m_GlobalPool;
+        
+        ImGuiLayer* m_ImGuiLayer = nullptr;
 
         EntityComponentSystem m_Ecs{};
 
         LayerStack m_LayerStack{};
 
         bool m_Running = true;
-    private:
-        static Application* s_Instance;
+        
     };
 
     Application* CreateApplication();

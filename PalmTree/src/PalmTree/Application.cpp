@@ -36,6 +36,8 @@ namespace PalmTree {
             .AddPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
             .Build();
         LoadGameObjects();
+        
+        m_ImGuiLayer = PushOverlay<ImGuiLayer>(dynamic_cast<MacWindow&>(*m_Window), *m_Device, *m_Renderer);
     }
 
     void Application::Run() {
@@ -144,13 +146,21 @@ namespace PalmTree {
                 // Render
                 m_Renderer->BeginSwapChainRenderPass(commandBuffer);
 
-                simpleRenderSystem->RenderGameObjects(frameInfo);
-                pointLightSystem->Render(frameInfo);
+                // simpleRenderSystem->RenderGameObjects(frameInfo);
+                // pointLightSystem->Render(frameInfo);
                 for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
                     Layer* layer = *it;
                     if (layer->IsEnabled())
                         layer->OnRender(frameTime);
                 }
+                
+                m_ImGuiLayer->Begin();
+                for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
+                    Layer* layer = *it;
+                    if (layer->IsEnabled())
+                        layer->OnImGuiRender();
+                }
+                m_ImGuiLayer->End();
 
                 m_Renderer->EndSwapChainRenderPass(commandBuffer);
                 m_Renderer->EndFrame();
