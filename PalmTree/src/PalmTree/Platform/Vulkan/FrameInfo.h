@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../../Camera.h"
-#include "../../EntityComponentSystem/GameObject.h"
 
 #include <vulkan/vulkan.h>
 
@@ -28,5 +27,6 @@ namespace PalmTree {
         VkCommandBuffer CommandBuffer;
         Camera& Camera;
         VkDescriptorSet GlobalDescriptorSet;
+        GlobalUBO GlobalUBO;
     };
 }

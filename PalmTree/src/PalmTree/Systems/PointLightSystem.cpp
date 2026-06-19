@@ -28,7 +28,7 @@ namespace PalmTree {
         vkDestroyPipelineLayout(m_Device.GetDevice(), m_PipelineLayout, nullptr);
     }
 
-    void PointLightSystem::Update(FrameInfo& frameInfo, GlobalUBO& ubo) {
+    void PointLightSystem::Update(FrameInfo& frameInfo) {
         auto rotateLight = glm::rotate(glm::mat4(1.0f), frameInfo.FrameTime, {0.0f, -1.0f, 0.0f});
 
         int lightIndex = 0;
@@ -39,14 +39,14 @@ namespace PalmTree {
 
             obj.GetTransform().Translation = glm::vec3(rotateLight * glm::vec4(obj.GetTransform().Translation, 1.0f));
 
-            ubo.PointLights[lightIndex].Position = glm::vec4(obj.GetTransform().Translation, 1.0f);
+            frameInfo.GlobalUBO.PointLights[lightIndex].Position = glm::vec4(obj.GetTransform().Translation, 1.0f);
             PointLightComponent& light = obj.GetComponent<PointLightComponent>();
-            ubo.PointLights[lightIndex].Color = glm::vec4(light.Color, light.LightIntensity);
+            frameInfo.GlobalUBO.PointLights[lightIndex].Color = glm::vec4(light.Color, light.LightIntensity);
 
             lightIndex++;
         }
 
-        ubo.NumLights = lightIndex;
+        frameInfo.GlobalUBO.NumLights = lightIndex;
     }
 
     void PointLightSystem::Render(FrameInfo& frameInfo) {

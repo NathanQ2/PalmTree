@@ -82,7 +82,7 @@ namespace PalmTree {
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        ImGui::DockSpaceOverViewport();
+        ImGui::DockSpaceOverViewport(0, nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
     }
 
     void ImGuiLayer::OnImGuiRender() {

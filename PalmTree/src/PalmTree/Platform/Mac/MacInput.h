@@ -11,7 +11,7 @@ namespace PalmTree {
         glm::vec2 GetMousePositionImpl() override;
         float GetMousePositionXImpl() override;
         float GetMousePositionYImpl() override;
-        
+        void SetCursorEnabledImpl(bool enabled) override;
     private:
         static GLFWwindow* GetWindow();
     };

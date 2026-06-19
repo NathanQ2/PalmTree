@@ -77,7 +77,8 @@ namespace PalmTree {
             VkImage& image,
             VkDeviceMemory& imageMemory
         );
-
+        
+        // TODO: Make this private
         VkPhysicalDeviceProperties m_Properties;
     private:
         void CreateInstance();

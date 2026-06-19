@@ -3,6 +3,7 @@
 #include <string_view>
 
 #include "EventSystem/Event.h"
+#include "Platform/Vulkan/FrameInfo.h"
 
 namespace PalmTree {
     class Layer {
@@ -20,8 +21,8 @@ namespace PalmTree {
         virtual void OnStart() {}
         virtual void OnEnd() {}
 
-        virtual void OnUpdate(float deltaTime) {}
-        virtual void OnRender(float deltaTime) {}
+        virtual void OnUpdate(FrameInfo& frameInfo) {}
+        virtual void OnRender(FrameInfo& frameInfo) {}
 
         virtual bool OnEvent(Event& event) { return false; }
         

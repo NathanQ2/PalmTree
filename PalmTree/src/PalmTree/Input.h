@@ -14,6 +14,8 @@ namespace PalmTree {
         static float GetMousePositionX() { return s_Instance->GetMousePositionXImpl(); }
         static float GetMousePositionY() { return s_Instance->GetMousePositionYImpl(); }
         
+        static void SetCursorEnabled(bool enabled) { s_Instance->SetCursorEnabledImpl(enabled); }
+        
         virtual ~Input() = default;
     protected:
         virtual bool IsKeyPressedImpl(int keycode) = 0;
@@ -21,6 +23,7 @@ namespace PalmTree {
         virtual glm::vec2 GetMousePositionImpl() = 0;
         virtual float GetMousePositionXImpl() = 0;
         virtual float GetMousePositionYImpl() = 0;
+        virtual void SetCursorEnabledImpl(bool enabled) = 0;
     private:
         static Input* s_Instance;
     };

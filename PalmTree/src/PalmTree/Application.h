@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Camera.h"
 #include "Core.h"
 #include "LayerStack.h"
 #include "Platform/Vulkan/Descriptors.h"
@@ -42,28 +43,29 @@ namespace PalmTree {
         void DebugPrintLayerStack();
         
         Window& GetWindow() const { return *m_Window; }
-    private:
-        static Application* s_Instance;
         
-        void LoadGameObjects();
-
+        DescriptorSetLayout& GetGlobalSetLayout() { return *m_GlobalSetLayout; }
+    protected:
         bool OnWindowClosed(WindowClosedEvent& event);
 
         std::unique_ptr<Window> m_Window;
         std::unique_ptr<Device> m_Device;
         std::unique_ptr<Renderer> m_Renderer;
-
-        // NOTE: Must be initialized after Device
-        std::unique_ptr<DescriptorPool> m_GlobalPool;
         
         ImGuiLayer* m_ImGuiLayer = nullptr;
 
         EntityComponentSystem m_Ecs{};
+        
+        Camera m_Camera{};
 
         LayerStack m_LayerStack{};
+        
+        std::vector<VkDescriptorSet> m_GlobalDescriptorSets{SwapChain::MAX_FRAMES_IN_FLIGHT};
+        std::unique_ptr<DescriptorSetLayout> m_GlobalSetLayout;
 
         bool m_Running = true;
-        
+    private:
+        static Application* s_Instance;
     };
 
     Application* CreateApplication();
