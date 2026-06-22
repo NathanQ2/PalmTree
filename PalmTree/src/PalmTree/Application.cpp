@@ -27,11 +27,10 @@ namespace PalmTree {
         m_Window = std::unique_ptr<Window>(Window::Create());
         m_Window->SetEventCallback(PT_BIND_EVENT_FN(Application::OnEvent));
 
-        // m_Renderer = std::make_unique<VulkanRendererBackend>(*m_Window, device);
         RendererBackend::Init(RendererBackend::API::VULKAN);
         m_Renderer = RendererBackend::GetVulkan();
         
-        m_ImGuiLayer = PushOverlay<ImGuiLayer>(dynamic_cast<MacWindow&>(*m_Window), m_Renderer->GetDevice());
+        m_ImGuiLayer = PushOverlay<ImGuiLayer>(dynamic_cast<MacWindow&>(*m_Window));
     }
     
     Application::~Application() {
@@ -85,12 +84,12 @@ namespace PalmTree {
             float frameTime = std::chrono::duration<float>(newTime - currentTime).count();
             currentTime = newTime;
 
-            if (VkCommandBuffer commandBuffer = m_Renderer->BeginFrame()) {
-                int frameIndex = m_Renderer->GetFrameIndex();
+            if (RendererBackend::BeginFrame()) {
+                int frameIndex = RendererBackend::GetFrameIndex();
                 FrameInfo frameInfo{
                     frameIndex,
                     frameTime,
-                    commandBuffer,
+                    m_Renderer->GetCurrentCommandBuffer(),
                     m_Camera,
                     globalDescriptorSets[frameIndex],
                     {
@@ -110,7 +109,7 @@ namespace PalmTree {
                 uboBuffers[frameIndex]->Flush();
 
                 // Render
-                m_Renderer->BeginSwapChainRenderPass(commandBuffer);
+                m_Renderer->BeginSwapChainRenderPass(m_Renderer->GetCurrentCommandBuffer());
 
                 for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
                     Layer* layer = *it;
@@ -126,8 +125,8 @@ namespace PalmTree {
                 }
                 m_ImGuiLayer->End();
 
-                m_Renderer->EndSwapChainRenderPass(commandBuffer);
-                m_Renderer->EndFrame();
+                m_Renderer->EndSwapChainRenderPass(m_Renderer->GetCurrentCommandBuffer());
+                m_Renderer->EndFrameImpl();
             }
         }
 

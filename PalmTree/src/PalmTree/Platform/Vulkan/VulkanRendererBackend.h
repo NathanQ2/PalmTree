@@ -25,12 +25,14 @@ namespace PalmTree {
             return m_CommandBuffers[m_CurrentFrameIndex];
         }
 
-        VkCommandBuffer BeginFrame();
-        void EndFrame();
+        API GetAPIImpl() override { return API::VULKAN; }
+
+        bool BeginFrameImpl() override;
+        void EndFrameImpl() override;
         void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer);
         void EndSwapChainRenderPass(VkCommandBuffer commandBuffer);
 
-        [[nodiscard]] int GetFrameIndex() const {
+        [[nodiscard]] int GetFrameIndexImpl() const override {
             PT_CORE_ASSERT(m_IsFrameStarted, "Cannot get command buffer when frame not in progress");
 
             return m_CurrentFrameIndex;

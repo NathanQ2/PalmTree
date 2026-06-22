@@ -29,7 +29,7 @@ namespace PalmTree {
         FreeCommandBuffers();
     }
 
-    VkCommandBuffer VulkanRendererBackend::BeginFrame() {
+    bool VulkanRendererBackend::BeginFrameImpl() {
         PT_CORE_ASSERT(!m_IsFrameStarted, "Can't call begin frame while already in progress!");
 
         auto result = m_SwapChain->AcquireNextImage(&m_CurrentImageIndex);
@@ -37,11 +37,13 @@ namespace PalmTree {
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {
             RecreateSwapChain();
 
-            return nullptr;
+            return false;
         }
 
         if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-            throw std::runtime_error("Failed to acquire swap chain image!");
+            PT_CORE_ERROR("Failed to acquire swap chain image!");
+            
+            return false;
         }
 
         m_IsFrameStarted = true;
@@ -52,19 +54,23 @@ namespace PalmTree {
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
         if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to begin recording command buffer!");
+            PT_CORE_ERROR("Failed to begin recording command buffer!");
+            
+            return false;
         }
 
-        return commandBuffer;
+        return true;
     }
 
-    void VulkanRendererBackend::EndFrame() {
+    void VulkanRendererBackend::EndFrameImpl() {
         PT_CORE_ASSERT(m_IsFrameStarted, "Can't call end frame while frame is not in progress");
 
         VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
 
         if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to end command buffer!");
+            PT_CORE_ERROR("Failed to end command buffer!");
+            
+            return;
         }
 
         auto result = m_SwapChain->SubmitCommandBuffers(&commandBuffer, &m_CurrentImageIndex);
@@ -76,7 +82,9 @@ namespace PalmTree {
             RecreateSwapChain();
         }
         else if (result != VK_SUCCESS) {
-            throw std::runtime_error("Failed to present swap chain image!");
+            PT_CORE_ERROR("Failed to present swap chain image!");
+            
+            return;
         }
 
         m_IsFrameStarted = false;

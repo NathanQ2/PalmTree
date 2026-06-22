@@ -39,11 +39,25 @@ namespace PalmTree {
             return s_Instance;
         }
         
+        static API GetAPI() { return Get()->GetAPIImpl(); }
+        
+        static bool BeginFrame() { return Get()->BeginFrameImpl(); }
+        static void EndFrame() { return Get()->EndFrameImpl(); }
+        
+        static int GetFrameIndex() { return Get()->GetFrameIndexImpl(); }
+        
         // TODO: TEMPORARY until all vulkan features are abstracted
         // Implemented in VulkanRendererBackend.cpp
         static VulkanRendererBackend* GetVulkan();
         
         virtual ~RendererBackend() = default;
+        
+        virtual API GetAPIImpl() = 0;
+        
+        virtual bool BeginFrameImpl() = 0;
+        virtual void EndFrameImpl() = 0;
+        
+        virtual int GetFrameIndexImpl() const = 0;
     private:
         static void InitVulkan();
         

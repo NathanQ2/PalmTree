@@ -15,7 +15,7 @@
 namespace PalmTree {
     class ImGuiLayer : public Layer {
     public:
-        ImGuiLayer(const MacWindow& window, VulkanDevice& device);
+        ImGuiLayer(const MacWindow& window);
         ~ImGuiLayer() override;
 
         void OnStart() override;
@@ -23,20 +23,14 @@ namespace PalmTree {
         void Begin();
         void OnImGuiRender() override;
         void End();
-        
-        bool OnEvent(Event& e) override;
     private:
-        bool OnMouseButtonPressed(const MouseButtonPressedEvent& e);
-        bool OnMouseButtonReleased(const MouseButtonReleasedEvent& e);
-        bool OnMouseMoved(const MouseMovedEvent& e);
-        bool OnMouseScrolled(const MouseScrolledEvent& e);
-        bool OnWindowResized(const WindowResizedEvent& e);
-        bool OnKeyReleased(const KeyReleasedEvent& e);
-        bool OnKeyPressed(const KeyPressedEvent& e);
-        bool OnKeyTyped(const KeyTypedEvent& e);
+        void InitImGui();
+        void InitImGuiVulkan();
+        
+        void ShutdownImGui();
+        void ShutdownImGuiVulkan();
         
         const MacWindow& m_Window;
-        VulkanDevice& m_Device;
         VulkanRendererBackend* m_Renderer;
 
         std::unique_ptr<VulkanDescriptorPool> m_DescriptorPool;
