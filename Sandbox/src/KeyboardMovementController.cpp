@@ -6,8 +6,6 @@ namespace Sandbox {
     void KeyboardMovementController::MoveInPlaneXZ(float dt, PalmTree::GameObject& gameObject) {
         if (PalmTree::Input::IsMouseButtonPressed(m_Keys.LeftButton) && m_ShouldCaptureMouse()) {
             PalmTree::Input::SetCursorEnabled(false);
-            
-            PT_TRACE("ENABLE");
 
             m_LookEnabled = true;
            
@@ -18,8 +16,6 @@ namespace Sandbox {
             PalmTree::Input::SetCursorEnabled(true);
 
             m_LookEnabled = false;
-            
-            PT_TRACE("DISABLE");
         }
 
         if (m_LookEnabled) {

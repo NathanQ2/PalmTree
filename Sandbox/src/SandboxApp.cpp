@@ -11,8 +11,8 @@ using namespace Sandbox;
 
 class GameLayer : public Layer {
 public:
-    GameLayer(Window& window, VulkanDevice& device, VulkanRenderer& renderer, EntityComponentSystem& ecs, Camera& camera) :
-        Layer("GameLayer"), m_Window(window), m_Device(device), m_Renderer(renderer), m_Ecs(ecs), m_Camera(camera), m_CameraController([]() { return !ImGui::GetIO().WantCaptureMouse; }) {}
+    GameLayer(Window& window, EntityComponentSystem& ecs, Camera& camera) :
+        Layer("GameLayer"), m_Window(window), m_Device(RendererBackend::GetVulkan()->GetDevice()), m_Renderer(RendererBackend::GetVulkan()), m_Ecs(ecs), m_Camera(camera), m_CameraController([]() { return !ImGui::GetIO().WantCaptureMouse; }) {}
 
     void OnStart() override {
         
@@ -20,7 +20,7 @@ public:
 
         m_SimpleRenderSystem = new SimpleRenderSystem(
             m_Device,
-            m_Renderer.GetSwapChainRenderPass(),
+            m_Renderer->GetSwapChainRenderPass(),
             Application::Get().GetGlobalSetLayout().GetDescriptorSetLayout()
         );
         m_Ecs.RegisterSystem<SimpleRenderSystem>(
@@ -30,7 +30,7 @@ public:
 
         m_PointLightSystem = new PointLightSystem(
             m_Device,
-            m_Renderer.GetSwapChainRenderPass(),
+            m_Renderer->GetSwapChainRenderPass(),
             Application::Get().GetGlobalSetLayout().GetDescriptorSetLayout()
         );
         m_Ecs.RegisterSystem<PointLightSystem>(
@@ -54,7 +54,7 @@ public:
         m_CameraController.MoveInPlaneXZ(frameInfo.FrameTime, *m_ViewerObject);
         m_Camera.SetViewYXZ(m_ViewerObject->GetTransform().Translation, m_ViewerObject->GetTransform().Rotation);
 
-        float aspect = m_Renderer.GetAspectRatio();
+        float aspect = m_Renderer->GetAspectRatio();
         m_Camera.SetPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
         
         m_PointLightSystem->Update(frameInfo);
@@ -134,7 +134,7 @@ public:
 private:
     Window& m_Window;
     VulkanDevice& m_Device;
-    VulkanRenderer& m_Renderer;
+    VulkanRendererBackend* m_Renderer;
     
     EntityComponentSystem& m_Ecs;
     Camera& m_Camera;
@@ -154,7 +154,7 @@ private:
 class SandboxApp : public Application {
 public:
     SandboxApp() {
-        PushLayer<GameLayer>(*m_Window, *m_Device, *m_Renderer, m_Ecs, m_Camera);
+        PushLayer<GameLayer>(*m_Window, m_Ecs, m_Camera);
     }
 };
 

@@ -27,16 +27,23 @@ namespace PalmTree {
         m_Window = std::unique_ptr<Window>(Window::Create());
         m_Window->SetEventCallback(PT_BIND_EVENT_FN(Application::OnEvent));
 
-        m_Device = std::make_unique<VulkanDevice>(*m_Window);
-        m_Renderer = std::make_unique<VulkanRenderer>(*m_Window, *m_Device);
+        // m_Renderer = std::make_unique<VulkanRendererBackend>(*m_Window, device);
+        RendererBackend::Init(RendererBackend::API::VULKAN);
+        m_Renderer = RendererBackend::GetVulkan();
         
-        m_ImGuiLayer = PushOverlay<ImGuiLayer>(dynamic_cast<MacWindow&>(*m_Window), *m_Device, *m_Renderer);
+        m_ImGuiLayer = PushOverlay<ImGuiLayer>(dynamic_cast<MacWindow&>(*m_Window), m_Renderer->GetDevice());
+    }
+    
+    Application::~Application() {
+        RendererBackend::Shutdown();
     }
 
     void Application::Run() {
         auto currentTime = std::chrono::high_resolution_clock::now();
         
-        std::unique_ptr<VulkanDescriptorPool> globalPool = VulkanDescriptorPool::Builder(*m_Device)
+        VulkanDevice& device = m_Renderer->GetDevice();
+        
+        std::unique_ptr<VulkanDescriptorPool> globalPool = VulkanDescriptorPool::Builder(device)
             .SetMaxSets(VulkanSwapChain::MAX_FRAMES_IN_FLIGHT)
             .AddPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VulkanSwapChain::MAX_FRAMES_IN_FLIGHT)
             .Build();
@@ -44,17 +51,17 @@ namespace PalmTree {
         std::vector<std::unique_ptr<VulkanBuffer>> uboBuffers{VulkanSwapChain::MAX_FRAMES_IN_FLIGHT};
         for (int i = 0; i < uboBuffers.size(); i++) {
             uboBuffers[i] = std::make_unique<VulkanBuffer>(
-                *m_Device,
+                device,
                 sizeof(GlobalUBO),
                 VulkanSwapChain::MAX_FRAMES_IN_FLIGHT,
                 VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
-                m_Device->m_Properties.limits.minUniformBufferOffsetAlignment
+                device.m_Properties.limits.minUniformBufferOffsetAlignment
             );
             uboBuffers[i]->Map();
         }
 
-        m_GlobalSetLayout = VulkanDescriptorSetLayout::Builder(*m_Device)
+        m_GlobalSetLayout = VulkanDescriptorSetLayout::Builder(device)
             .AddBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
             .Build();
 
@@ -130,7 +137,7 @@ namespace PalmTree {
                 layer->OnEnd();
         }
 
-        vkDeviceWaitIdle(m_Device->GetDevice());
+        vkDeviceWaitIdle(device.GetDevice());
     }
 
     void Application::OnEvent(Event& event) {

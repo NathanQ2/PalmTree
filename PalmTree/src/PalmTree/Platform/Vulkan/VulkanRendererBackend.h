@@ -4,16 +4,17 @@
 #include "../../Model.h"
 #include "VulkanSwapChain.h"
 #include "../../Window.h"
+#include "PalmTree/Renderer/RendererBackend.h"
 
 
 namespace PalmTree {
-    class VulkanRenderer {
+    class VulkanRendererBackend : public RendererBackend {
     public:
-        VulkanRenderer(Window& window, VulkanDevice& device);
-        ~VulkanRenderer();
+        VulkanRendererBackend(Window& window);
+        ~VulkanRendererBackend() override;
 
-        VulkanRenderer(const VulkanRenderer&) = delete;
-        VulkanRenderer& operator=(const VulkanRenderer&) = delete;
+        VulkanRendererBackend(const VulkanRendererBackend&) = delete;
+        VulkanRendererBackend& operator=(const VulkanRendererBackend&) = delete;
 
         [[nodiscard]] VkRenderPass GetSwapChainRenderPass() const { return m_SwapChain->GetRenderPass(); }
         [[nodiscard]] float GetAspectRatio() const { return m_SwapChain->ExtentAspectRatio(); }
@@ -36,14 +37,16 @@ namespace PalmTree {
         }
 
         uint32_t GetImageCount() { return m_SwapChain->ImageCount(); }
+        
+        VulkanDevice& GetDevice() { return *m_Device; }
     private:
         void CreateCommandBuffers();
         void FreeCommandBuffers();
         void RecreateSwapChain();
 
         Window& m_Window;
-        VulkanDevice& m_Device;
-        std::unique_ptr<VulkanSwapChain> m_SwapChain = std::make_unique<VulkanSwapChain>(m_Window, m_Device);
+        std::unique_ptr<VulkanDevice> m_Device;
+        std::unique_ptr<VulkanSwapChain> m_SwapChain;
         std::vector<VkCommandBuffer> m_CommandBuffers;
 
         uint32_t m_CurrentImageIndex;

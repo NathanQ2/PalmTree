@@ -12,8 +12,8 @@
 ImGuiKey ImGui_ImplGlfw_KeyToImGuiKey(int keycode, int scancode);
 
 namespace PalmTree {
-    ImGuiLayer::ImGuiLayer(const MacWindow& window, VulkanDevice& device, VulkanRenderer& renderer) : Layer("ImGui"),
-        m_Window(window), m_Device(device), m_Renderer(renderer) {}
+    ImGuiLayer::ImGuiLayer(const MacWindow& window, VulkanDevice& device) : Layer("ImGui"),
+        m_Window(window), m_Device(device), m_Renderer(RendererBackend::GetVulkan()) {}
 
     ImGuiLayer::~ImGuiLayer() {
         ImGui_ImplVulkan_Shutdown();
@@ -66,11 +66,11 @@ namespace PalmTree {
         initInfo.Device = m_Device.GetDevice();
         initInfo.Queue = m_Device.GraphicsQueue();
         initInfo.DescriptorPool = m_DescriptorPool->GetDescriptorPool();
-        initInfo.MinImageCount = m_Renderer.GetImageCount();
+        initInfo.MinImageCount = m_Renderer->GetImageCount();
         initInfo.ImageCount = VulkanSwapChain::MAX_FRAMES_IN_FLIGHT;
         // initInfo.PipelineCache = VK_NULL_HANDLE;
         // initInfo.Allocator = VK_NULL_HANDLE;
-        initInfo.RenderPass = m_Renderer.GetSwapChainRenderPass();
+        initInfo.RenderPass = m_Renderer->GetSwapChainRenderPass();
         initInfo.Subpass = 0;
         initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
         // initInfo.CheckVkResultFn = check_vk_result;
@@ -93,7 +93,7 @@ namespace PalmTree {
 
     void ImGuiLayer::End() {
         ImGui::Render();
-        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), m_Renderer.GetCurrentCommandBuffer());
+        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), m_Renderer->GetCurrentCommandBuffer());
         ImGui::UpdatePlatformWindows();
         ImGui::RenderPlatformWindowsDefault();
     }

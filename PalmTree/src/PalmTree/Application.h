@@ -6,7 +6,7 @@
 #include "Platform/Vulkan/VulkanDescriptors.h"
 #include "EntityComponentSystem/EntityComponentSystem.h"
 #include "Model.h"
-#include "Platform/Vulkan/VulkanRenderer.h"
+#include "Platform/Vulkan/VulkanRendererBackend.h"
 #include "Window.h"
 #include "EventSystem/ApplicationEvents.h"
 #include "ImGui/ImGuiLayer.h"
@@ -18,7 +18,7 @@ namespace PalmTree {
         static Application& Get() { return *s_Instance; }
 
         Application();
-        ~Application() = default;
+        ~Application();
 
         Application(const Application&) = delete;
         Application& operator=(const Application&) = delete;
@@ -49,8 +49,7 @@ namespace PalmTree {
         bool OnWindowClosed(WindowClosedEvent& event);
 
         std::unique_ptr<Window> m_Window;
-        std::unique_ptr<VulkanDevice> m_Device;
-        std::unique_ptr<VulkanRenderer> m_Renderer;
+        VulkanRendererBackend* m_Renderer;
         
         ImGuiLayer* m_ImGuiLayer = nullptr;
 

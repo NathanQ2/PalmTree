@@ -1,23 +1,35 @@
-#include "VulkanRenderer.h"
+#include "VulkanRendererBackend.h"
 
 #include <stdexcept>
 
 #include "../../Log.h"
+#include "PalmTree/Application.h"
 
 namespace PalmTree {
-    VulkanRenderer::VulkanRenderer(
-        Window& window,
-        VulkanDevice& device
-    ) : m_Window(window), m_Device(device) {
+    void RendererBackend::InitVulkan() {
+        Window& window = Application::Get().GetWindow();
+        
+        s_Instance = new VulkanRendererBackend(window);
+    }
+    
+    VulkanRendererBackend* RendererBackend::GetVulkan() {
+        return dynamic_cast<VulkanRendererBackend*>(Get());
+    } 
+    
+    VulkanRendererBackend::VulkanRendererBackend(Window& window) : m_Window(window) {
+        m_Device = std::make_unique<VulkanDevice>(m_Window);
+        PT_CORE_TRACE("INIT DEVICE");
+        m_SwapChain = std::make_unique<VulkanSwapChain>(m_Window, *m_Device);
+        
         RecreateSwapChain();
         CreateCommandBuffers();
     }
 
-    VulkanRenderer::~VulkanRenderer() {
+    VulkanRendererBackend::~VulkanRendererBackend() {
         FreeCommandBuffers();
     }
 
-    VkCommandBuffer VulkanRenderer::BeginFrame() {
+    VkCommandBuffer VulkanRendererBackend::BeginFrame() {
         PT_CORE_ASSERT(!m_IsFrameStarted, "Can't call begin frame while already in progress!");
 
         auto result = m_SwapChain->AcquireNextImage(&m_CurrentImageIndex);
@@ -46,7 +58,7 @@ namespace PalmTree {
         return commandBuffer;
     }
 
-    void VulkanRenderer::EndFrame() {
+    void VulkanRendererBackend::EndFrame() {
         PT_CORE_ASSERT(m_IsFrameStarted, "Can't call end frame while frame is not in progress");
 
         VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
@@ -71,7 +83,7 @@ namespace PalmTree {
         m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % VulkanSwapChain::MAX_FRAMES_IN_FLIGHT;
     }
 
-    void VulkanRenderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer) {
+    void VulkanRendererBackend::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer) {
         PT_CORE_ASSERT(m_IsFrameStarted, "Can't call BeginSwapChainRenderPass if frame is not in progress!");
         PT_CORE_ASSERT(
             commandBuffer == GetCurrentCommandBuffer(),
@@ -107,7 +119,7 @@ namespace PalmTree {
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
     }
 
-    void VulkanRenderer::EndSwapChainRenderPass(VkCommandBuffer commandBuffer) {
+    void VulkanRendererBackend::EndSwapChainRenderPass(VkCommandBuffer commandBuffer) {
         PT_CORE_ASSERT(m_IsFrameStarted, "Can't call EndSwapChainRenderPass if frame is not in progress!");
         PT_CORE_ASSERT(
             commandBuffer == GetCurrentCommandBuffer(),
@@ -117,24 +129,24 @@ namespace PalmTree {
         vkCmdEndRenderPass(commandBuffer);
     }
 
-    void VulkanRenderer::CreateCommandBuffers() {
+    void VulkanRendererBackend::CreateCommandBuffers() {
         m_CommandBuffers.resize(VulkanSwapChain::MAX_FRAMES_IN_FLIGHT);
 
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandPool = m_Device.GetCommandPool();
+        allocInfo.commandPool = m_Device->GetCommandPool();
         allocInfo.commandBufferCount = static_cast<uint32_t>(m_CommandBuffers.size());
 
-        if (vkAllocateCommandBuffers(m_Device.GetDevice(), &allocInfo, m_CommandBuffers.data()) != VK_SUCCESS) {
+        if (vkAllocateCommandBuffers(m_Device->GetDevice(), &allocInfo, m_CommandBuffers.data()) != VK_SUCCESS) {
             throw std::runtime_error("Failed to allocate command buffers!");
         }
     }
 
-    void VulkanRenderer::FreeCommandBuffers() {
+    void VulkanRendererBackend::FreeCommandBuffers() {
         vkFreeCommandBuffers(
-            m_Device.GetDevice(),
-            m_Device.GetCommandPool(),
+            m_Device->GetDevice(),
+            m_Device->GetCommandPool(),
             static_cast<uint32_t>(m_CommandBuffers.size()),
             m_CommandBuffers.data()
         );
@@ -142,14 +154,14 @@ namespace PalmTree {
         m_CommandBuffers.clear();
     }
 
-    void VulkanRenderer::RecreateSwapChain() {
+    void VulkanRendererBackend::RecreateSwapChain() {
         // auto extent = m_Window.GetExtent();
         // while (extent.width == 0 || extent.height == 0) {
         //     extent = m_Window.GetExtent();
         //     glfwWaitEvents();
         // }
 
-        // vkDeviceWaitIdle(m_Device.device());
+        // vkDeviceWaitIdle(m_Device->device());
         // m_SwapChain = std::make_unique<SwapChain>(m_Window, m_Device);
         m_SwapChain->RecreateSwapChain();
         if (m_SwapChain->ImageCount() != m_CommandBuffers.size()) {

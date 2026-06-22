@@ -10,12 +10,12 @@
 #include "PalmTree/Platform/Mac/MacWindow.h"
 #include "PalmTree/Platform/Vulkan/VulkanDescriptors.h"
 #include "PalmTree/Platform/Vulkan/VulkanDevice.h"
-#include "PalmTree/Platform/Vulkan/VulkanRenderer.h"
+#include "PalmTree/Platform/Vulkan/VulkanRendererBackend.h"
 
 namespace PalmTree {
     class ImGuiLayer : public Layer {
     public:
-        ImGuiLayer(const MacWindow& window, VulkanDevice& device, VulkanRenderer& renderer);
+        ImGuiLayer(const MacWindow& window, VulkanDevice& device);
         ~ImGuiLayer() override;
 
         void OnStart() override;
@@ -37,7 +37,7 @@ namespace PalmTree {
         
         const MacWindow& m_Window;
         VulkanDevice& m_Device;
-        VulkanRenderer& m_Renderer;
+        VulkanRendererBackend* m_Renderer;
 
         std::unique_ptr<VulkanDescriptorPool> m_DescriptorPool;
     };
