@@ -23,4 +23,8 @@ namespace PalmTree {
     GameObject& EntityComponentSystem::GetObject(Id id) {
         return m_GameObjects[id];
     }
+
+    std::vector<GameObject>& EntityComponentSystem::GetGameObjects() {
+        return m_GameObjects;
+    }
 }

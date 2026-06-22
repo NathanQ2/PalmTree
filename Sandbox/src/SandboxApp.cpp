@@ -48,8 +48,27 @@ public:
     }
 
     void OnImGuiRender() override {
-        ImGui::Begin("Viewport");
-        ImGui::Text("Hello");
+        ImGui::Begin("Inspector");
+        auto& objs = m_Ecs.GetGameObjects();
+        
+        int i = 0;
+        for (auto& obj : objs) {
+            glm::vec3& translation = obj.GetTransform().Translation;
+            glm::vec3& rotation = obj.GetTransform().Rotation;
+            glm::vec3& scale = obj.GetTransform().Scale;
+            ImGui::PushID(i);
+            
+            ImGui::Text("ID: %i", obj.GetId());
+            ImGui::DragFloat3("Transform", &translation.x, 0.01);
+            ImGui::DragFloat3("Rotation", &rotation.x, 0.01);
+            ImGui::DragFloat3("Scale", &scale.x, 0.01);
+            ImGui::Separator();
+            
+            ImGui::PopID();
+            
+            i++;
+        }
+        
         ImGui::End();
     }
 

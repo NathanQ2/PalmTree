@@ -37,11 +37,7 @@ namespace PalmTree {
         ImGui::DockSpaceOverViewport(0, nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
     }
 
-    void ImGuiLayer::OnImGuiRender() {
-        static bool show_demo_window = true;
-
-        ImGui::ShowDemoWindow(&show_demo_window);
-    }
+    void ImGuiLayer::OnImGuiRender() {}
 
     void ImGuiLayer::End() {
         ImGui::Render();
