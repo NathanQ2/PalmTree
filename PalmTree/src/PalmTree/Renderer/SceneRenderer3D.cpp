@@ -8,15 +8,16 @@
 #include "PalmTree/Platform/Vulkan/FrameInfo.h"
 
 namespace PalmTree {
-    SceneRenderer3D::SceneRenderer3D(Window& window, EntityComponentSystem& ecs, Camera& camera) : m_Window(window), m_Ecs(ecs), m_Camera(camera) {
+    SceneRenderer3D::SceneRenderer3D(Window& window, EntityComponentSystem& ecs, Camera& camera) : m_Window(window),
+        m_Ecs(ecs), m_Camera(camera) {
         VulkanRendererBackend* m_Renderer = RendererBackend::GetVulkan();
         VulkanDevice& device = m_Renderer->GetDevice();
-        
+
         m_DescriptorPool = VulkanDescriptorPool::Builder(device)
             .SetMaxSets(VulkanSwapChain::MAX_FRAMES_IN_FLIGHT)
             .AddPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VulkanSwapChain::MAX_FRAMES_IN_FLIGHT)
             .Build();
-        
+
         for (int i = 0; i < m_UboBuffers.size(); i++) {
             m_UboBuffers[i] = std::make_unique<VulkanBuffer>(
                 device,
@@ -28,18 +29,18 @@ namespace PalmTree {
             );
             m_UboBuffers[i]->Map();
         }
-        
+
         m_DescriptorSetLayout = VulkanDescriptorSetLayout::Builder(device)
             .AddBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
             .Build();
-        
+
         for (int i = 0; i < m_DescriptorSets.size(); i++) {
             auto bufferInfo = m_UboBuffers[i]->DescriptorInfo();
             VulkanDescriptorWriter(*m_DescriptorSetLayout, *m_DescriptorPool)
                 .WriteBuffer(0, &bufferInfo)
                 .Build(m_DescriptorSets[i]);
         }
-        
+
         m_SimpleRenderSystem = std::make_shared<SimpleRenderSystem>(
             device,
             m_Renderer->GetSwapChainRenderPass(),
@@ -63,13 +64,13 @@ namespace PalmTree {
 
     void SceneRenderer3D::Update(float frameTime) {
         int frameIndex = RendererBackend::GetFrameIndex();
-        
+
         // Delete old frame info
         if (m_FrameInfo != nullptr) {
             delete m_FrameInfo;
         }
-        
-        m_FrameInfo = new FrameInfo {
+
+        m_FrameInfo = new FrameInfo{
             frameIndex,
             frameTime,
             RendererBackend::GetVulkan()->GetCurrentCommandBuffer(),
@@ -81,16 +82,16 @@ namespace PalmTree {
                 m_Camera.GetInverseView()
             }
         };
-        
+
         m_PointLightSystem->Update(*m_FrameInfo);
-        
+
         m_UboBuffers[frameIndex]->WriteToBuffer(&m_FrameInfo->GlobalUBO);
         m_UboBuffers[frameIndex]->Flush();
     }
 
     void SceneRenderer3D::Render(float frameTime) {
         PT_CORE_ASSERT(m_FrameInfo != nullptr, "m_FrameInfo is nullptr");
-        
+
         m_SimpleRenderSystem->RenderGameObjects(*m_FrameInfo);
         m_PointLightSystem->Render(*m_FrameInfo);
     }

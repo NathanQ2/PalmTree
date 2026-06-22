@@ -8,19 +8,19 @@
 namespace PalmTree {
     void RendererBackend::InitVulkan() {
         Window& window = Application::Get().GetWindow();
-        
+
         s_Instance = new VulkanRendererBackend(window);
     }
-    
+
     VulkanRendererBackend* RendererBackend::GetVulkan() {
         return dynamic_cast<VulkanRendererBackend*>(Get());
-    } 
-    
+    }
+
     VulkanRendererBackend::VulkanRendererBackend(Window& window) : m_Window(window) {
         m_Device = std::make_unique<VulkanDevice>(m_Window);
         PT_CORE_TRACE("INIT DEVICE");
         m_SwapChain = std::make_unique<VulkanSwapChain>(m_Window, *m_Device);
-        
+
         RecreateSwapChain();
         CreateCommandBuffers();
     }
@@ -42,7 +42,7 @@ namespace PalmTree {
 
         if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
             PT_CORE_ERROR("Failed to acquire swap chain image!");
-            
+
             return false;
         }
 
@@ -55,7 +55,7 @@ namespace PalmTree {
 
         if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
             PT_CORE_ERROR("Failed to begin recording command buffer!");
-            
+
             return false;
         }
 
@@ -69,7 +69,7 @@ namespace PalmTree {
 
         if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
             PT_CORE_ERROR("Failed to end command buffer!");
-            
+
             return;
         }
 
@@ -83,7 +83,7 @@ namespace PalmTree {
         }
         else if (result != VK_SUCCESS) {
             PT_CORE_ERROR("Failed to present swap chain image!");
-            
+
             return;
         }
 

@@ -20,7 +20,9 @@ namespace Sandbox {
             int LeftButton = PT_MOUSE_BUTTON_LEFT;
         };
 
-        explicit KeyboardMovementController(std::function<bool()> shouldCaptureMouse) : m_ShouldCaptureMouse(shouldCaptureMouse) {
+        explicit KeyboardMovementController(std::function<bool()> shouldCaptureMouse) : m_ShouldCaptureMouse(
+            shouldCaptureMouse
+        ) {
             m_PreviousMousePosition = PalmTree::Input::GetMousePosition();
         }
 

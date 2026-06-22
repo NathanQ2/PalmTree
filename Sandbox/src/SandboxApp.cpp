@@ -13,7 +13,8 @@ using namespace Sandbox;
 class GameLayer : public Layer {
 public:
     GameLayer(Window& window, EntityComponentSystem& ecs, Camera& camera) :
-        Layer("GameLayer"), m_Window(window), m_Device(RendererBackend::GetVulkan()->GetDevice()), m_Ecs(ecs), m_Camera(camera), m_CameraController([]() { return !ImGui::GetIO().WantCaptureMouse; }) {}
+        Layer("GameLayer"), m_Window(window), m_Device(RendererBackend::GetVulkan()->GetDevice()), m_Ecs(ecs),
+        m_Camera(camera), m_CameraController([]() { return !ImGui::GetIO().WantCaptureMouse; }) {}
 
     void OnStart() override {
         LoadGameObjects();
@@ -22,39 +23,40 @@ public:
 
         m_ViewerObject = &m_Ecs.CreateGameObject();
         m_ViewerObject->GetTransform().Translation.z = -2.5f;
-        
+
         m_Renderer = std::make_unique<SceneRenderer3D>(
             m_Window,
             m_Ecs,
             m_Camera
         );
     }
+
     void OnEnd() override {}
-    
+
     void OnUpdate(float dt) override {
         m_CameraController.MoveInPlaneXZ(dt, *m_ViewerObject);
         m_Camera.SetViewYXZ(m_ViewerObject->GetTransform().Translation, m_ViewerObject->GetTransform().Rotation);
 
         float aspect = RendererBackend::GetVulkan()->GetAspectRatio();
         m_Camera.SetPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
-        
+
         m_Renderer->Update(dt);
     }
-    
+
     void OnRender(float dt) override {
         m_Renderer->Render(dt);
     }
-    
+
     void OnImGuiRender() override {
         ImGui::Begin("Viewport");
         ImGui::Text("Hello");
         ImGui::End();
     }
-    
+
     bool OnEvent(Event& event) override {
         return false;
     }
-    
+
     void LoadGameObjects() {
         // Flat Vase
         {
@@ -114,16 +116,15 @@ public:
 private:
     Window& m_Window;
     VulkanDevice& m_Device;
-    
+
     EntityComponentSystem& m_Ecs;
     Camera& m_Camera;
-    
-    
+
     // Owned by ECS
     GameObject* m_ViewerObject = nullptr;
-    
+
     KeyboardMovementController m_CameraController;
-    
+
     std::unique_ptr<SceneRenderer3D> m_Renderer;
 };
 

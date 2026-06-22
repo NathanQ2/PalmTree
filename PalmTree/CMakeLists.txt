@@ -10,13 +10,13 @@ find_package(glm REQUIRED)
 file(GLOB_RECURSE SOURCES src/**.cpp src/**.h)
 
 # ImGui
-file(GLOB IMGUI_SOURCES 
-    vendor/imgui/*.cpp 
-    vendor/imgui/*.h
-    vendor/imgui/backends/imgui_impl_glfw.cpp
-    vendor/imgui/backends/imgui_impl_glfw.h
-    vendor/imgui/backends/imgui_impl_vulkan.cpp
-    vendor/imgui/backends/imgui_impl_vulkan.h
+file(GLOB IMGUI_SOURCES
+        vendor/imgui/*.cpp
+        vendor/imgui/*.h
+        vendor/imgui/backends/imgui_impl_glfw.cpp
+        vendor/imgui/backends/imgui_impl_glfw.h
+        vendor/imgui/backends/imgui_impl_vulkan.cpp
+        vendor/imgui/backends/imgui_impl_vulkan.h
 )
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)

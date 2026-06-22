@@ -38,7 +38,7 @@ namespace PalmTree {
         std::string ToString() const override {
             return std::format("MouseScrolledEvent: Scroll=({}, {})", m_ScrollX, m_ScrollY);
         }
-        
+
         float GetScrollX() const { return m_ScrollX; }
         float GetScrollY() const { return m_ScrollY; }
     private:

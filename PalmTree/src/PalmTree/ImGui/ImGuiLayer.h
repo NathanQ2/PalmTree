@@ -19,17 +19,17 @@ namespace PalmTree {
         ~ImGuiLayer() override;
 
         void OnStart() override;
-        
+
         void Begin();
         void OnImGuiRender() override;
         void End();
     private:
         void InitImGui();
         void InitImGuiVulkan();
-        
+
         void ShutdownImGui();
         void ShutdownImGuiVulkan();
-        
+
         const MacWindow& m_Window;
         VulkanRendererBackend* m_Renderer;
 

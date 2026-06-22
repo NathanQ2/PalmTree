@@ -1,19 +1,13 @@
 #include "Application.h"
 
-#include "Platform/Vulkan/VulkanBuffer.h"
-#include "Camera.h"
 #include "EntityComponentSystem/EntityComponentSystem.h"
-#include "Systems/PointLightSystem.h"
-#include "Systems/SimpleRenderSystem.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
-#include <glm/gtc/constants.hpp>
 
 #include <chrono>
 #include <ostream>
-#include <glm/ext/matrix_transform.hpp>
 
 #include "Platform/Mac/MacWindow.h"
 
@@ -29,17 +23,17 @@ namespace PalmTree {
 
         RendererBackend::Init(RendererBackend::API::VULKAN);
         m_Renderer = RendererBackend::GetVulkan();
-        
+
         m_ImGuiLayer = PushOverlay<ImGuiLayer>(dynamic_cast<MacWindow&>(*m_Window));
     }
-    
+
     Application::~Application() {
         RendererBackend::Shutdown();
     }
 
     void Application::Run() {
         auto currentTime = std::chrono::high_resolution_clock::now();
-        
+
         VulkanDevice& device = m_Renderer->GetDevice();
 
         for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
@@ -71,7 +65,7 @@ namespace PalmTree {
                     if (layer->IsEnabled())
                         layer->OnRender(frameTime);
                 }
-                
+
                 m_ImGuiLayer->Begin();
                 for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
                     Layer* layer = *it;
@@ -90,7 +84,7 @@ namespace PalmTree {
             if (layer->IsEnabled())
                 layer->OnEnd();
         }
-        
+
         vkDeviceWaitIdle(device.GetDevice());
     }
 

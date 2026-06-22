@@ -6,16 +6,16 @@ namespace PalmTree {
     class Input {
     public:
         static void Init();
-        
+
         static bool IsKeyPressed(int keycode) { return s_Instance->IsKeyPressedImpl(keycode); }
         static bool IsMouseButtonPressed(int button) { return s_Instance->IsMouseButtonPressedImpl(button); }
-        
+
         static glm::vec2 GetMousePosition() { return s_Instance->GetMousePositionImpl(); }
         static float GetMousePositionX() { return s_Instance->GetMousePositionXImpl(); }
         static float GetMousePositionY() { return s_Instance->GetMousePositionYImpl(); }
-        
+
         static void SetCursorEnabled(bool enabled) { s_Instance->SetCursorEnabledImpl(enabled); }
-        
+
         virtual ~Input() = default;
     protected:
         virtual bool IsKeyPressedImpl(int keycode) = 0;

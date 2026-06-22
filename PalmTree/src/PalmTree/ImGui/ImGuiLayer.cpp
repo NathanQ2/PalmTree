@@ -13,8 +13,11 @@ ImGuiKey ImGui_ImplGlfw_KeyToImGuiKey(int keycode, int scancode);
 
 namespace PalmTree {
     ImGuiLayer::ImGuiLayer(const MacWindow& window) : Layer("ImGui"),
-        m_Window(window) {
-        PT_CORE_ASSERT(RendererBackend::GetAPI() == RendererBackend::API::VULKAN, "ImGuiLayer requires the vulkan renderering backend!");
+                                                      m_Window(window) {
+        PT_CORE_ASSERT(
+            RendererBackend::GetAPI() == RendererBackend::API::VULKAN,
+            "ImGuiLayer requires the vulkan renderering backend!"
+        );
         m_Renderer = RendererBackend::GetVulkan();
     }
 
@@ -59,7 +62,7 @@ namespace PalmTree {
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-        
+
         // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
             ImGuiStyle& style = ImGui::GetStyle();
@@ -77,19 +80,19 @@ namespace PalmTree {
         // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
         style.FontScaleDpi = main_scale;
         // Set initial font scale. (in docking branch: using io.ConfigDpiScaleFonts=true automatically overrides this for every window depending on the current monitor)
-        
+
         switch (RendererBackend::GetAPI()) {
             case RendererBackend::API::VULKAN:
                 InitImGuiVulkan();
-                
+
                 break;
             default:
                 PT_CORE_ASSERT(false, "ImGuiLayer does not support the current renderering backend!");
-                
+
                 break;
         }
     }
-    
+
     void ImGuiLayer::InitImGuiVulkan() {
         VulkanDevice& device = m_Renderer->GetDevice();
 
@@ -120,20 +123,20 @@ namespace PalmTree {
 
     void ImGuiLayer::ShutdownImGui() {
         switch (RendererBackend::GetAPI()) {
-            case RendererBackend::API::VULKAN:;
+            case RendererBackend::API::VULKAN: ;
                 ShutdownImGuiVulkan();
-                
+
                 break;
             default:
                 PT_CORE_ASSERT(false, "ImGuiLayer does not support the current rendering backend!");
-                
+
                 break;
         }
-        
+
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
     }
-    
+
     void ImGuiLayer::ShutdownImGuiVulkan() {
         ImGui_ImplVulkan_Shutdown();
     }

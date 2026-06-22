@@ -41,18 +41,18 @@ namespace PalmTree {
         Layer* GetLayer(int index) { return m_LayerStack.GetLayer(index); }
 
         void DebugPrintLayerStack();
-        
+
         Window& GetWindow() const { return *m_Window; }
     protected:
         bool OnWindowClosed(WindowClosedEvent& event);
 
         std::unique_ptr<Window> m_Window;
         VulkanRendererBackend* m_Renderer;
-        
+
         ImGuiLayer* m_ImGuiLayer = nullptr;
 
         EntityComponentSystem m_Ecs{};
-        
+
         Camera m_Camera{};
 
         LayerStack m_LayerStack{};

@@ -8,7 +8,7 @@ namespace Sandbox {
             PalmTree::Input::SetCursorEnabled(false);
 
             m_LookEnabled = true;
-           
+
             m_PreviousMousePosition = PalmTree::Input::GetMousePosition();
         }
 

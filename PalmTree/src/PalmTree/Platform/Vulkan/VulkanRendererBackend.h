@@ -39,7 +39,7 @@ namespace PalmTree {
         }
 
         uint32_t GetImageCount() { return m_SwapChain->ImageCount(); }
-        
+
         VulkanDevice& GetDevice() { return *m_Device; }
     private:
         void CreateCommandBuffers();

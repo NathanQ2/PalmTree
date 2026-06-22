@@ -12,7 +12,7 @@ namespace PalmTree {
     static void GLFWErrorCallback(int error, const char* description) {
         PT_CORE_ERROR("GLFW error {0}: {1}", error, description);
     }
-       
+
     static bool g_GLFWInitialized = false;
 
     Window* Window::Create(WindowProps props) {
@@ -74,34 +74,37 @@ namespace PalmTree {
                 WindowData* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
                 switch (action) {
-                case GLFW_PRESS: {
-                    KeyPressedEvent event{key, 0};
-                    data->EventCallback(event);
+                    case GLFW_PRESS: {
+                        KeyPressedEvent event{key, 0};
+                        data->EventCallback(event);
 
-                    break;
-                }
-                case GLFW_RELEASE: {
-                    KeyReleasedEvent event{key};
-                    data->EventCallback(event);
+                        break;
+                    }
+                    case GLFW_RELEASE: {
+                        KeyReleasedEvent event{key};
+                        data->EventCallback(event);
 
-                    break;
-                }
-                case GLFW_REPEAT: {
-                    KeyPressedEvent event{key, 1};
-                    data->EventCallback(event);
+                        break;
+                    }
+                    case GLFW_REPEAT: {
+                        KeyPressedEvent event{key, 1};
+                        data->EventCallback(event);
 
-                    break;
-                }
+                        break;
+                    }
                 }
             }
         );
-        
-        glfwSetCharCallback(m_WindowHandle, [](GLFWwindow* window, unsigned int c) {
-            WindowData* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
-            
-            KeyTypedEvent event{c};
-            data->EventCallback(event);
-        });
+
+        glfwSetCharCallback(
+            m_WindowHandle,
+            [](GLFWwindow* window, unsigned int c) {
+                WindowData* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
+
+                KeyTypedEvent event{c};
+                data->EventCallback(event);
+            }
+        );
 
         glfwSetMouseButtonCallback(
             m_WindowHandle,
@@ -109,18 +112,18 @@ namespace PalmTree {
                 WindowData* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
                 switch (action) {
-                case GLFW_PRESS: {
-                    MouseButtonPressedEvent event{button};
-                    data->EventCallback(event);
+                    case GLFW_PRESS: {
+                        MouseButtonPressedEvent event{button};
+                        data->EventCallback(event);
 
-                    break;
-                }
-                case GLFW_RELEASE: {
-                    MouseButtonReleasedEvent event{button};
-                    data->EventCallback(event);
+                        break;
+                    }
+                    case GLFW_RELEASE: {
+                        MouseButtonReleasedEvent event{button};
+                        data->EventCallback(event);
 
-                    break;
-                }
+                        break;
+                    }
                 }
             }
         );
