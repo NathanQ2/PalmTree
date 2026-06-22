@@ -1,5 +1,5 @@
 #include "ptpch.h"
-#include "Descriptors.h"
+#include "VulkanDescriptors.h"
 
 #include "../../Log.h"
 
@@ -8,7 +8,7 @@
 namespace PalmTree {
     // *************** Descriptor Set Layout Builder *********************
 
-    DescriptorSetLayout::Builder& DescriptorSetLayout::Builder::AddBinding(
+    VulkanDescriptorSetLayout::Builder& VulkanDescriptorSetLayout::Builder::AddBinding(
         uint32_t binding,
         VkDescriptorType descriptorType,
         VkShaderStageFlags stageFlags,
@@ -24,14 +24,14 @@ namespace PalmTree {
         return *this;
     }
 
-    std::unique_ptr<DescriptorSetLayout> DescriptorSetLayout::Builder::Build() const {
-        return std::make_unique<DescriptorSetLayout>(m_Device, m_Bindings);
+    std::unique_ptr<VulkanDescriptorSetLayout> VulkanDescriptorSetLayout::Builder::Build() const {
+        return std::make_unique<VulkanDescriptorSetLayout>(m_Device, m_Bindings);
     }
 
     // *************** Descriptor Set Layout *********************
 
-    DescriptorSetLayout::DescriptorSetLayout(
-        Device& ptDevice,
+    VulkanDescriptorSetLayout::VulkanDescriptorSetLayout(
+        VulkanDevice& ptDevice,
         std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings
     )
         : m_Device{ptDevice}, m_Bindings{bindings} {
@@ -55,13 +55,13 @@ namespace PalmTree {
         }
     }
 
-    DescriptorSetLayout::~DescriptorSetLayout() {
+    VulkanDescriptorSetLayout::~VulkanDescriptorSetLayout() {
         vkDestroyDescriptorSetLayout(m_Device.GetDevice(), m_DescriptorSetLayout, nullptr);
     }
 
     // *************** Descriptor Pool Builder *********************
 
-    DescriptorPool::Builder& DescriptorPool::Builder::AddPoolSize(
+    VulkanDescriptorPool::Builder& VulkanDescriptorPool::Builder::AddPoolSize(
         VkDescriptorType descriptorType,
         uint32_t count
     ) {
@@ -69,26 +69,26 @@ namespace PalmTree {
         return *this;
     }
 
-    DescriptorPool::Builder& DescriptorPool::Builder::SetPoolFlags(
+    VulkanDescriptorPool::Builder& VulkanDescriptorPool::Builder::SetPoolFlags(
         VkDescriptorPoolCreateFlags flags
     ) {
         m_PoolFlags = flags;
         return *this;
     }
 
-    DescriptorPool::Builder& DescriptorPool::Builder::SetMaxSets(uint32_t count) {
+    VulkanDescriptorPool::Builder& VulkanDescriptorPool::Builder::SetMaxSets(uint32_t count) {
         m_MaxSets = count;
         return *this;
     }
 
-    std::unique_ptr<DescriptorPool> DescriptorPool::Builder::Build() const {
-        return std::make_unique<DescriptorPool>(m_Device, m_MaxSets, m_PoolFlags, m_PoolSizes);
+    std::unique_ptr<VulkanDescriptorPool> VulkanDescriptorPool::Builder::Build() const {
+        return std::make_unique<VulkanDescriptorPool>(m_Device, m_MaxSets, m_PoolFlags, m_PoolSizes);
     }
 
     // *************** Descriptor Pool *********************
 
-    DescriptorPool::DescriptorPool(
-        Device& ptDevice,
+    VulkanDescriptorPool::VulkanDescriptorPool(
+        VulkanDevice& ptDevice,
         uint32_t maxSets,
         VkDescriptorPoolCreateFlags poolFlags,
         const std::vector<VkDescriptorPoolSize>& poolSizes
@@ -107,11 +107,11 @@ namespace PalmTree {
         }
     }
 
-    DescriptorPool::~DescriptorPool() {
+    VulkanDescriptorPool::~VulkanDescriptorPool() {
         vkDestroyDescriptorPool(m_Device.GetDevice(), m_DescriptorPool, nullptr);
     }
 
-    bool DescriptorPool::AllocateDescriptor(
+    bool VulkanDescriptorPool::AllocateDescriptor(
         const VkDescriptorSetLayout descriptorSetLayout,
         VkDescriptorSet& descriptor
     ) const {
@@ -129,7 +129,7 @@ namespace PalmTree {
         return true;
     }
 
-    void DescriptorPool::FreeDescriptors(std::vector<VkDescriptorSet>& descriptors) const {
+    void VulkanDescriptorPool::FreeDescriptors(std::vector<VkDescriptorSet>& descriptors) const {
         vkFreeDescriptorSets(
             m_Device.GetDevice(),
             m_DescriptorPool,
@@ -138,16 +138,16 @@ namespace PalmTree {
         );
     }
 
-    void DescriptorPool::ResetPool() {
+    void VulkanDescriptorPool::ResetPool() {
         vkResetDescriptorPool(m_Device.GetDevice(), m_DescriptorPool, 0);
     }
 
     // *************** Descriptor Writer *********************
 
-    DescriptorWriter::DescriptorWriter(DescriptorSetLayout& setLayout, DescriptorPool& pool)
+    VulkanDescriptorWriter::VulkanDescriptorWriter(VulkanDescriptorSetLayout& setLayout, VulkanDescriptorPool& pool)
         : m_SetLayout{setLayout}, m_Pool{pool} {}
 
-    DescriptorWriter& DescriptorWriter::WriteBuffer(
+    VulkanDescriptorWriter& VulkanDescriptorWriter::WriteBuffer(
         uint32_t binding,
         VkDescriptorBufferInfo* bufferInfo
     ) {
@@ -171,7 +171,7 @@ namespace PalmTree {
         return *this;
     }
 
-    DescriptorWriter& DescriptorWriter::WriteImage(
+    VulkanDescriptorWriter& VulkanDescriptorWriter::WriteImage(
         uint32_t binding,
         VkDescriptorImageInfo* imageInfo
     ) {
@@ -195,7 +195,7 @@ namespace PalmTree {
         return *this;
     }
 
-    bool DescriptorWriter::Build(VkDescriptorSet& set) {
+    bool VulkanDescriptorWriter::Build(VkDescriptorSet& set) {
         bool success = m_Pool.AllocateDescriptor(m_SetLayout.GetDescriptorSetLayout(), set);
         if (!success) {
             return false;
@@ -204,7 +204,7 @@ namespace PalmTree {
         return true;
     }
 
-    void DescriptorWriter::Overwrite(VkDescriptorSet& set) {
+    void VulkanDescriptorWriter::Overwrite(VkDescriptorSet& set) {
         for (auto& write : m_Writes) {
             write.dstSet = set;
         }

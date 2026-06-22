@@ -1,26 +1,26 @@
 #pragma once
 
-#include "Device.h"
+#include "VulkanDevice.h"
 #include "../../Window.h"
 
 
 namespace PalmTree {
-    class SwapChain {
+    class VulkanSwapChain {
     public:
         static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
-        SwapChain(
+        VulkanSwapChain(
             Window& window,
-            Device& device
+            VulkanDevice& device
         ) : m_Window{window}, m_Device{device} { Init(); }
 
-        ~SwapChain() {
+        ~VulkanSwapChain() {
             CleanupSwapChain();
             CleanupSyncObjects();
         }
 
-        SwapChain(const SwapChain&) = delete;
-        SwapChain& operator=(const SwapChain&) = delete;
+        VulkanSwapChain(const VulkanSwapChain&) = delete;
+        VulkanSwapChain& operator=(const VulkanSwapChain&) = delete;
 
         VkFramebuffer GetFrameBuffer(int index) { return m_SwapChainFramebuffers[index]; }
         VkRenderPass GetRenderPass() { return m_RenderPass; }
@@ -78,7 +78,7 @@ namespace PalmTree {
         std::vector<VkImageView> m_SwapChainImageViews;
 
         Window& m_Window;
-        Device& m_Device;
+        VulkanDevice& m_Device;
 
         VkSwapchainKHR m_SwapChain = VK_NULL_HANDLE;
 

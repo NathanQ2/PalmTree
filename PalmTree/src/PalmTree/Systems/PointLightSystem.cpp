@@ -16,7 +16,7 @@ namespace PalmTree {
     };
 
     PointLightSystem::PointLightSystem(
-        Device& device,
+        VulkanDevice& device,
         VkRenderPass renderPass,
         VkDescriptorSetLayout globalSetLayout
     ) : m_Device(device) {
@@ -123,15 +123,15 @@ namespace PalmTree {
     void PointLightSystem::CreatePipeline(VkRenderPass renderPass) {
         PT_CORE_ASSERT(m_PipelineLayout != nullptr, "Cannot create pipeline before pipeline layout!");
 
-        PipelineConfig pipelineConfig{};
-        Pipeline::DefaultPipelineConfig(pipelineConfig);
-        Pipeline::EnableAlphaBlending(pipelineConfig);
+        VulkanPipelineConfig pipelineConfig{};
+        VulkanPipeline::DefaultPipelineConfig(pipelineConfig);
+        VulkanPipeline::EnableAlphaBlending(pipelineConfig);
         pipelineConfig.BindingDescriptions.clear();
         pipelineConfig.AttributeDescriptions.clear();
 
         pipelineConfig.RenderPass = renderPass;
         pipelineConfig.PipelineLayout = m_PipelineLayout;
-        m_Pipeline = std::make_unique<Pipeline>(
+        m_Pipeline = std::make_unique<VulkanPipeline>(
             m_Device,
             "PalmTree/pointLight.vert.spv",
             "PalmTree/pointLight.frag.spv",

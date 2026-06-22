@@ -1,5 +1,5 @@
 #include "ptpch.h"
-#include "SwapChain.h"
+#include "VulkanSwapChain.h"
 
 #include <iostream>
 #include <set>
@@ -8,7 +8,7 @@
 #include "../../Log.h"
 
 namespace PalmTree {
-    void SwapChain::RecreateSwapChain() {
+    void VulkanSwapChain::RecreateSwapChain() {
         while (m_Window.GetWidth() == 0 || m_Window.GetHeight() == 0) {
             glfwWaitEvents();
         }
@@ -27,7 +27,7 @@ namespace PalmTree {
         }
     }
 
-    void SwapChain::CleanupSwapChain() {
+    void VulkanSwapChain::CleanupSwapChain() {
         for (auto imageView : m_SwapChainImageViews) {
             vkDestroyImageView(m_Device.GetDevice(), imageView, nullptr);
         }
@@ -51,7 +51,7 @@ namespace PalmTree {
         vkDestroyRenderPass(m_Device.GetDevice(), m_RenderPass, nullptr);
     }
 
-    VkFormat SwapChain::FindDepthFormat() {
+    VkFormat VulkanSwapChain::FindDepthFormat() {
         return m_Device.FindSupportedFormat(
             {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
             VK_IMAGE_TILING_OPTIMAL,
@@ -59,7 +59,7 @@ namespace PalmTree {
         );
     }
 
-    VkResult SwapChain::AcquireNextImage(uint32_t* imageIndex) {
+    VkResult VulkanSwapChain::AcquireNextImage(uint32_t* imageIndex) {
         vkWaitForFences(
             m_Device.GetDevice(),
             1,
@@ -81,7 +81,7 @@ namespace PalmTree {
         return result;
     }
 
-    VkResult SwapChain::SubmitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex) {
+    VkResult VulkanSwapChain::SubmitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex) {
         if (m_ImagesInFlight[*imageIndex] != VK_NULL_HANDLE) {
             vkWaitForFences(m_Device.GetDevice(), 1, &m_ImagesInFlight[*imageIndex], VK_TRUE, UINT64_MAX);
         }
@@ -128,7 +128,7 @@ namespace PalmTree {
         return result;
     }
 
-    void SwapChain::Init() {
+    void VulkanSwapChain::Init() {
         CreateSwapChain();
         CreateImageViews();
         CreateRenderPass();
@@ -137,7 +137,7 @@ namespace PalmTree {
         CreateSyncObjects();
     }
 
-    void SwapChain::CleanupSyncObjects() {
+    void VulkanSwapChain::CleanupSyncObjects() {
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             vkDestroySemaphore(m_Device.GetDevice(), m_RenderFinishedSemaphores[i], nullptr);
             vkDestroySemaphore(m_Device.GetDevice(), m_ImageAvailableSemaphores[i], nullptr);
@@ -145,7 +145,7 @@ namespace PalmTree {
         }
     }
 
-    void SwapChain::CreateSwapChain() {
+    void VulkanSwapChain::CreateSwapChain() {
         // TODO That's all it takes to recreate the swap chain! However, the
         // disadvantage of this approach is that we need to stop all rendering
         // before creating the new swap chain. It is possible to create a new swap
@@ -154,7 +154,7 @@ namespace PalmTree {
         // oldSwapChain field in the VkSwapchainCreateInfoKHR struct and destroy the
         // old swap chain as soon as you've finished using it. Also might be the
         // reason frame drops on resizing or moving the window
-        SwapChainSupportDetails swapChainSupport = m_Device.GetSwapChainSupport();
+        VulkanSwapChainSupportDetails swapChainSupport = m_Device.GetSwapChainSupport();
 
         VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat(swapChainSupport.Formats);
         VkPresentModeKHR presentMode = ChooseSwapPresentMode(swapChainSupport.PresentModes);
@@ -181,7 +181,7 @@ namespace PalmTree {
         createInfo.imageArrayLayers = 1;
         createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-        QueueFamilyIndices indices = m_Device.FindPhysicalQueueFamilies();
+        VulkanQueueFamilyIndices indices = m_Device.FindPhysicalQueueFamilies();
         uint32_t queueFamilyIndices[] = {indices.GraphicsFamily, indices.PresentFamily};
 
         if (indices.GraphicsFamily != indices.PresentFamily) {
@@ -219,7 +219,7 @@ namespace PalmTree {
         m_SwapChainExtent = extent;
     }
 
-    void SwapChain::CreateImageViews() {
+    void VulkanSwapChain::CreateImageViews() {
         m_SwapChainImageViews.resize(m_SwapChainImages.size());
         for (size_t i = 0; i < m_SwapChainImages.size(); i++) {
             VkImageViewCreateInfo viewInfo{};
@@ -240,7 +240,7 @@ namespace PalmTree {
         }
     }
 
-    void SwapChain::CreateDepthResources() {
+    void VulkanSwapChain::CreateDepthResources() {
         VkFormat depthFormat = FindDepthFormat();
         m_SwapChainImageFormat = depthFormat;
         VkExtent2D swapChainExtent = GetSwapChainExtent();
@@ -291,7 +291,7 @@ namespace PalmTree {
         }
     }
 
-    void SwapChain::CreateRenderPass() {
+    void VulkanSwapChain::CreateRenderPass() {
         VkAttachmentDescription depthAttachment{};
         depthAttachment.format = FindDepthFormat();
         depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -361,7 +361,7 @@ namespace PalmTree {
         }
     }
 
-    void SwapChain::CreateFramebuffers() {
+    void VulkanSwapChain::CreateFramebuffers() {
         m_SwapChainFramebuffers.resize(ImageCount());
         for (size_t i = 0; i < ImageCount(); i++) {
             std::array<VkImageView, 2> attachments = {m_SwapChainImageViews[i], m_DepthImageViews[i]};
@@ -387,7 +387,7 @@ namespace PalmTree {
         }
     }
 
-    void SwapChain::CreateSyncObjects() {
+    void VulkanSwapChain::CreateSyncObjects() {
         m_ImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         m_RenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         m_InFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
@@ -419,7 +419,7 @@ namespace PalmTree {
         }
     }
 
-    VkSurfaceFormatKHR SwapChain::ChooseSwapSurfaceFormat(
+    VkSurfaceFormatKHR VulkanSwapChain::ChooseSwapSurfaceFormat(
         const std::vector<VkSurfaceFormatKHR>& availableFormats
     ) {
         for (const auto& availableFormat : availableFormats) {
@@ -432,7 +432,7 @@ namespace PalmTree {
         return availableFormats[0];
     }
 
-    VkPresentModeKHR SwapChain::ChooseSwapPresentMode(
+    VkPresentModeKHR VulkanSwapChain::ChooseSwapPresentMode(
         const std::vector<VkPresentModeKHR>& availablePresentModes
     ) {
         for (const auto& availablePresentMode : availablePresentModes) {
@@ -451,7 +451,7 @@ namespace PalmTree {
         // return VK_PRESENT_MODE_IMMEDIATE_KHR;
     }
 
-    VkExtent2D SwapChain::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
+    VkExtent2D VulkanSwapChain::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
         if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
             return capabilities.currentExtent;
         }

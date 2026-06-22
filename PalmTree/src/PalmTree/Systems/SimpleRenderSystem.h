@@ -2,13 +2,13 @@
 
 #include "../EntityComponentSystem/System.h"
 #include "../Platform/Vulkan/FrameInfo.h"
-#include "../Platform/Vulkan/Pipeline.h"
+#include "../Platform/Vulkan/VulkanPipeline.h"
 
 
 namespace PalmTree {
     class SimpleRenderSystem : public System {
     public:
-        SimpleRenderSystem(Device& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
+        SimpleRenderSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
         ~SimpleRenderSystem();
 
         SimpleRenderSystem(const SimpleRenderSystem&) = delete;
@@ -19,8 +19,8 @@ namespace PalmTree {
         void CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout);
         void CreatePipeline(VkRenderPass renderPass);
 
-        Device& m_Device;
-        std::unique_ptr<Pipeline> m_Pipeline;
+        VulkanDevice& m_Device;
+        std::unique_ptr<VulkanPipeline> m_Pipeline;
         VkPipelineLayout m_PipelineLayout;
     };
 }

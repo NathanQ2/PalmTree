@@ -1,13 +1,13 @@
 #pragma once
 
 
-#include "Device.h"
+#include "VulkanDevice.h"
 
 namespace PalmTree {
-    struct PipelineConfig {
-        PipelineConfig() = default;
-        PipelineConfig(const PipelineConfig&) = delete;
-        PipelineConfig& operator=(const PipelineConfig&) = delete;
+    struct VulkanPipelineConfig {
+        VulkanPipelineConfig() = default;
+        VulkanPipelineConfig(const VulkanPipelineConfig&) = delete;
+        VulkanPipelineConfig& operator=(const VulkanPipelineConfig&) = delete;
 
         std::vector<VkVertexInputBindingDescription> BindingDescriptions{};
         std::vector<VkVertexInputAttributeDescription> AttributeDescriptions{};
@@ -25,22 +25,22 @@ namespace PalmTree {
         uint32_t Subpass = 0;
     };
 
-    class Pipeline {
+    class VulkanPipeline {
     public:
-        Pipeline(
-            Device& device,
+        VulkanPipeline(
+            VulkanDevice& device,
             const std::string& vertPath,
             const std::string& fragPath,
-            const PipelineConfig& info
+            const VulkanPipelineConfig& info
         );
 
-        ~Pipeline();
+        ~VulkanPipeline();
 
-        Pipeline(const Pipeline&) = delete;
-        Pipeline& operator=(const Pipeline) = delete;
+        VulkanPipeline(const VulkanPipeline&) = delete;
+        VulkanPipeline& operator=(const VulkanPipeline) = delete;
 
-        static void DefaultPipelineConfig(PipelineConfig& config);
-        static void EnableAlphaBlending(PipelineConfig& config);
+        static void DefaultPipelineConfig(VulkanPipelineConfig& config);
+        static void EnableAlphaBlending(VulkanPipelineConfig& config);
 
         void Bind(VkCommandBuffer commandBuffer);
     private:
@@ -49,12 +49,12 @@ namespace PalmTree {
         void CreateGraphicsPipeline(
             const std::string& vertPath,
             const std::string& fragPath,
-            const PipelineConfig& config
+            const VulkanPipelineConfig& config
         );
 
         void CreateShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
 
-        Device& m_Device;
+        VulkanDevice& m_Device;
         VkPipeline m_GraphicsPipeline;
         VkShaderModule m_VertShaderModule;
         VkShaderModule m_FragShaderModule;

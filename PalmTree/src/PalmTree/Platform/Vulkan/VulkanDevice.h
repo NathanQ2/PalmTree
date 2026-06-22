@@ -4,13 +4,13 @@
 
 
 namespace PalmTree {
-    struct SwapChainSupportDetails {
+    struct VulkanSwapChainSupportDetails {
         VkSurfaceCapabilitiesKHR Capabilities;
         std::vector<VkSurfaceFormatKHR> Formats;
         std::vector<VkPresentModeKHR> PresentModes;
     };
 
-    struct QueueFamilyIndices {
+    struct VulkanQueueFamilyIndices {
         uint32_t GraphicsFamily;
         uint32_t PresentFamily;
         bool GraphicsFamilyHasValue = false;
@@ -18,7 +18,7 @@ namespace PalmTree {
         bool IsComplete() { return GraphicsFamilyHasValue && PresentFamilyHasValue; }
     };
 
-    class Device {
+    class VulkanDevice {
     public:
 #ifdef NDEBUG
         const bool EnableValidationLayers = false;
@@ -26,14 +26,14 @@ namespace PalmTree {
         const bool EnableValidationLayers = true;
 #endif
 
-        Device(Window& window);
-        ~Device();
+        VulkanDevice(Window& window);
+        ~VulkanDevice();
 
         // Not copyable or movable
-        Device(const Device&) = delete;
-        Device& operator=(const Device&) = delete;
-        Device(Device&&) = delete;
-        Device& operator=(Device&&) = delete;
+        VulkanDevice(const VulkanDevice&) = delete;
+        VulkanDevice& operator=(const VulkanDevice&) = delete;
+        VulkanDevice(VulkanDevice&&) = delete;
+        VulkanDevice& operator=(VulkanDevice&&) = delete;
 
         VkInstance GetInstance() { return m_Instance; }
         VkPhysicalDevice GetPhysicalDevice() { return m_PhysicalDevice; }
@@ -43,9 +43,9 @@ namespace PalmTree {
         VkQueue GraphicsQueue() { return m_GraphicsQueue; }
         VkQueue PresentQueue() { return m_PresentQueue; }
 
-        SwapChainSupportDetails GetSwapChainSupport() { return QuerySwapChainSupport(m_PhysicalDevice); }
+        VulkanSwapChainSupportDetails GetSwapChainSupport() { return QuerySwapChainSupport(m_PhysicalDevice); }
         uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
-        QueueFamilyIndices FindPhysicalQueueFamilies() { return FindQueueFamilies(m_PhysicalDevice); }
+        VulkanQueueFamilyIndices FindPhysicalQueueFamilies() { return FindQueueFamilies(m_PhysicalDevice); }
         VkFormat FindSupportedFormat(
             const std::vector<VkFormat>& candidates,
             VkImageTiling tiling,
@@ -92,11 +92,11 @@ namespace PalmTree {
         bool IsDeviceSuitable(VkPhysicalDevice device);
         std::vector<const char*> GetRequiredExtensions();
         bool CheckValidationLayerSupport();
-        QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
+        VulkanQueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
         void PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
         void HasGlfwRequiredInstanceExtensions();
         bool CheckDeviceExtensionSupport(VkPhysicalDevice device);
-        SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
+        VulkanSwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
 
         VkInstance m_Instance;
         VkDebugUtilsMessengerEXT m_DebugMessenger;

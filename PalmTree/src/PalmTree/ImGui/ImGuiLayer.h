@@ -8,14 +8,14 @@
 #include "PalmTree/EventSystem/KeyEvents.h"
 #include "PalmTree/EventSystem/MouseEvents.h"
 #include "PalmTree/Platform/Mac/MacWindow.h"
-#include "PalmTree/Platform/Vulkan/Descriptors.h"
-#include "PalmTree/Platform/Vulkan/Device.h"
-#include "PalmTree/Platform/Vulkan/Renderer.h"
+#include "PalmTree/Platform/Vulkan/VulkanDescriptors.h"
+#include "PalmTree/Platform/Vulkan/VulkanDevice.h"
+#include "PalmTree/Platform/Vulkan/VulkanRenderer.h"
 
 namespace PalmTree {
     class ImGuiLayer : public Layer {
     public:
-        ImGuiLayer(const MacWindow& window, Device& device, Renderer& renderer);
+        ImGuiLayer(const MacWindow& window, VulkanDevice& device, VulkanRenderer& renderer);
         ~ImGuiLayer() override;
 
         void OnStart() override;
@@ -36,9 +36,9 @@ namespace PalmTree {
         bool OnKeyTyped(const KeyTypedEvent& e);
         
         const MacWindow& m_Window;
-        Device& m_Device;
-        Renderer& m_Renderer;
+        VulkanDevice& m_Device;
+        VulkanRenderer& m_Renderer;
 
-        std::unique_ptr<DescriptorPool> m_DescriptorPool;
+        std::unique_ptr<VulkanDescriptorPool> m_DescriptorPool;
     };
 }

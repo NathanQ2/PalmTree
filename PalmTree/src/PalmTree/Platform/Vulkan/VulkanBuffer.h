@@ -2,23 +2,23 @@
 
 // TODO: Change formatting
 
-#include "Device.h"
+#include "VulkanDevice.h"
 
 namespace PalmTree {
-    class Buffer {
+    class VulkanBuffer {
     public:
-        Buffer(
-            Device& device,
+        VulkanBuffer(
+            VulkanDevice& device,
             VkDeviceSize instanceSize,
             uint32_t instanceCount,
             VkBufferUsageFlags usageFlags,
             VkMemoryPropertyFlags memoryPropertyFlags,
             VkDeviceSize minOffsetAlignment = 1
         );
-        ~Buffer();
+        ~VulkanBuffer();
 
-        Buffer(const Buffer&) = delete;
-        Buffer& operator=(const Buffer&) = delete;
+        VulkanBuffer(const VulkanBuffer&) = delete;
+        VulkanBuffer& operator=(const VulkanBuffer&) = delete;
 
         VkResult Map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
         void Unmap();
@@ -44,7 +44,7 @@ namespace PalmTree {
     private:
         static VkDeviceSize GetAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment);
 
-        Device& m_Device;
+        VulkanDevice& m_Device;
         void* m_Mapped = nullptr;
         VkBuffer m_Buffer = VK_NULL_HANDLE;
         VkDeviceMemory m_Memory = VK_NULL_HANDLE;

@@ -12,7 +12,7 @@
 ImGuiKey ImGui_ImplGlfw_KeyToImGuiKey(int keycode, int scancode);
 
 namespace PalmTree {
-    ImGuiLayer::ImGuiLayer(const MacWindow& window, Device& device, Renderer& renderer) : Layer("ImGui"),
+    ImGuiLayer::ImGuiLayer(const MacWindow& window, VulkanDevice& device, VulkanRenderer& renderer) : Layer("ImGui"),
         m_Window(window), m_Device(device), m_Renderer(renderer) {}
 
     ImGuiLayer::~ImGuiLayer() {
@@ -54,7 +54,7 @@ namespace PalmTree {
 
         // Setup Platform/Renderer backends
         ImGui_ImplGlfw_InitForVulkan(m_Window.GetGLFWWindow(), true);
-        m_DescriptorPool = DescriptorPool::Builder(m_Device)
+        m_DescriptorPool = VulkanDescriptorPool::Builder(m_Device)
             .SetMaxSets(IMGUI_IMPL_VULKAN_MINIMUM_IMAGE_SAMPLER_POOL_SIZE)
             .AddPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, IMGUI_IMPL_VULKAN_MINIMUM_IMAGE_SAMPLER_POOL_SIZE)
             .Build();
@@ -67,7 +67,7 @@ namespace PalmTree {
         initInfo.Queue = m_Device.GraphicsQueue();
         initInfo.DescriptorPool = m_DescriptorPool->GetDescriptorPool();
         initInfo.MinImageCount = m_Renderer.GetImageCount();
-        initInfo.ImageCount = SwapChain::MAX_FRAMES_IN_FLIGHT;
+        initInfo.ImageCount = VulkanSwapChain::MAX_FRAMES_IN_FLIGHT;
         // initInfo.PipelineCache = VK_NULL_HANDLE;
         // initInfo.Allocator = VK_NULL_HANDLE;
         initInfo.RenderPass = m_Renderer.GetSwapChainRenderPass();

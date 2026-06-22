@@ -101,14 +101,14 @@ namespace PalmTree {
         }
     }
 
-    Model::Model(Device& device, const Model::Builder& builder) : m_Device(device) {
+    Model::Model(VulkanDevice& device, const Model::Builder& builder) : m_Device(device) {
         CreateVertexBuffers(builder.Vertices);
         CreateIndexBuffers(builder.Indices);
     }
 
     Model::~Model() {}
 
-    std::unique_ptr<Model> Model::CreateModelFromFile(Device& device, const std::string& path) {
+    std::unique_ptr<Model> Model::CreateModelFromFile(VulkanDevice& device, const std::string& path) {
         Builder builder{};
 
         builder.LoadModel(path);
@@ -143,7 +143,7 @@ namespace PalmTree {
         VkDeviceSize bufferSize = sizeof(vertices[0]) * m_VertexCount;
         uint32_t vertexSize = sizeof(vertices[0]);
 
-        Buffer stagingBuffer = Buffer(
+        VulkanBuffer stagingBuffer = VulkanBuffer(
             m_Device,
             vertexSize,
             m_VertexCount,
@@ -154,7 +154,7 @@ namespace PalmTree {
         stagingBuffer.Map();
         stagingBuffer.WriteToBuffer((void*)vertices.data());
 
-        m_VertexBuffer = std::make_unique<Buffer>(
+        m_VertexBuffer = std::make_unique<VulkanBuffer>(
             m_Device,
             vertexSize,
             m_VertexCount,
@@ -174,7 +174,7 @@ namespace PalmTree {
         VkDeviceSize bufferSize = sizeof(indices[0]) * m_IndexCount;
         uint32_t indexSize = sizeof(indices[0]);
 
-        Buffer stagingBuffer = Buffer(
+        VulkanBuffer stagingBuffer = VulkanBuffer(
             m_Device,
             indexSize,
             m_IndexCount,
@@ -185,7 +185,7 @@ namespace PalmTree {
         stagingBuffer.Map();
         stagingBuffer.WriteToBuffer((void*)indices.data());
 
-        m_IndexBuffer = std::make_unique<Buffer>(
+        m_IndexBuffer = std::make_unique<VulkanBuffer>(
             m_Device,
             indexSize,
             m_IndexCount,

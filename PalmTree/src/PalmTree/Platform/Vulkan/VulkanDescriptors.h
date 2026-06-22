@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Device.h"
+#include "VulkanDevice.h"
 
 
 namespace PalmTree {
-    class DescriptorSetLayout {
+    class VulkanDescriptorSetLayout {
     public:
         class Builder {
         public:
-            Builder(Device& device) : m_Device{device} {}
+            Builder(VulkanDevice& device) : m_Device{device} {}
 
             Builder& AddBinding(
                 uint32_t binding,
@@ -16,55 +16,55 @@ namespace PalmTree {
                 VkShaderStageFlags stageFlags,
                 uint32_t count = 1
             );
-            std::unique_ptr<DescriptorSetLayout> Build() const;
+            std::unique_ptr<VulkanDescriptorSetLayout> Build() const;
         private:
-            Device& m_Device;
+            VulkanDevice& m_Device;
             std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_Bindings{};
         };
 
-        DescriptorSetLayout(
-            Device& ptDevice,
+        VulkanDescriptorSetLayout(
+            VulkanDevice& ptDevice,
             std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings
         );
-        ~DescriptorSetLayout();
-        DescriptorSetLayout(const DescriptorSetLayout&) = delete;
-        DescriptorSetLayout& operator=(const DescriptorSetLayout&) = delete;
+        ~VulkanDescriptorSetLayout();
+        VulkanDescriptorSetLayout(const VulkanDescriptorSetLayout&) = delete;
+        VulkanDescriptorSetLayout& operator=(const VulkanDescriptorSetLayout&) = delete;
 
         VkDescriptorSetLayout GetDescriptorSetLayout() const { return m_DescriptorSetLayout; }
     private:
-        Device& m_Device;
+        VulkanDevice& m_Device;
         VkDescriptorSetLayout m_DescriptorSetLayout;
         std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_Bindings;
 
-        friend class DescriptorWriter;
+        friend class VulkanDescriptorWriter;
     };
 
-    class DescriptorPool {
+    class VulkanDescriptorPool {
     public:
         class Builder {
         public:
-            Builder(Device& device) : m_Device{device} {}
+            Builder(VulkanDevice& device) : m_Device{device} {}
 
             Builder& AddPoolSize(VkDescriptorType descriptorType, uint32_t count);
             Builder& SetPoolFlags(VkDescriptorPoolCreateFlags flags);
             Builder& SetMaxSets(uint32_t count);
-            std::unique_ptr<DescriptorPool> Build() const;
+            std::unique_ptr<VulkanDescriptorPool> Build() const;
         private:
-            Device& m_Device;
+            VulkanDevice& m_Device;
             std::vector<VkDescriptorPoolSize> m_PoolSizes{};
             uint32_t m_MaxSets = 1000;
             VkDescriptorPoolCreateFlags m_PoolFlags = 0;
         };
 
-        DescriptorPool(
-            Device& ptDevice,
+        VulkanDescriptorPool(
+            VulkanDevice& ptDevice,
             uint32_t maxSets,
             VkDescriptorPoolCreateFlags poolFlags,
             const std::vector<VkDescriptorPoolSize>& poolSizes
         );
-        ~DescriptorPool();
-        DescriptorPool(const DescriptorPool&) = delete;
-        DescriptorPool& operator=(const DescriptorPool&) = delete;
+        ~VulkanDescriptorPool();
+        VulkanDescriptorPool(const VulkanDescriptorPool&) = delete;
+        VulkanDescriptorPool& operator=(const VulkanDescriptorPool&) = delete;
 
         bool AllocateDescriptor(
             const VkDescriptorSetLayout descriptorSetLayout,
@@ -77,24 +77,24 @@ namespace PalmTree {
 
         VkDescriptorPool GetDescriptorPool() const { return m_DescriptorPool; }
     private:
-        Device& m_Device;
+        VulkanDevice& m_Device;
         VkDescriptorPool m_DescriptorPool;
 
-        friend class DescriptorWriter;
+        friend class VulkanDescriptorWriter;
     };
 
-    class DescriptorWriter {
+    class VulkanDescriptorWriter {
     public:
-        DescriptorWriter(DescriptorSetLayout& setLayout, DescriptorPool& pool);
+        VulkanDescriptorWriter(VulkanDescriptorSetLayout& setLayout, VulkanDescriptorPool& pool);
 
-        DescriptorWriter& WriteBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo);
-        DescriptorWriter& WriteImage(uint32_t binding, VkDescriptorImageInfo* imageInfo);
+        VulkanDescriptorWriter& WriteBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo);
+        VulkanDescriptorWriter& WriteImage(uint32_t binding, VkDescriptorImageInfo* imageInfo);
 
         bool Build(VkDescriptorSet& set);
         void Overwrite(VkDescriptorSet& set);
     private:
-        DescriptorSetLayout& m_SetLayout;
-        DescriptorPool& m_Pool;
+        VulkanDescriptorSetLayout& m_SetLayout;
+        VulkanDescriptorPool& m_Pool;
         std::vector<VkWriteDescriptorSet> m_Writes;
     };
 }

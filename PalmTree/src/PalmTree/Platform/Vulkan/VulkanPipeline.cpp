@@ -1,5 +1,5 @@
 #include "ptpch.h"
-#include "Pipeline.h"
+#include "VulkanPipeline.h"
 
 #include "../../Model.h"
 
@@ -10,22 +10,22 @@
 #include "../../Log.h"
 
 namespace PalmTree {
-    Pipeline::Pipeline(
-        Device& device,
+    VulkanPipeline::VulkanPipeline(
+        VulkanDevice& device,
         const std::string& vertPath,
         const std::string& fragPath,
-        const PipelineConfig& config
+        const VulkanPipelineConfig& config
     ) : m_Device{device} {
         CreateGraphicsPipeline(vertPath, fragPath, config);
     }
 
-    Pipeline::~Pipeline() {
+    VulkanPipeline::~VulkanPipeline() {
         vkDestroyShaderModule(m_Device.GetDevice(), m_VertShaderModule, nullptr);
         vkDestroyShaderModule(m_Device.GetDevice(), m_FragShaderModule, nullptr);
         vkDestroyPipeline(m_Device.GetDevice(), m_GraphicsPipeline, nullptr);
     }
 
-    void Pipeline::DefaultPipelineConfig(PipelineConfig& config) {
+    void VulkanPipeline::DefaultPipelineConfig(VulkanPipelineConfig& config) {
         config.InputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
         config.InputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         config.InputAssemblyInfo.primitiveRestartEnable = VK_FALSE;
@@ -97,7 +97,7 @@ namespace PalmTree {
         config.AttributeDescriptions = Model::Vertex::GetAttributeDescriptions();
     }
 
-    void Pipeline::EnableAlphaBlending(PipelineConfig& config) {
+    void VulkanPipeline::EnableAlphaBlending(VulkanPipelineConfig& config) {
         config.ColorBlendAttachment.blendEnable = VK_TRUE;
         config.ColorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
             VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
@@ -109,11 +109,11 @@ namespace PalmTree {
         config.ColorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
     }
 
-    void Pipeline::Bind(VkCommandBuffer commandBuffer) {
+    void VulkanPipeline::Bind(VkCommandBuffer commandBuffer) {
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
     }
 
-    std::vector<char> Pipeline::ReadFile(const std::string& path) {
+    std::vector<char> VulkanPipeline::ReadFile(const std::string& path) {
         std::ifstream file(path, std::ios::ate | std::ios::binary);
 
         if (!file.is_open()) {
@@ -129,10 +129,10 @@ namespace PalmTree {
         return buffer;
     }
 
-    void Pipeline::CreateGraphicsPipeline(
+    void VulkanPipeline::CreateGraphicsPipeline(
         const std::string& vertPath,
         const std::string& fragPath,
-        const PipelineConfig& config
+        const VulkanPipelineConfig& config
     ) {
         PT_CORE_ASSERT(
             config.PipelineLayout != VK_NULL_HANDLE,
@@ -209,7 +209,7 @@ namespace PalmTree {
         }
     }
 
-    void Pipeline::CreateShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule) {
+    void VulkanPipeline::CreateShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule) {
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         createInfo.codeSize = code.size();

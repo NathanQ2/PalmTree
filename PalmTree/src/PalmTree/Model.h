@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Platform/Vulkan/Buffer.h"
-#include "Platform/Vulkan/Device.h"
+#include "Platform/Vulkan/VulkanBuffer.h"
+#include "Platform/Vulkan/VulkanDevice.h"
 
 
 #define GLM_FORCE_RADIANS
@@ -32,13 +32,13 @@ namespace PalmTree {
             void LoadModel(const std::string& path);
         };
 
-        Model(Device& device, const Model::Builder& builder);
+        Model(VulkanDevice& device, const Model::Builder& builder);
         ~Model();
 
         Model(const Model&) = delete;
         Model& operator=(const Model&) = delete;
 
-        static std::unique_ptr<Model> CreateModelFromFile(Device& device, const std::string& path);
+        static std::unique_ptr<Model> CreateModelFromFile(VulkanDevice& device, const std::string& path);
 
         void Bind(VkCommandBuffer commandBuffer);
         void Draw(VkCommandBuffer commandBuffer);
@@ -46,13 +46,13 @@ namespace PalmTree {
         void CreateVertexBuffers(const std::vector<Vertex>& vertices);
         void CreateIndexBuffers(const std::vector<uint32_t>& indices);
 
-        Device& m_Device;
+        VulkanDevice& m_Device;
 
-        std::unique_ptr<Buffer> m_VertexBuffer;
+        std::unique_ptr<VulkanBuffer> m_VertexBuffer;
         uint32_t m_VertexCount;
 
         bool m_HasIndexBuffer = false;
-        std::unique_ptr<Buffer> m_IndexBuffer;
+        std::unique_ptr<VulkanBuffer> m_IndexBuffer;
         uint32_t m_IndexCount;
     };
 }

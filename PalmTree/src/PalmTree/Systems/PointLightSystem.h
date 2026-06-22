@@ -2,7 +2,7 @@
 
 #include "../Platform/Vulkan/FrameInfo.h"
 #include "../Model.h"
-#include "../Platform/Vulkan/Pipeline.h"
+#include "../Platform/Vulkan/VulkanPipeline.h"
 
 #include "../EntityComponentSystem/EntityComponentSystem.h"
 
@@ -10,7 +10,7 @@
 namespace PalmTree {
     class PointLightSystem : public System {
     public:
-        PointLightSystem(Device& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
+        PointLightSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
         ~PointLightSystem();
 
         PointLightSystem(const PointLightSystem&) = delete;
@@ -22,8 +22,8 @@ namespace PalmTree {
         void CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout);
         void CreatePipeline(VkRenderPass renderPass);
 
-        Device& m_Device;
-        std::unique_ptr<Pipeline> m_Pipeline;
+        VulkanDevice& m_Device;
+        std::unique_ptr<VulkanPipeline> m_Pipeline;
         VkPipelineLayout m_PipelineLayout{};
     };
 }

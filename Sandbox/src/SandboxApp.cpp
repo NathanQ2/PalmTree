@@ -11,7 +11,7 @@ using namespace Sandbox;
 
 class GameLayer : public Layer {
 public:
-    GameLayer(Window& window, Device& device, Renderer& renderer, EntityComponentSystem& ecs, Camera& camera) :
+    GameLayer(Window& window, VulkanDevice& device, VulkanRenderer& renderer, EntityComponentSystem& ecs, Camera& camera) :
         Layer("GameLayer"), m_Window(window), m_Device(device), m_Renderer(renderer), m_Ecs(ecs), m_Camera(camera), m_CameraController([]() { return !ImGui::GetIO().WantCaptureMouse; }) {}
 
     void OnStart() override {
@@ -133,8 +133,8 @@ public:
     }
 private:
     Window& m_Window;
-    Device& m_Device;
-    Renderer& m_Renderer;
+    VulkanDevice& m_Device;
+    VulkanRenderer& m_Renderer;
     
     EntityComponentSystem& m_Ecs;
     Camera& m_Camera;

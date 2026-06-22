@@ -1,6 +1,6 @@
 #include "Application.h"
 
-#include "Platform/Vulkan/Buffer.h"
+#include "Platform/Vulkan/VulkanBuffer.h"
 #include "Camera.h"
 #include "EntityComponentSystem/EntityComponentSystem.h"
 #include "Systems/PointLightSystem.h"
@@ -27,8 +27,8 @@ namespace PalmTree {
         m_Window = std::unique_ptr<Window>(Window::Create());
         m_Window->SetEventCallback(PT_BIND_EVENT_FN(Application::OnEvent));
 
-        m_Device = std::make_unique<Device>(*m_Window);
-        m_Renderer = std::make_unique<Renderer>(*m_Window, *m_Device);
+        m_Device = std::make_unique<VulkanDevice>(*m_Window);
+        m_Renderer = std::make_unique<VulkanRenderer>(*m_Window, *m_Device);
         
         m_ImGuiLayer = PushOverlay<ImGuiLayer>(dynamic_cast<MacWindow&>(*m_Window), *m_Device, *m_Renderer);
     }
@@ -36,17 +36,17 @@ namespace PalmTree {
     void Application::Run() {
         auto currentTime = std::chrono::high_resolution_clock::now();
         
-        std::unique_ptr<DescriptorPool> globalPool = DescriptorPool::Builder(*m_Device)
-            .SetMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
-            .AddPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
+        std::unique_ptr<VulkanDescriptorPool> globalPool = VulkanDescriptorPool::Builder(*m_Device)
+            .SetMaxSets(VulkanSwapChain::MAX_FRAMES_IN_FLIGHT)
+            .AddPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VulkanSwapChain::MAX_FRAMES_IN_FLIGHT)
             .Build();
         
-        std::vector<std::unique_ptr<Buffer>> uboBuffers{SwapChain::MAX_FRAMES_IN_FLIGHT};
+        std::vector<std::unique_ptr<VulkanBuffer>> uboBuffers{VulkanSwapChain::MAX_FRAMES_IN_FLIGHT};
         for (int i = 0; i < uboBuffers.size(); i++) {
-            uboBuffers[i] = std::make_unique<Buffer>(
+            uboBuffers[i] = std::make_unique<VulkanBuffer>(
                 *m_Device,
                 sizeof(GlobalUBO),
-                SwapChain::MAX_FRAMES_IN_FLIGHT,
+                VulkanSwapChain::MAX_FRAMES_IN_FLIGHT,
                 VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
                 m_Device->m_Properties.limits.minUniformBufferOffsetAlignment
@@ -54,14 +54,14 @@ namespace PalmTree {
             uboBuffers[i]->Map();
         }
 
-        m_GlobalSetLayout = DescriptorSetLayout::Builder(*m_Device)
+        m_GlobalSetLayout = VulkanDescriptorSetLayout::Builder(*m_Device)
             .AddBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
             .Build();
 
-        std::vector<VkDescriptorSet> globalDescriptorSets(SwapChain::MAX_FRAMES_IN_FLIGHT);
+        std::vector<VkDescriptorSet> globalDescriptorSets(VulkanSwapChain::MAX_FRAMES_IN_FLIGHT);
         for (int i = 0; i < globalDescriptorSets.size(); i++) {
             auto bufferInfo = uboBuffers[i]->DescriptorInfo();
-            DescriptorWriter(*m_GlobalSetLayout, *globalPool)
+            VulkanDescriptorWriter(*m_GlobalSetLayout, *globalPool)
                 .WriteBuffer(0, &bufferInfo)
                 .Build(globalDescriptorSets[i]);
         }

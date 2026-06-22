@@ -2,18 +2,18 @@
 
 #include "../../Log.h"
 #include "../../Model.h"
-#include "SwapChain.h"
+#include "VulkanSwapChain.h"
 #include "../../Window.h"
 
 
 namespace PalmTree {
-    class Renderer {
+    class VulkanRenderer {
     public:
-        Renderer(Window& window, Device& device);
-        ~Renderer();
+        VulkanRenderer(Window& window, VulkanDevice& device);
+        ~VulkanRenderer();
 
-        Renderer(const Renderer&) = delete;
-        Renderer& operator=(const Renderer&) = delete;
+        VulkanRenderer(const VulkanRenderer&) = delete;
+        VulkanRenderer& operator=(const VulkanRenderer&) = delete;
 
         [[nodiscard]] VkRenderPass GetSwapChainRenderPass() const { return m_SwapChain->GetRenderPass(); }
         [[nodiscard]] float GetAspectRatio() const { return m_SwapChain->ExtentAspectRatio(); }
@@ -42,8 +42,8 @@ namespace PalmTree {
         void RecreateSwapChain();
 
         Window& m_Window;
-        Device& m_Device;
-        std::unique_ptr<SwapChain> m_SwapChain = std::make_unique<SwapChain>(m_Window, m_Device);
+        VulkanDevice& m_Device;
+        std::unique_ptr<VulkanSwapChain> m_SwapChain = std::make_unique<VulkanSwapChain>(m_Window, m_Device);
         std::vector<VkCommandBuffer> m_CommandBuffers;
 
         uint32_t m_CurrentImageIndex;

@@ -1,23 +1,23 @@
-#include "Renderer.h"
+#include "VulkanRenderer.h"
 
 #include <stdexcept>
 
 #include "../../Log.h"
 
 namespace PalmTree {
-    Renderer::Renderer(
+    VulkanRenderer::VulkanRenderer(
         Window& window,
-        Device& device
+        VulkanDevice& device
     ) : m_Window(window), m_Device(device) {
         RecreateSwapChain();
         CreateCommandBuffers();
     }
 
-    Renderer::~Renderer() {
+    VulkanRenderer::~VulkanRenderer() {
         FreeCommandBuffers();
     }
 
-    VkCommandBuffer Renderer::BeginFrame() {
+    VkCommandBuffer VulkanRenderer::BeginFrame() {
         PT_CORE_ASSERT(!m_IsFrameStarted, "Can't call begin frame while already in progress!");
 
         auto result = m_SwapChain->AcquireNextImage(&m_CurrentImageIndex);
@@ -46,7 +46,7 @@ namespace PalmTree {
         return commandBuffer;
     }
 
-    void Renderer::EndFrame() {
+    void VulkanRenderer::EndFrame() {
         PT_CORE_ASSERT(m_IsFrameStarted, "Can't call end frame while frame is not in progress");
 
         VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
@@ -68,10 +68,10 @@ namespace PalmTree {
         }
 
         m_IsFrameStarted = false;
-        m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % SwapChain::MAX_FRAMES_IN_FLIGHT;
+        m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % VulkanSwapChain::MAX_FRAMES_IN_FLIGHT;
     }
 
-    void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer) {
+    void VulkanRenderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer) {
         PT_CORE_ASSERT(m_IsFrameStarted, "Can't call BeginSwapChainRenderPass if frame is not in progress!");
         PT_CORE_ASSERT(
             commandBuffer == GetCurrentCommandBuffer(),
@@ -107,7 +107,7 @@ namespace PalmTree {
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
     }
 
-    void Renderer::EndSwapChainRenderPass(VkCommandBuffer commandBuffer) {
+    void VulkanRenderer::EndSwapChainRenderPass(VkCommandBuffer commandBuffer) {
         PT_CORE_ASSERT(m_IsFrameStarted, "Can't call EndSwapChainRenderPass if frame is not in progress!");
         PT_CORE_ASSERT(
             commandBuffer == GetCurrentCommandBuffer(),
@@ -117,8 +117,8 @@ namespace PalmTree {
         vkCmdEndRenderPass(commandBuffer);
     }
 
-    void Renderer::CreateCommandBuffers() {
-        m_CommandBuffers.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
+    void VulkanRenderer::CreateCommandBuffers() {
+        m_CommandBuffers.resize(VulkanSwapChain::MAX_FRAMES_IN_FLIGHT);
 
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -131,7 +131,7 @@ namespace PalmTree {
         }
     }
 
-    void Renderer::FreeCommandBuffers() {
+    void VulkanRenderer::FreeCommandBuffers() {
         vkFreeCommandBuffers(
             m_Device.GetDevice(),
             m_Device.GetCommandPool(),
@@ -142,7 +142,7 @@ namespace PalmTree {
         m_CommandBuffers.clear();
     }
 
-    void Renderer::RecreateSwapChain() {
+    void VulkanRenderer::RecreateSwapChain() {
         // auto extent = m_Window.GetExtent();
         // while (extent.width == 0 || extent.height == 0) {
         //     extent = m_Window.GetExtent();

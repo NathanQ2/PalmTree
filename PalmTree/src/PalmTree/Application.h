@@ -3,10 +3,10 @@
 #include "Camera.h"
 #include "Core.h"
 #include "LayerStack.h"
-#include "Platform/Vulkan/Descriptors.h"
+#include "Platform/Vulkan/VulkanDescriptors.h"
 #include "EntityComponentSystem/EntityComponentSystem.h"
 #include "Model.h"
-#include "Platform/Vulkan/Renderer.h"
+#include "Platform/Vulkan/VulkanRenderer.h"
 #include "Window.h"
 #include "EventSystem/ApplicationEvents.h"
 #include "ImGui/ImGuiLayer.h"
@@ -44,13 +44,13 @@ namespace PalmTree {
         
         Window& GetWindow() const { return *m_Window; }
         
-        DescriptorSetLayout& GetGlobalSetLayout() { return *m_GlobalSetLayout; }
+        VulkanDescriptorSetLayout& GetGlobalSetLayout() { return *m_GlobalSetLayout; }
     protected:
         bool OnWindowClosed(WindowClosedEvent& event);
 
         std::unique_ptr<Window> m_Window;
-        std::unique_ptr<Device> m_Device;
-        std::unique_ptr<Renderer> m_Renderer;
+        std::unique_ptr<VulkanDevice> m_Device;
+        std::unique_ptr<VulkanRenderer> m_Renderer;
         
         ImGuiLayer* m_ImGuiLayer = nullptr;
 
@@ -60,8 +60,8 @@ namespace PalmTree {
 
         LayerStack m_LayerStack{};
         
-        std::vector<VkDescriptorSet> m_GlobalDescriptorSets{SwapChain::MAX_FRAMES_IN_FLIGHT};
-        std::unique_ptr<DescriptorSetLayout> m_GlobalSetLayout;
+        std::vector<VkDescriptorSet> m_GlobalDescriptorSets{VulkanSwapChain::MAX_FRAMES_IN_FLIGHT};
+        std::unique_ptr<VulkanDescriptorSetLayout> m_GlobalSetLayout;
 
         bool m_Running = true;
     private:

@@ -15,7 +15,7 @@ namespace PalmTree {
     };
 
     SimpleRenderSystem::SimpleRenderSystem(
-        Device& device,
+        VulkanDevice& device,
         VkRenderPass renderPass,
         VkDescriptorSetLayout globalSetLayout
     ) : m_Device(device) {
@@ -91,12 +91,12 @@ namespace PalmTree {
     void SimpleRenderSystem::CreatePipeline(VkRenderPass renderPass) {
         PT_CORE_ASSERT(m_PipelineLayout != nullptr, "Cannot create pipeline before pipeline layout!");
 
-        PipelineConfig pipelineConfig{};
-        Pipeline::DefaultPipelineConfig(pipelineConfig);
+        VulkanPipelineConfig pipelineConfig{};
+        VulkanPipeline::DefaultPipelineConfig(pipelineConfig);
 
         pipelineConfig.RenderPass = renderPass;
         pipelineConfig.PipelineLayout = m_PipelineLayout;
-        m_Pipeline = std::make_unique<Pipeline>(
+        m_Pipeline = std::make_unique<VulkanPipeline>(
             m_Device,
             "PalmTree/simpleShader.vert.spv",
             "PalmTree/simpleShader.frag.spv",
