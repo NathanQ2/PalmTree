@@ -21,8 +21,8 @@ namespace PalmTree {
         virtual void OnStart() {}
         virtual void OnEnd() {}
 
-        virtual void OnUpdate(FrameInfo& frameInfo) {}
-        virtual void OnRender(FrameInfo& frameInfo) {}
+        virtual void OnUpdate(float dt) {}
+        virtual void OnRender(float dt) {}
 
         virtual bool OnEvent(Event& event) { return false; }
         

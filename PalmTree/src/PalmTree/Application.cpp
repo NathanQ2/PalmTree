@@ -41,36 +41,7 @@ namespace PalmTree {
         auto currentTime = std::chrono::high_resolution_clock::now();
         
         VulkanDevice& device = m_Renderer->GetDevice();
-        
-        std::unique_ptr<VulkanDescriptorPool> globalPool = VulkanDescriptorPool::Builder(device)
-            .SetMaxSets(VulkanSwapChain::MAX_FRAMES_IN_FLIGHT)
-            .AddPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VulkanSwapChain::MAX_FRAMES_IN_FLIGHT)
-            .Build();
-        
-        std::vector<std::unique_ptr<VulkanBuffer>> uboBuffers{VulkanSwapChain::MAX_FRAMES_IN_FLIGHT};
-        for (int i = 0; i < uboBuffers.size(); i++) {
-            uboBuffers[i] = std::make_unique<VulkanBuffer>(
-                device,
-                sizeof(GlobalUBO),
-                VulkanSwapChain::MAX_FRAMES_IN_FLIGHT,
-                VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
-                device.m_Properties.limits.minUniformBufferOffsetAlignment
-            );
-            uboBuffers[i]->Map();
-        }
 
-        m_GlobalSetLayout = VulkanDescriptorSetLayout::Builder(device)
-            .AddBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
-            .Build();
-
-        std::vector<VkDescriptorSet> globalDescriptorSets(VulkanSwapChain::MAX_FRAMES_IN_FLIGHT);
-        for (int i = 0; i < globalDescriptorSets.size(); i++) {
-            auto bufferInfo = uboBuffers[i]->DescriptorInfo();
-            VulkanDescriptorWriter(*m_GlobalSetLayout, *globalPool)
-                .WriteBuffer(0, &bufferInfo)
-                .Build(globalDescriptorSets[i]);
-        }
         for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
             Layer* layer = *it;
             if (layer->IsEnabled())
@@ -85,28 +56,12 @@ namespace PalmTree {
             currentTime = newTime;
 
             if (RendererBackend::BeginFrame()) {
-                int frameIndex = RendererBackend::GetFrameIndex();
-                FrameInfo frameInfo{
-                    frameIndex,
-                    frameTime,
-                    m_Renderer->GetCurrentCommandBuffer(),
-                    m_Camera,
-                    globalDescriptorSets[frameIndex],
-                    {
-                        m_Camera.GetProjection(),
-                        m_Camera.GetView(),
-                        m_Camera.GetInverseView()
-                    }
-                };
-
                 // Update
                 for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
                     Layer* layer = *it;
                     if (layer->IsEnabled())
-                        layer->OnUpdate(frameInfo);
+                        layer->OnUpdate(frameTime);
                 }
-                uboBuffers[frameIndex]->WriteToBuffer(&frameInfo.GlobalUBO);
-                uboBuffers[frameIndex]->Flush();
 
                 // Render
                 m_Renderer->BeginSwapChainRenderPass(m_Renderer->GetCurrentCommandBuffer());
@@ -114,7 +69,7 @@ namespace PalmTree {
                 for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
                     Layer* layer = *it;
                     if (layer->IsEnabled())
-                        layer->OnRender(frameInfo);
+                        layer->OnRender(frameTime);
                 }
                 
                 m_ImGuiLayer->Begin();
@@ -126,7 +81,7 @@ namespace PalmTree {
                 m_ImGuiLayer->End();
 
                 m_Renderer->EndSwapChainRenderPass(m_Renderer->GetCurrentCommandBuffer());
-                m_Renderer->EndFrameImpl();
+                RendererBackend::EndFrame();
             }
         }
 
@@ -135,7 +90,7 @@ namespace PalmTree {
             if (layer->IsEnabled())
                 layer->OnEnd();
         }
-
+        
         vkDeviceWaitIdle(device.GetDevice());
     }
 

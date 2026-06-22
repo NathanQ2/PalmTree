@@ -5,6 +5,7 @@
 #include <glm/gtc/constants.hpp>
 
 #include "KeyboardMovementController.h"
+#include "PalmTree/Renderer/SceneRenderer3D.h"
 
 using namespace PalmTree;
 using namespace Sandbox;
@@ -12,57 +13,36 @@ using namespace Sandbox;
 class GameLayer : public Layer {
 public:
     GameLayer(Window& window, EntityComponentSystem& ecs, Camera& camera) :
-        Layer("GameLayer"), m_Window(window), m_Device(RendererBackend::GetVulkan()->GetDevice()), m_Renderer(RendererBackend::GetVulkan()), m_Ecs(ecs), m_Camera(camera), m_CameraController([]() { return !ImGui::GetIO().WantCaptureMouse; }) {}
+        Layer("GameLayer"), m_Window(window), m_Device(RendererBackend::GetVulkan()->GetDevice()), m_Ecs(ecs), m_Camera(camera), m_CameraController([]() { return !ImGui::GetIO().WantCaptureMouse; }) {}
 
     void OnStart() override {
-        
         LoadGameObjects();
-
-        m_SimpleRenderSystem = new SimpleRenderSystem(
-            m_Device,
-            m_Renderer->GetSwapChainRenderPass(),
-            Application::Get().GetGlobalSetLayout().GetDescriptorSetLayout()
-        );
-        m_Ecs.RegisterSystem<SimpleRenderSystem>(
-            std::shared_ptr<SimpleRenderSystem>(m_SimpleRenderSystem),
-            SignatureBuilder<TransformComponent, ModelComponent>(m_Ecs.GetComponentManager()).Build()
-        );
-
-        m_PointLightSystem = new PointLightSystem(
-            m_Device,
-            m_Renderer->GetSwapChainRenderPass(),
-            Application::Get().GetGlobalSetLayout().GetDescriptorSetLayout()
-        );
-        m_Ecs.RegisterSystem<PointLightSystem>(
-            std::shared_ptr<PointLightSystem>(m_PointLightSystem),
-            SignatureBuilder<TransformComponent, PointLightComponent>(m_Ecs.GetComponentManager()).Build()
-        );
 
         m_Camera.SetViewDirection(glm::vec3(0), glm::vec3(0.0, 0.0f, 1.0f));
 
         m_ViewerObject = &m_Ecs.CreateGameObject();
         m_ViewerObject->GetTransform().Translation.z = -2.5f;
-
-        m_GlfwWindow = dynamic_cast<MacWindow&>(m_Window).GetGLFWWindow();
-
-        glm::f64vec2 cursorPos = glm::f64vec2(0);
-        glfwGetCursorPos(m_GlfwWindow, &cursorPos.x, &cursorPos.y);
+        
+        m_Renderer = std::make_unique<SceneRenderer3D>(
+            m_Window,
+            m_Ecs,
+            m_Camera
+        );
     }
     void OnEnd() override {}
     
-    void OnUpdate(FrameInfo& frameInfo) override {
-        m_CameraController.MoveInPlaneXZ(frameInfo.FrameTime, *m_ViewerObject);
+    void OnUpdate(float dt) override {
+        m_CameraController.MoveInPlaneXZ(dt, *m_ViewerObject);
         m_Camera.SetViewYXZ(m_ViewerObject->GetTransform().Translation, m_ViewerObject->GetTransform().Rotation);
 
-        float aspect = m_Renderer->GetAspectRatio();
+        float aspect = RendererBackend::GetVulkan()->GetAspectRatio();
         m_Camera.SetPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
         
-        m_PointLightSystem->Update(frameInfo);
+        m_Renderer->Update(dt);
     }
     
-    void OnRender(FrameInfo& frameInfo) override {
-        m_SimpleRenderSystem->RenderGameObjects(frameInfo);
-        m_PointLightSystem->Render(frameInfo);
+    void OnRender(float dt) override {
+        m_Renderer->Render(dt);
     }
     
     void OnImGuiRender() override {
@@ -134,7 +114,6 @@ public:
 private:
     Window& m_Window;
     VulkanDevice& m_Device;
-    VulkanRendererBackend* m_Renderer;
     
     EntityComponentSystem& m_Ecs;
     Camera& m_Camera;
@@ -145,10 +124,7 @@ private:
     
     KeyboardMovementController m_CameraController;
     
-    GLFWwindow* m_GlfwWindow = nullptr;
-    
-    PointLightSystem* m_PointLightSystem = nullptr;
-    SimpleRenderSystem* m_SimpleRenderSystem = nullptr;
+    std::unique_ptr<SceneRenderer3D> m_Renderer;
 };
 
 class SandboxApp : public Application {

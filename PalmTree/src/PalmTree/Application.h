@@ -43,8 +43,6 @@ namespace PalmTree {
         void DebugPrintLayerStack();
         
         Window& GetWindow() const { return *m_Window; }
-        
-        VulkanDescriptorSetLayout& GetGlobalSetLayout() { return *m_GlobalSetLayout; }
     protected:
         bool OnWindowClosed(WindowClosedEvent& event);
 
@@ -58,9 +56,6 @@ namespace PalmTree {
         Camera m_Camera{};
 
         LayerStack m_LayerStack{};
-        
-        std::vector<VkDescriptorSet> m_GlobalDescriptorSets{VulkanSwapChain::MAX_FRAMES_IN_FLIGHT};
-        std::unique_ptr<VulkanDescriptorSetLayout> m_GlobalSetLayout;
 
         bool m_Running = true;
     private:
