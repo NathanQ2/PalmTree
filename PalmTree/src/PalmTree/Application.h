@@ -47,7 +47,6 @@ namespace PalmTree {
         bool OnWindowClosed(WindowClosedEvent& event);
 
         std::unique_ptr<Window> m_Window;
-        VulkanRendererBackend* m_Renderer;
 
         ImGuiLayer* m_ImGuiLayer = nullptr;
 

@@ -3,6 +3,7 @@
 
 namespace PalmTree {
     class VulkanRendererBackend;
+    class Model;
 
     class RendererBackend {
     public:
@@ -44,6 +45,12 @@ namespace PalmTree {
         static bool BeginFrame() { return Get()->BeginFrameImpl(); }
         static void EndFrame() { return Get()->EndFrameImpl(); }
 
+        static void BeginRenderPass() { return Get()->BeginRenderPassImpl(); }
+        static void EndRenderPass() { return Get()->EndRenderPassImpl(); }
+
+        static void BindModel(const Model& model) { return Get()->BindModelImpl(model); }
+        static void DrawModel(const Model& model) { return Get()->DrawModelImpl(model); }
+
         static int GetFrameIndex() { return Get()->GetFrameIndexImpl(); }
 
         // TODO: TEMPORARY until all vulkan features are abstracted
@@ -56,6 +63,12 @@ namespace PalmTree {
 
         virtual bool BeginFrameImpl() = 0;
         virtual void EndFrameImpl() = 0;
+
+        virtual void BeginRenderPassImpl() = 0;
+        virtual void EndRenderPassImpl() = 0;
+
+        virtual void BindModelImpl(const Model& model) const = 0;
+        virtual void DrawModelImpl(const Model& model) const = 0;
 
         virtual int GetFrameIndexImpl() const = 0;
     private:

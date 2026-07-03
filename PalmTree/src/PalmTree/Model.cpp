@@ -13,8 +13,8 @@
 
 namespace std {
     template<>
-    struct hash<PalmTree::Model::Vertex> {
-        size_t operator()(PalmTree::Model::Vertex const& vertex) const {
+    struct hash<PalmTree::Vertex> {
+        size_t operator()(PalmTree::Vertex const& vertex) const {
             size_t seed = 0;
             PalmTree::HashCombine(seed, vertex.Position, vertex.Color, vertex.Normal, vertex.Uv);
 
@@ -24,26 +24,6 @@ namespace std {
 }
 
 namespace PalmTree {
-    std::vector<VkVertexInputBindingDescription> Model::Vertex::GetBindingDescriptions() {
-        std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
-        bindingDescriptions[0].binding = 0;
-        bindingDescriptions[0].stride = sizeof(Vertex);
-        bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-        return bindingDescriptions;
-    }
-
-    std::vector<VkVertexInputAttributeDescription> Model::Vertex::GetAttributeDescriptions() {
-        std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
-
-        attributeDescriptions.push_back({0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Position)});
-        attributeDescriptions.push_back({1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Color)});
-        attributeDescriptions.push_back({2, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Normal)});
-        attributeDescriptions.push_back({3, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, Uv)});
-
-        return attributeDescriptions;
-    }
-
     void Model::Builder::LoadModel(const std::string& path) {
         tinyobj::attrib_t attrib;
         std::vector<tinyobj::shape_t> shapes;
@@ -101,98 +81,31 @@ namespace PalmTree {
         }
     }
 
-    Model::Model(VulkanDevice& device, const Model::Builder& builder) : m_Device(device) {
+    Model::Model(const Builder& builder) {
         CreateVertexBuffers(builder.Vertices);
         CreateIndexBuffers(builder.Indices);
     }
 
     Model::~Model() {}
 
-    std::unique_ptr<Model> Model::CreateModelFromFile(VulkanDevice& device, const std::string& path) {
+    std::unique_ptr<Model> Model::CreateModelFromFile(const std::string& path) {
         Builder builder{};
 
         builder.LoadModel(path);
 
-        return std::make_unique<Model>(device, builder);
-    }
-
-    void Model::Bind(VkCommandBuffer commandBuffer) {
-        VkBuffer buffers[] = {m_VertexBuffer->GetBuffer()};
-        VkDeviceSize offsets[] = {0};
-        vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
-
-
-        if (m_HasIndexBuffer) {
-            vkCmdBindIndexBuffer(commandBuffer, m_IndexBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
-        }
-    }
-
-    void Model::Draw(VkCommandBuffer commandBuffer) {
-        if (m_HasIndexBuffer) {
-            vkCmdDrawIndexed(commandBuffer, m_IndexCount, 1, 0, 0, 0);
-        }
-        else {
-            vkCmdDraw(commandBuffer, m_VertexCount, 1, 0, 0);
-        }
+        return std::make_unique<Model>(builder);
     }
 
     void Model::CreateVertexBuffers(const std::vector<Vertex>& vertices) {
-        m_VertexCount = static_cast<uint32_t>(vertices.size());
-        PT_CORE_ASSERT(m_VertexCount >= 3, "Vertex count must be at least 3");
+        PT_CORE_ASSERT(vertices.size() >= 3, "Vertex count must be at least 3");
 
-        VkDeviceSize bufferSize = sizeof(vertices[0]) * m_VertexCount;
-        uint32_t vertexSize = sizeof(vertices[0]);
-
-        VulkanBuffer stagingBuffer = VulkanBuffer(
-            m_Device,
-            vertexSize,
-            m_VertexCount,
-            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-        );
-
-        stagingBuffer.Map();
-        stagingBuffer.WriteToBuffer((void*)vertices.data());
-
-        m_VertexBuffer = std::make_unique<VulkanBuffer>(
-            m_Device,
-            vertexSize,
-            m_VertexCount,
-            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-        );
-
-        m_Device.CopyBuffer(stagingBuffer.GetBuffer(), m_VertexBuffer->GetBuffer(), bufferSize);
+        m_VertexBuffer = std::unique_ptr<VertexBuffer>(VertexBuffer::Create(vertices));
     }
 
     void Model::CreateIndexBuffers(const std::vector<uint32_t>& indices) {
-        m_IndexCount = static_cast<uint32_t>(indices.size());
-        m_HasIndexBuffer = m_IndexCount > 0;
-
+        m_HasIndexBuffer = indices.size() > 0;
         if (!m_HasIndexBuffer) return;
 
-        VkDeviceSize bufferSize = sizeof(indices[0]) * m_IndexCount;
-        uint32_t indexSize = sizeof(indices[0]);
-
-        VulkanBuffer stagingBuffer = VulkanBuffer(
-            m_Device,
-            indexSize,
-            m_IndexCount,
-            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-        );
-
-        stagingBuffer.Map();
-        stagingBuffer.WriteToBuffer((void*)indices.data());
-
-        m_IndexBuffer = std::make_unique<VulkanBuffer>(
-            m_Device,
-            indexSize,
-            m_IndexCount,
-            VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-        );
-
-        m_Device.CopyBuffer(stagingBuffer.GetBuffer(), m_IndexBuffer->GetBuffer(), bufferSize);
+        m_IndexBuffer = std::unique_ptr<IndexBuffer>(IndexBuffer::Create(indices));
     }
 }

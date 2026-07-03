@@ -21,7 +21,6 @@ namespace PalmTree {
         void OnStart() override;
 
         void Begin();
-        void OnImGuiRender() override;
         void End();
     private:
         void InitImGui();

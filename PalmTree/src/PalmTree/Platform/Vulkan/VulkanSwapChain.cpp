@@ -435,19 +435,24 @@ namespace PalmTree {
     VkPresentModeKHR VulkanSwapChain::ChooseSwapPresentMode(
         const std::vector<VkPresentModeKHR>& availablePresentModes
     ) {
+        std::stringstream ss;
         for (const auto& availablePresentMode : availablePresentModes) {
             if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
-                PT_CORE_TRACE("Present mode: Tripple Buffered");
+                PT_CORE_TRACE("Present mode: Triple Buffered");
                 return availablePresentMode;
             }
+
+            ss << "    " << availablePresentMode << '\n';
         }
+
+        PT_CORE_TRACE("Available Present Modes:\n{}", ss.str());
 
         // if using this mode glfwPollEvents will block on movement, so dragging
         // becomes choppy framerate fixed to 60 fps
         PT_CORE_TRACE("Present mode: V-Sync");
         return VK_PRESENT_MODE_FIFO_KHR;
 
-        // std::cout << "Present mode: Immediate" << std::endl;
+        // PT_CORE_TRACE("Present mode: Immediate");
         // return VK_PRESENT_MODE_IMMEDIATE_KHR;
     }
 

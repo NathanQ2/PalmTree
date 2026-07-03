@@ -22,7 +22,6 @@ namespace PalmTree {
         m_Window->SetEventCallback(PT_BIND_EVENT_FN(Application::OnEvent));
 
         RendererBackend::Init(RendererBackend::API::VULKAN);
-        m_Renderer = RendererBackend::GetVulkan();
 
         m_ImGuiLayer = PushOverlay<ImGuiLayer>(dynamic_cast<MacWindow&>(*m_Window));
     }
@@ -33,8 +32,6 @@ namespace PalmTree {
 
     void Application::Run() {
         auto currentTime = std::chrono::high_resolution_clock::now();
-
-        VulkanDevice& device = m_Renderer->GetDevice();
 
         for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
             Layer* layer = *it;
@@ -58,7 +55,7 @@ namespace PalmTree {
                 }
 
                 // Render
-                m_Renderer->BeginSwapChainRenderPass(m_Renderer->GetCurrentCommandBuffer());
+                RendererBackend::BeginRenderPass();
 
                 for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
                     Layer* layer = *it;
@@ -74,7 +71,7 @@ namespace PalmTree {
                 }
                 m_ImGuiLayer->End();
 
-                m_Renderer->EndSwapChainRenderPass(m_Renderer->GetCurrentCommandBuffer());
+                RendererBackend::EndRenderPass();
                 RendererBackend::EndFrame();
             }
         }
@@ -84,8 +81,6 @@ namespace PalmTree {
             if (layer->IsEnabled())
                 layer->OnEnd();
         }
-
-        vkDeviceWaitIdle(device.GetDevice());
     }
 
     void Application::OnEvent(Event& event) {

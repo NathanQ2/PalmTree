@@ -1,30 +1,10 @@
 #pragma once
 
-#include "Platform/Vulkan/VulkanBuffer.h"
-#include "Platform/Vulkan/VulkanDevice.h"
-
-
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
+#include "Renderer/Buffer.h"
 
 namespace PalmTree {
     class Model {
     public:
-        struct Vertex {
-            glm::vec3 Position{};
-            glm::vec3 Color{};
-            glm::vec3 Normal{};
-            glm::vec2 Uv{};
-
-            static std::vector<VkVertexInputBindingDescription> GetBindingDescriptions();
-            static std::vector<VkVertexInputAttributeDescription> GetAttributeDescriptions();
-
-            bool operator==(const Vertex& other) const {
-                return Position == other.Position && Color == other.Color && Normal == other.Normal && Uv == other.Uv;
-            }
-        };
-
         struct Builder {
             std::vector<Vertex> Vertices{};
             std::vector<uint32_t> Indices{};
@@ -32,27 +12,27 @@ namespace PalmTree {
             void LoadModel(const std::string& path);
         };
 
-        Model(VulkanDevice& device, const Model::Builder& builder);
+        Model(const Builder& builder);
         ~Model();
 
         Model(const Model&) = delete;
         Model& operator=(const Model&) = delete;
 
-        static std::unique_ptr<Model> CreateModelFromFile(VulkanDevice& device, const std::string& path);
+        static std::unique_ptr<Model> CreateModelFromFile(const std::string& path);
 
-        void Bind(VkCommandBuffer commandBuffer);
-        void Draw(VkCommandBuffer commandBuffer);
+        bool HasIndexBuffer() const { return m_HasIndexBuffer; }
+        const VertexBuffer& GetVertexBuffer() const { return *m_VertexBuffer; }
+        const IndexBuffer& GetIndexBuffer() const { return *m_IndexBuffer; }
+
+        uint32_t GetVertexCount() const { return m_VertexBuffer->GetCount(); }
+        uint32_t GetIndexCount() const { return m_IndexBuffer->GetCount(); }
     private:
         void CreateVertexBuffers(const std::vector<Vertex>& vertices);
         void CreateIndexBuffers(const std::vector<uint32_t>& indices);
 
-        VulkanDevice& m_Device;
-
-        std::unique_ptr<VulkanBuffer> m_VertexBuffer;
-        uint32_t m_VertexCount;
+        std::unique_ptr<VertexBuffer> m_VertexBuffer;
 
         bool m_HasIndexBuffer = false;
-        std::unique_ptr<VulkanBuffer> m_IndexBuffer;
-        uint32_t m_IndexCount;
+        std::unique_ptr<IndexBuffer> m_IndexBuffer;
     };
 }

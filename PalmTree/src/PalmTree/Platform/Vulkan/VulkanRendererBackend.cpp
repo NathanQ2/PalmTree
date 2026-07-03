@@ -2,6 +2,8 @@
 
 #include <stdexcept>
 
+#include "VulkanIndexBuffer.h"
+#include "VulkanVertexBuffer.h"
 #include "../../Log.h"
 #include "PalmTree/Application.h"
 
@@ -91,12 +93,10 @@ namespace PalmTree {
         m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % VulkanSwapChain::MAX_FRAMES_IN_FLIGHT;
     }
 
-    void VulkanRendererBackend::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer) {
+    void VulkanRendererBackend::BeginRenderPassImpl() {
         PT_CORE_ASSERT(m_IsFrameStarted, "Can't call BeginSwapChainRenderPass if frame is not in progress!");
-        PT_CORE_ASSERT(
-            commandBuffer == GetCurrentCommandBuffer(),
-            "Can't begin render pass on command buffer from a different frame!"
-        );
+
+        VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
 
         VkRenderPassBeginInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -127,14 +127,36 @@ namespace PalmTree {
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
     }
 
-    void VulkanRendererBackend::EndSwapChainRenderPass(VkCommandBuffer commandBuffer) {
+    void VulkanRendererBackend::EndRenderPassImpl() {
         PT_CORE_ASSERT(m_IsFrameStarted, "Can't call EndSwapChainRenderPass if frame is not in progress!");
-        PT_CORE_ASSERT(
-            commandBuffer == GetCurrentCommandBuffer(),
-            "Can't end render pass on command buffer from a different frame!"
-        );
+
+        VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
 
         vkCmdEndRenderPass(commandBuffer);
+    }
+
+    void VulkanRendererBackend::BindModelImpl(const Model& model) const {
+        VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
+
+        VkBuffer buffers[] = {dynamic_cast<const VulkanVertexBuffer&>(model.GetVertexBuffer()).GetVkBuffer()};
+        VkDeviceSize offsets[] = {0};
+        vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
+
+        if (model.HasIndexBuffer()) {
+            VkBuffer indexBuffer = dynamic_cast<const VulkanIndexBuffer&>(model.GetIndexBuffer()).GetVkBuffer();
+            vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+        }
+    }
+
+    void VulkanRendererBackend::DrawModelImpl(const Model& model) const {
+        VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
+
+        if (model.HasIndexBuffer()) {
+            vkCmdDrawIndexed(commandBuffer, model.GetIndexCount(), 1, 0, 0, 0);
+        }
+        else {
+            vkCmdDraw(commandBuffer, model.GetVertexCount(), 1, 0, 0);
+        }
     }
 
     void VulkanRendererBackend::CreateCommandBuffers() {

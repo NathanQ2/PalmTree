@@ -2,6 +2,7 @@
 #include "PalmTree/Camera.h"
 #include "PalmTree/Window.h"
 #include "PalmTree/EntityComponentSystem/EntityComponentSystem.h"
+#include "PalmTree/Platform/Vulkan/VulkanBuffer.h"
 #include "PalmTree/Platform/Vulkan/VulkanSwapChain.h"
 #include "PalmTree/Systems/PointLightSystem.h"
 #include "PalmTree/Systems/SimpleRenderSystem.h"

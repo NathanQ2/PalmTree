@@ -55,7 +55,7 @@ namespace PalmTree {
         }
 
         ComponentManager& GetComponentManager() { return m_ComponentManager; }
-        
+
         std::vector<GameObject>& GetGameObjects();
     private:
         EntityManager m_EntityManager{};

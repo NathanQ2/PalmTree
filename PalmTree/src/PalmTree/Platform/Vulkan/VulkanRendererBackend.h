@@ -29,14 +29,17 @@ namespace PalmTree {
 
         bool BeginFrameImpl() override;
         void EndFrameImpl() override;
-        void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer);
-        void EndSwapChainRenderPass(VkCommandBuffer commandBuffer);
+        void BeginRenderPassImpl() override;
+        void EndRenderPassImpl() override;
 
         [[nodiscard]] int GetFrameIndexImpl() const override {
             PT_CORE_ASSERT(m_IsFrameStarted, "Cannot get command buffer when frame not in progress");
 
             return m_CurrentFrameIndex;
         }
+
+        void BindModelImpl(const Model& model) const override;
+        void DrawModelImpl(const Model& model) const override;
 
         uint32_t GetImageCount() { return m_SwapChain->ImageCount(); }
 

@@ -7,6 +7,7 @@
 #include <iostream>
 #include <stdexcept>
 
+#include "VulkanVertexBuffer.h"
 #include "../../Log.h"
 
 namespace PalmTree {
@@ -93,8 +94,8 @@ namespace PalmTree {
         config.DynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(config.DynamicStateEnables.size());
         config.DynamicStateInfo.flags = 0;
 
-        config.BindingDescriptions = Model::Vertex::GetBindingDescriptions();
-        config.AttributeDescriptions = Model::Vertex::GetAttributeDescriptions();
+        config.BindingDescriptions = VulkanVertexBuffer::GetBindingDescriptions();
+        config.AttributeDescriptions = VulkanVertexBuffer::GetAttributeDescriptions();
     }
 
     void VulkanPipeline::EnableAlphaBlending(VulkanPipelineConfig& config) {

@@ -37,8 +37,6 @@ namespace PalmTree {
         ImGui::DockSpaceOverViewport(0, nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
     }
 
-    void ImGuiLayer::OnImGuiRender() {}
-
     void ImGuiLayer::End() {
         ImGui::Render();
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), m_Renderer->GetCurrentCommandBuffer());

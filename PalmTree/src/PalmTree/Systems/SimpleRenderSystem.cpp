@@ -58,8 +58,8 @@ namespace PalmTree {
             );
 
             ModelComponent& model = obj.GetComponent<ModelComponent>();
-            model.Model->Bind(frameInfo.CommandBuffer);
-            model.Model->Draw(frameInfo.CommandBuffer);
+            RendererBackend::BindModel(*model.Model);
+            RendererBackend::DrawModel(*model.Model);
         }
     }
 

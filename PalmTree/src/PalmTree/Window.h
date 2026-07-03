@@ -16,7 +16,7 @@ namespace PalmTree {
 
     class Window {
     public:
-        using EventCallbackFn = std::function<void(Event&)>;
+        using EventCallbackFn = std::function<void(Event &)>;
 
         static Window* Create(WindowProps props = WindowProps());
 

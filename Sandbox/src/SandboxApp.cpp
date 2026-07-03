@@ -34,6 +34,23 @@ public:
     void OnEnd() override {}
 
     void OnUpdate(float dt) override {
+        m_DeltaTime = dt;
+        m_FrameTimes.push(dt);
+        if (m_FrameTimes.size() == 10) {
+            float avgFrameTime = 0.0f;
+            for (int i = 0; i < 10; i++) {
+                avgFrameTime += m_FrameTimes.front();
+                m_FrameTimes.pop();
+            }
+            
+            avgFrameTime /= 10;
+            
+            // seconds/frame -> Frames / seconds
+            
+            
+            m_Fps = 1 / avgFrameTime;
+        }
+        
         m_CameraController.MoveInPlaneXZ(dt, *m_ViewerObject);
         m_Camera.SetViewYXZ(m_ViewerObject->GetTransform().Translation, m_ViewerObject->GetTransform().Rotation);
 
@@ -70,6 +87,11 @@ public:
         }
         
         ImGui::End();
+        
+        ImGui::Begin("Performance");
+        ImGui::Text("Frame Time: %fms", m_DeltaTime * 1000);
+        ImGui::Text("FPS: %f", m_Fps);
+        ImGui::End();
     }
 
     bool OnEvent(Event& event) override {
@@ -79,7 +101,7 @@ public:
     void LoadGameObjects() {
         // Flat Vase
         {
-            std::shared_ptr model = Model::CreateModelFromFile(m_Device, "../assets/models/flat_vase.obj");
+            std::shared_ptr model = Model::CreateModelFromFile("../assets/models/flat_vase.obj");
 
             GameObject& obj = m_Ecs.CreateGameObject();
 
@@ -91,7 +113,7 @@ public:
 
         // Smooth Vase
         {
-            std::shared_ptr model = Model::CreateModelFromFile(m_Device, "../assets/models/smooth_vase.obj");
+            std::shared_ptr model = Model::CreateModelFromFile("../assets/models/smooth_vase.obj");
 
             GameObject& obj = m_Ecs.CreateGameObject();
             obj.AddComponent(ModelComponent{glm::vec3(1), model});
@@ -101,7 +123,7 @@ public:
 
         // Floor
         {
-            std::shared_ptr model = Model::CreateModelFromFile(m_Device, "../assets/models/quad.obj");
+            std::shared_ptr model = Model::CreateModelFromFile("../assets/models/quad.obj");
 
             GameObject& obj = m_Ecs.CreateGameObject();
             obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
@@ -145,6 +167,10 @@ private:
     KeyboardMovementController m_CameraController;
 
     std::unique_ptr<SceneRenderer3D> m_Renderer;
+    
+    float m_DeltaTime = 0.0f;
+    float m_Fps = 0.0f;
+    std::queue<float> m_FrameTimes;
 };
 
 class SandboxApp : public Application {
