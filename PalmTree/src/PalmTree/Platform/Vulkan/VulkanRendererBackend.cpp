@@ -50,7 +50,7 @@ namespace PalmTree {
 
         m_IsFrameStarted = true;
 
-        VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
+        VkCommandBuffer commandBuffer = GetCurrentVkCommandBuffer();
 
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -67,7 +67,7 @@ namespace PalmTree {
     void VulkanRendererBackend::EndFrameImpl() {
         PT_CORE_ASSERT(m_IsFrameStarted, "Can't call end frame while frame is not in progress");
 
-        VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
+        VkCommandBuffer commandBuffer = GetCurrentVkCommandBuffer();
 
         if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
             PT_CORE_ERROR("Failed to end command buffer!");
@@ -96,91 +96,23 @@ namespace PalmTree {
     void VulkanRendererBackend::BeginRenderPassImpl() {
         PT_CORE_ASSERT(m_IsFrameStarted, "Can't call BeginSwapChainRenderPass if frame is not in progress!");
 
-        VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
-
-        VkRenderPassBeginInfo renderPassInfo{};
-        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass = m_SwapChain->GetRenderPass();
-        renderPassInfo.framebuffer = m_SwapChain->GetFrameBuffer(m_CurrentImageIndex);
-
-        renderPassInfo.renderArea.offset = {0, 0};
-        renderPassInfo.renderArea.extent = m_SwapChain->GetSwapChainExtent();
-
-        std::array<VkClearValue, 2> clearValues{};
-        clearValues[0].color = {0.01f, 0.01f, 0.01f, 1.0f};
-        clearValues[1].depthStencil = {1.0f, 0};
-
-        renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-        renderPassInfo.pClearValues = clearValues.data();
-
-        vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-        VkViewport viewport{};
-        viewport.x = 0.0f;
-        viewport.y = 0.0f;
-        viewport.width = static_cast<float>(m_SwapChain->GetSwapChainExtent().width);
-        viewport.height = static_cast<float>(m_SwapChain->GetSwapChainExtent().height);
-        viewport.minDepth = 0.0f;
-        viewport.maxDepth = 1.0f;
-        VkRect2D scissor{{0, 0}, m_SwapChain->GetSwapChainExtent()};
-        vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-        vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+        GetCurrentCommandBufferImpl().BeginRenderPass(m_CurrentFrameIndex);
     }
 
     void VulkanRendererBackend::EndRenderPassImpl() {
         PT_CORE_ASSERT(m_IsFrameStarted, "Can't call EndSwapChainRenderPass if frame is not in progress!");
 
-        VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
-
-        vkCmdEndRenderPass(commandBuffer);
-    }
-
-    void VulkanRendererBackend::BindModelImpl(const Model& model) const {
-        VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
-
-        VkBuffer buffers[] = {dynamic_cast<const VulkanVertexBuffer&>(model.GetVertexBuffer()).GetVkBuffer()};
-        VkDeviceSize offsets[] = {0};
-        vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
-
-        if (model.HasIndexBuffer()) {
-            VkBuffer indexBuffer = dynamic_cast<const VulkanIndexBuffer&>(model.GetIndexBuffer()).GetVkBuffer();
-            vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-        }
-    }
-
-    void VulkanRendererBackend::DrawModelImpl(const Model& model) const {
-        VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
-
-        if (model.HasIndexBuffer()) {
-            vkCmdDrawIndexed(commandBuffer, model.GetIndexCount(), 1, 0, 0, 0);
-        }
-        else {
-            vkCmdDraw(commandBuffer, model.GetVertexCount(), 1, 0, 0);
-        }
+        GetCurrentCommandBufferImpl().EndRenderPass();
     }
 
     void VulkanRendererBackend::CreateCommandBuffers() {
-        m_CommandBuffers.resize(VulkanSwapChain::MAX_FRAMES_IN_FLIGHT);
-
-        VkCommandBufferAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandPool = m_Device->GetCommandPool();
-        allocInfo.commandBufferCount = static_cast<uint32_t>(m_CommandBuffers.size());
-
-        if (vkAllocateCommandBuffers(m_Device->GetDevice(), &allocInfo, m_CommandBuffers.data()) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to allocate command buffers!");
+        m_CommandBuffers.reserve(VulkanSwapChain::MAX_FRAMES_IN_FLIGHT);
+        for (int i = 0; i < VulkanSwapChain::MAX_FRAMES_IN_FLIGHT; i++) {
+            m_CommandBuffers.emplace_back(std::make_unique<VulkanCommandBuffer>(*m_Device, *m_SwapChain));
         }
     }
 
     void VulkanRendererBackend::FreeCommandBuffers() {
-        vkFreeCommandBuffers(
-            m_Device->GetDevice(),
-            m_Device->GetCommandPool(),
-            static_cast<uint32_t>(m_CommandBuffers.size()),
-            m_CommandBuffers.data()
-        );
-
         m_CommandBuffers.clear();
     }
 
@@ -194,7 +126,7 @@ namespace PalmTree {
         // vkDeviceWaitIdle(m_Device->device());
         // m_SwapChain = std::make_unique<SwapChain>(m_Window, m_Device);
         m_SwapChain->RecreateSwapChain();
-        if (m_SwapChain->ImageCount() != m_CommandBuffers.size()) {
+        if (m_SwapChain->GetImageCount() != m_CommandBuffers.size()) {
             // Vulkan will complain if we free 0 command buffers
             if (!m_CommandBuffers.empty())
                 FreeCommandBuffers();

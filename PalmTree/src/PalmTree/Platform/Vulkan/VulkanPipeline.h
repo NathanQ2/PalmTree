@@ -1,7 +1,7 @@
 #pragma once
 
-
 #include "VulkanDevice.h"
+#include "PalmTree/Renderer/Pipeline.h"
 
 namespace PalmTree {
     struct VulkanPipelineConfig {
@@ -25,7 +25,7 @@ namespace PalmTree {
         uint32_t Subpass = 0;
     };
 
-    class VulkanPipeline {
+    class VulkanPipeline : public Pipeline {
     public:
         VulkanPipeline(
             VulkanDevice& device,
@@ -42,7 +42,8 @@ namespace PalmTree {
         static void DefaultPipelineConfig(VulkanPipelineConfig& config);
         static void EnableAlphaBlending(VulkanPipelineConfig& config);
 
-        void Bind(VkCommandBuffer commandBuffer);
+        VkPipelineLayout GetPipelineLayout() const { return m_PipelineLayout; }
+        VkPipeline GetVkPipeline() const { return m_GraphicsPipeline; }
     private:
         static std::vector<char> ReadFile(const std::string& path);
 
@@ -56,6 +57,7 @@ namespace PalmTree {
 
         VulkanDevice& m_Device;
         VkPipeline m_GraphicsPipeline;
+        VkPipelineLayout m_PipelineLayout;
         VkShaderModule m_VertShaderModule;
         VkShaderModule m_FragShaderModule;
     };

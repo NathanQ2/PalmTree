@@ -8,19 +8,13 @@
 namespace PalmTree {
     class SimpleRenderSystem : public System {
     public:
-        SimpleRenderSystem(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
-        ~SimpleRenderSystem();
+        SimpleRenderSystem(DescriptorSetLayout& globalSetLayout);
 
         SimpleRenderSystem(const SimpleRenderSystem&) = delete;
         SimpleRenderSystem& operator=(const SimpleRenderSystem&) = delete;
 
-        void RenderGameObjects(FrameInfo& fameInfo);
+        void Render(FrameInfo& fameInfo);
     private:
-        void CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout);
-        void CreatePipeline(VkRenderPass renderPass);
-
-        VulkanDevice& m_Device;
-        std::unique_ptr<VulkanPipeline> m_Pipeline;
-        VkPipelineLayout m_PipelineLayout;
+        std::unique_ptr<Pipeline> m_Pipeline;
     };
 }

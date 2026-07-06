@@ -8,32 +8,38 @@
 
 #include <stdexcept>
 
+#include "PalmTree/Renderer/CommandBuffer.h"
+
 namespace PalmTree {
     struct SimplePushConstantData {
         glm::mat4 ModelMatrix{1.0f};
         glm::mat4 NormalMatrix{1.0f};
     };
 
-    SimpleRenderSystem::SimpleRenderSystem(
-        VulkanDevice& device,
-        VkRenderPass renderPass,
-        VkDescriptorSetLayout globalSetLayout
-    ) : m_Device(device) {
-        CreatePipelineLayout(globalSetLayout);
-        CreatePipeline(renderPass);
+    SimpleRenderSystem::SimpleRenderSystem(DescriptorSetLayout& globalSetLayout) {
+        Pipeline::CreateInfo info{
+            .VertexShaderPath = "PalmTree/simpleShader.vert.spv",
+            .FragmentShaderPath = "PalmTree/simpleShader.frag.spv",
+            .PushConstants = {
+                {
+                    .Offset = 0,
+                    .Size = sizeof(SimplePushConstantData)
+                }
+            },
+            .DescriptorSetLayout = globalSetLayout
+        };
+
+        m_Pipeline = std::unique_ptr<Pipeline>(Pipeline::Create(info));
     }
 
-    SimpleRenderSystem::~SimpleRenderSystem() {
-        vkDestroyPipelineLayout(m_Device.GetDevice(), m_PipelineLayout, nullptr);
-    }
-
-    void SimpleRenderSystem::RenderGameObjects(FrameInfo& frameInfo) {
-        m_Pipeline->Bind(frameInfo.CommandBuffer);
+    void SimpleRenderSystem::Render(FrameInfo& frameInfo) {
+        CommandBuffer& cmds = RendererBackend::GetCurrentCommandBuffer();
+        cmds.BindPipeline(*m_Pipeline);
 
         vkCmdBindDescriptorSets(
             frameInfo.CommandBuffer,
             VK_PIPELINE_BIND_POINT_GRAPHICS,
-            m_PipelineLayout,
+            dynamic_cast<VulkanPipeline&>(*m_Pipeline).GetPipelineLayout(),
             0,
             1,
             &frameInfo.GlobalDescriptorSet,
@@ -48,59 +54,29 @@ namespace PalmTree {
             push.ModelMatrix = obj.GetTransform().Mat4();
             push.NormalMatrix = obj.GetTransform().NormalMatrix();
 
-            vkCmdPushConstants(
-                frameInfo.CommandBuffer,
-                m_PipelineLayout,
+            cmds.PushConstants(
+                dynamic_cast<VulkanPipeline&>(*m_Pipeline).GetPipelineLayout(),
                 VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
                 0,
                 sizeof(SimplePushConstantData),
                 &push
             );
 
-            ModelComponent& model = obj.GetComponent<ModelComponent>();
-            RendererBackend::BindModel(*model.Model);
-            RendererBackend::DrawModel(*model.Model);
+            std::shared_ptr model = obj.GetComponent<ModelComponent>().Model;
+
+            // Bind
+            cmds.BindVertexBuffer(model->GetVertexBuffer());
+            if (model->HasIndexBuffer()) {
+                cmds.BindIndexBuffer(model->GetIndexBuffer());
+            }
+
+            // Draw
+            if (model->HasIndexBuffer()) {
+                cmds.DrawIndexed(model->GetIndexCount());
+            }
+            else {
+                cmds.Draw(model->GetVertexCount());
+            }
         }
-    }
-
-    void SimpleRenderSystem::CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout) {
-        VkPushConstantRange pushConstantRange{};
-        pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-        pushConstantRange.offset = 0;
-        pushConstantRange.size = sizeof(SimplePushConstantData);
-
-        std::vector descriptorSetLayouts{globalSetLayout};
-
-        VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-        pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
-        pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
-        pipelineLayoutInfo.pushConstantRangeCount = 1;
-        pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
-
-        if (vkCreatePipelineLayout(
-            m_Device.GetDevice(),
-            &pipelineLayoutInfo,
-            nullptr,
-            &m_PipelineLayout
-        ) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to create pipeline layout!");
-        }
-    }
-
-    void SimpleRenderSystem::CreatePipeline(VkRenderPass renderPass) {
-        PT_CORE_ASSERT(m_PipelineLayout != nullptr, "Cannot create pipeline before pipeline layout!");
-
-        VulkanPipelineConfig pipelineConfig{};
-        VulkanPipeline::DefaultPipelineConfig(pipelineConfig);
-
-        pipelineConfig.RenderPass = renderPass;
-        pipelineConfig.PipelineLayout = m_PipelineLayout;
-        m_Pipeline = std::make_unique<VulkanPipeline>(
-            m_Device,
-            "PalmTree/simpleShader.vert.spv",
-            "PalmTree/simpleShader.frag.spv",
-            pipelineConfig
-        );
     }
 }

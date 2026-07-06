@@ -33,4 +33,26 @@ namespace PalmTree {
 
         virtual uint32_t GetCount() const = 0;
     };
+
+    template<typename T>
+    class UniformBuffer {
+    public:
+        static UniformBuffer* Create();
+
+        virtual ~UniformBuffer() = default;
+
+        virtual void WriteToBuffer(int index, T* uniformObject) = 0;
+        virtual void Flush(int index) = 0;
+    private:
+        static UniformBuffer<T>* CreateVulkan();
+    };
+
+
+    template<typename T>
+    UniformBuffer<T>* UniformBuffer<T>::Create() {
+        switch (RendererBackend::GetAPI()) {
+            case RendererBackend::API::VULKAN: return CreateVulkan();
+            default: PT_CORE_ASSERT(false, "UniformBuffer is not supported on the current RendererBackend");
+        }
+    }
 }

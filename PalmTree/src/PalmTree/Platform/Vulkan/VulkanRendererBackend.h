@@ -1,5 +1,6 @@
 #pragma once
 
+#include "VulkanCommandBuffer.h"
 #include "../../Log.h"
 #include "../../Model.h"
 #include "VulkanSwapChain.h"
@@ -20,9 +21,9 @@ namespace PalmTree {
         [[nodiscard]] float GetAspectRatio() const { return m_SwapChain->ExtentAspectRatio(); }
         [[nodiscard]] bool IsFrameInProgress() const { return m_IsFrameStarted; }
 
-        [[nodiscard]] VkCommandBuffer GetCurrentCommandBuffer() const {
+        CommandBuffer& GetCurrentCommandBufferImpl() override {
             PT_CORE_ASSERT(m_IsFrameStarted, "Cannot get command buffer when frame not in progress");
-            return m_CommandBuffers[m_CurrentFrameIndex];
+            return *m_CommandBuffers[m_CurrentFrameIndex];
         }
 
         API GetAPIImpl() override { return API::VULKAN; }
@@ -38,12 +39,13 @@ namespace PalmTree {
             return m_CurrentFrameIndex;
         }
 
-        void BindModelImpl(const Model& model) const override;
-        void DrawModelImpl(const Model& model) const override;
-
-        uint32_t GetImageCount() { return m_SwapChain->ImageCount(); }
+        uint32_t GetImageCount() { return m_SwapChain->GetImageCount(); }
 
         VulkanDevice& GetDevice() { return *m_Device; }
+
+        VkCommandBuffer GetCurrentVkCommandBuffer() {
+            return dynamic_cast<VulkanCommandBuffer&>(GetCurrentCommandBufferImpl()).GetVkCommandBuffer();
+        }
     private:
         void CreateCommandBuffers();
         void FreeCommandBuffers();
@@ -52,7 +54,7 @@ namespace PalmTree {
         Window& m_Window;
         std::unique_ptr<VulkanDevice> m_Device;
         std::unique_ptr<VulkanSwapChain> m_SwapChain;
-        std::vector<VkCommandBuffer> m_CommandBuffers;
+        std::vector<std::unique_ptr<VulkanCommandBuffer>> m_CommandBuffers;
 
         uint32_t m_CurrentImageIndex;
         int m_CurrentFrameIndex;

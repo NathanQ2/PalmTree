@@ -35,13 +35,13 @@ namespace PalmTree {
         VulkanDevice(VulkanDevice&&) = delete;
         VulkanDevice& operator=(VulkanDevice&&) = delete;
 
-        VkInstance GetInstance() { return m_Instance; }
-        VkPhysicalDevice GetPhysicalDevice() { return m_PhysicalDevice; }
-        VkCommandPool GetCommandPool() { return m_CommandPool; }
-        VkDevice GetDevice() { return m_Device; }
-        VkSurfaceKHR Surface() { return m_Surface; }
-        VkQueue GraphicsQueue() { return m_GraphicsQueue; }
-        VkQueue PresentQueue() { return m_PresentQueue; }
+        VkInstance GetInstance() const { return m_Instance; }
+        VkPhysicalDevice GetPhysicalDevice() const { return m_PhysicalDevice; }
+        VkCommandPool GetCommandPool() const { return m_CommandPool; }
+        VkDevice GetDevice() const { return m_Device; }
+        VkSurfaceKHR Surface() const { return m_Surface; }
+        VkQueue GraphicsQueue() const { return m_GraphicsQueue; }
+        VkQueue PresentQueue() const { return m_PresentQueue; }
 
         VulkanSwapChainSupportDetails GetSwapChainSupport() { return QuerySwapChainSupport(m_PhysicalDevice); }
         uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);

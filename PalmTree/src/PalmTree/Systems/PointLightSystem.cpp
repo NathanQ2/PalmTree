@@ -5,8 +5,9 @@
 #include <glm/glm.hpp>
 
 #include <map>
-#include <stdexcept>
 #include <glm/ext/matrix_transform.hpp>
+
+#include "PalmTree/Renderer/CommandBuffer.h"
 
 namespace PalmTree {
     struct PointLightPushConstants {
@@ -15,17 +16,21 @@ namespace PalmTree {
         float Radius;
     };
 
-    PointLightSystem::PointLightSystem(
-        VulkanDevice& device,
-        VkRenderPass renderPass,
-        VkDescriptorSetLayout globalSetLayout
-    ) : m_Device(device) {
-        CreatePipelineLayout(globalSetLayout);
-        CreatePipeline(renderPass);
-    }
+    PointLightSystem::PointLightSystem(DescriptorSetLayout& globalSetLayout) {
+        Pipeline::CreateInfo info{
+            .VertexShaderPath = "PalmTree/pointLight.vert.spv",
+            .FragmentShaderPath = "PalmTree/pointLight.frag.spv",
+            .PushConstants = {
+                {
+                    .Offset = 0,
+                    .Size = sizeof(PointLightPushConstants)
+                }
+            },
+            .DescriptorSetLayout = globalSetLayout,
+            .EnableAlphaBlending = true
+        };
 
-    PointLightSystem::~PointLightSystem() {
-        vkDestroyPipelineLayout(m_Device.GetDevice(), m_PipelineLayout, nullptr);
+        m_Pipeline = std::unique_ptr<Pipeline>(Pipeline::Create(info));
     }
 
     void PointLightSystem::Update(FrameInfo& frameInfo) {
@@ -50,6 +55,7 @@ namespace PalmTree {
     }
 
     void PointLightSystem::Render(FrameInfo& frameInfo) {
+        CommandBuffer& cmds = RendererBackend::GetCurrentCommandBuffer();
         std::map<float, Id> sorted;
         for (Id id : m_Ids) {
             GameObject& obj = m_Ecs->GetObject(id);
@@ -59,12 +65,12 @@ namespace PalmTree {
             sorted[distSquared] = obj.GetId();
         }
 
-        m_Pipeline->Bind(frameInfo.CommandBuffer);
+        cmds.BindPipeline(*m_Pipeline);
 
         vkCmdBindDescriptorSets(
             frameInfo.CommandBuffer,
             VK_PIPELINE_BIND_POINT_GRAPHICS,
-            m_PipelineLayout,
+            dynamic_cast<VulkanPipeline&>(*m_Pipeline).GetPipelineLayout(),
             0,
             1,
             &frameInfo.GlobalDescriptorSet,
@@ -82,60 +88,15 @@ namespace PalmTree {
             push.Color = glm::vec4(light.Color, light.LightIntensity);
             push.Radius = obj.GetTransform().Scale.x;
 
-            vkCmdPushConstants(
-                frameInfo.CommandBuffer,
-                m_PipelineLayout,
+            cmds.PushConstants(
+                dynamic_cast<VulkanPipeline&>(*m_Pipeline).GetPipelineLayout(),
                 VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
                 0,
                 sizeof(PointLightPushConstants),
                 &push
             );
 
-            vkCmdDraw(frameInfo.CommandBuffer, 6, 1, 0, 0);
+            cmds.Draw(6);
         }
-    }
-
-    void PointLightSystem::CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout) {
-        VkPushConstantRange pushConstantRange{};
-        pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-        pushConstantRange.offset = 0;
-        pushConstantRange.size = sizeof(PointLightPushConstants);
-
-        std::vector descriptorSetLayouts{globalSetLayout};
-
-        VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-        pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
-        pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
-        pipelineLayoutInfo.pushConstantRangeCount = 1;
-        pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
-
-        if (vkCreatePipelineLayout(
-            m_Device.GetDevice(),
-            &pipelineLayoutInfo,
-            nullptr,
-            &m_PipelineLayout
-        ) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to create pipeline layout!");
-        }
-    }
-
-    void PointLightSystem::CreatePipeline(VkRenderPass renderPass) {
-        PT_CORE_ASSERT(m_PipelineLayout != nullptr, "Cannot create pipeline before pipeline layout!");
-
-        VulkanPipelineConfig pipelineConfig{};
-        VulkanPipeline::DefaultPipelineConfig(pipelineConfig);
-        VulkanPipeline::EnableAlphaBlending(pipelineConfig);
-        pipelineConfig.BindingDescriptions.clear();
-        pipelineConfig.AttributeDescriptions.clear();
-
-        pipelineConfig.RenderPass = renderPass;
-        pipelineConfig.PipelineLayout = m_PipelineLayout;
-        m_Pipeline = std::make_unique<VulkanPipeline>(
-            m_Device,
-            "PalmTree/pointLight.vert.spv",
-            "PalmTree/pointLight.frag.spv",
-            pipelineConfig
-        );
     }
 }

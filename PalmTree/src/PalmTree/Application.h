@@ -1,12 +1,8 @@
 #pragma once
 
 #include "Camera.h"
-#include "Core.h"
 #include "LayerStack.h"
-#include "Platform/Vulkan/VulkanDescriptors.h"
 #include "EntityComponentSystem/EntityComponentSystem.h"
-#include "Model.h"
-#include "Platform/Vulkan/VulkanRendererBackend.h"
 #include "Window.h"
 #include "EventSystem/ApplicationEvents.h"
 #include "ImGui/ImGuiLayer.h"
@@ -39,8 +35,6 @@ namespace PalmTree {
 
         void DeleteLayer(Layer* layer) { m_LayerStack.DeleteLayer(layer); }
         Layer* GetLayer(int index) { return m_LayerStack.GetLayer(index); }
-
-        void DebugPrintLayerStack();
 
         Window& GetWindow() const { return *m_Window; }
     protected:

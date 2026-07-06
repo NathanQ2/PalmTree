@@ -1,29 +1,14 @@
 #pragma once
 
 #include "VulkanDevice.h"
+#include "PalmTree/Renderer/Descriptors.h"
 
 
 namespace PalmTree {
-    class VulkanDescriptorSetLayout {
+    class VulkanDescriptorSetLayout : public DescriptorSetLayout {
     public:
-        class Builder {
-        public:
-            Builder(VulkanDevice& device) : m_Device{device} {}
-
-            Builder& AddBinding(
-                uint32_t binding,
-                VkDescriptorType descriptorType,
-                VkShaderStageFlags stageFlags,
-                uint32_t count = 1
-            );
-            std::unique_ptr<VulkanDescriptorSetLayout> Build() const;
-        private:
-            VulkanDevice& m_Device;
-            std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_Bindings{};
-        };
-
         VulkanDescriptorSetLayout(
-            VulkanDevice& ptDevice,
+            VulkanDevice& device,
             std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings
         );
         ~VulkanDescriptorSetLayout();

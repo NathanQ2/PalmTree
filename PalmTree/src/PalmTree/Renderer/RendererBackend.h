@@ -4,6 +4,7 @@
 namespace PalmTree {
     class VulkanRendererBackend;
     class Model;
+    class CommandBuffer;
 
     class RendererBackend {
     public:
@@ -13,7 +14,7 @@ namespace PalmTree {
         };
 
         static void Init(API api) {
-            PT_CORE_ASSERT(s_Instance == nullptr, "Renderer backend has already been initalized!");
+            PT_CORE_ASSERT(s_Instance == nullptr, "Renderer backend has already been initialized!");
 
             switch (api) {
                 case API::VULKAN:
@@ -35,7 +36,7 @@ namespace PalmTree {
         }
 
         static RendererBackend* Get() {
-            PT_CORE_ASSERT(s_Instance != nullptr, "RendererBackend has not been initalized!");
+            PT_CORE_ASSERT(s_Instance != nullptr, "RendererBackend has not been initialized!");
 
             return s_Instance;
         }
@@ -48,8 +49,7 @@ namespace PalmTree {
         static void BeginRenderPass() { return Get()->BeginRenderPassImpl(); }
         static void EndRenderPass() { return Get()->EndRenderPassImpl(); }
 
-        static void BindModel(const Model& model) { return Get()->BindModelImpl(model); }
-        static void DrawModel(const Model& model) { return Get()->DrawModelImpl(model); }
+        static CommandBuffer& GetCurrentCommandBuffer() { return Get()->GetCurrentCommandBufferImpl(); }
 
         static int GetFrameIndex() { return Get()->GetFrameIndexImpl(); }
 
@@ -67,8 +67,7 @@ namespace PalmTree {
         virtual void BeginRenderPassImpl() = 0;
         virtual void EndRenderPassImpl() = 0;
 
-        virtual void BindModelImpl(const Model& model) const = 0;
-        virtual void DrawModelImpl(const Model& model) const = 0;
+        virtual CommandBuffer& GetCurrentCommandBufferImpl() = 0;
 
         virtual int GetFrameIndexImpl() const = 0;
     private:

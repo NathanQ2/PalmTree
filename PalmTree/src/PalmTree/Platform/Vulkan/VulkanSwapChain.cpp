@@ -245,9 +245,9 @@ namespace PalmTree {
         m_SwapChainImageFormat = depthFormat;
         VkExtent2D swapChainExtent = GetSwapChainExtent();
 
-        m_DepthImages.resize(ImageCount());
-        m_DepthImageMemories.resize(ImageCount());
-        m_DepthImageViews.resize(ImageCount());
+        m_DepthImages.resize(GetImageCount());
+        m_DepthImageMemories.resize(GetImageCount());
+        m_DepthImageViews.resize(GetImageCount());
 
         for (int i = 0; i < m_DepthImages.size(); i++) {
             VkImageCreateInfo imageInfo{};
@@ -362,8 +362,8 @@ namespace PalmTree {
     }
 
     void VulkanSwapChain::CreateFramebuffers() {
-        m_SwapChainFramebuffers.resize(ImageCount());
-        for (size_t i = 0; i < ImageCount(); i++) {
+        m_SwapChainFramebuffers.resize(GetImageCount());
+        for (size_t i = 0; i < GetImageCount(); i++) {
             std::array<VkImageView, 2> attachments = {m_SwapChainImageViews[i], m_DepthImageViews[i]};
 
             VkExtent2D swapChainExtent = GetSwapChainExtent();
@@ -391,7 +391,7 @@ namespace PalmTree {
         m_ImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         m_RenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         m_InFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
-        m_ImagesInFlight.resize(ImageCount(), VK_NULL_HANDLE);
+        m_ImagesInFlight.resize(GetImageCount(), VK_NULL_HANDLE);
 
         VkSemaphoreCreateInfo semaphoreInfo = {};
         semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;

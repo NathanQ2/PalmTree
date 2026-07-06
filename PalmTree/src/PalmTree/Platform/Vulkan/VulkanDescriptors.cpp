@@ -1,41 +1,55 @@
 #include "ptpch.h"
 #include "VulkanDescriptors.h"
 
-#include "../../Log.h"
+#include "PalmTree/Log.h"
+#include "PalmTree/Renderer/Descriptors.h"
 
 #include <stdexcept>
 
-namespace PalmTree {
-    // *************** Descriptor Set Layout Builder *********************
+#include "VulkanRendererBackend.h"
+#include "PalmTree/Renderer/RendererBackend.h"
 
-    VulkanDescriptorSetLayout::Builder& VulkanDescriptorSetLayout::Builder::AddBinding(
-        uint32_t binding,
-        VkDescriptorType descriptorType,
-        VkShaderStageFlags stageFlags,
-        uint32_t count
-    ) {
-        PT_CORE_ASSERT(m_Bindings.count(binding) == 0, "Binding already in use");
-        VkDescriptorSetLayoutBinding layoutBinding{};
-        layoutBinding.binding = binding;
-        layoutBinding.descriptorType = descriptorType;
-        layoutBinding.descriptorCount = count;
-        layoutBinding.stageFlags = stageFlags;
-        m_Bindings[binding] = layoutBinding;
-        return *this;
+namespace PalmTree {
+    VkDescriptorType GetVkDescriptorType(DescriptorSetBinding::Type type) {
+        switch (type) {
+            case DescriptorSetBinding::Type::UniformBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            default: PT_CORE_ASSERT(false, "Unsupported DescriptorSetBinding::Type!");
+        }
     }
 
-    std::unique_ptr<VulkanDescriptorSetLayout> VulkanDescriptorSetLayout::Builder::Build() const {
-        return std::make_unique<VulkanDescriptorSetLayout>(m_Device, m_Bindings);
+    DescriptorSetLayout* DescriptorSetLayout::CreateVulkan(
+        const std::unordered_map<uint32_t, DescriptorSetBinding>& bindings
+    ) {
+        std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> vkBindings;
+        vkBindings.reserve(bindings.size());
+        for (auto kv : bindings) {
+            PT_CORE_ASSERT(
+                kv.first == kv.second.Binding,
+                "Malformed binding map! The item at binding index should match the object's binding property."
+            );
+
+            VkDescriptorSetLayoutBinding layoutBinding{};
+            layoutBinding.binding = kv.first;
+            layoutBinding.descriptorType = GetVkDescriptorType(kv.second.DescriptorType);
+            layoutBinding.descriptorCount = kv.second.Count;
+            layoutBinding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
+
+            vkBindings[kv.first] = layoutBinding;
+        }
+
+        VulkanRendererBackend* renderer = dynamic_cast<VulkanRendererBackend*>(RendererBackend::Get());
+        return new VulkanDescriptorSetLayout(renderer->GetDevice(), vkBindings);
     }
 
     // *************** Descriptor Set Layout *********************
 
     VulkanDescriptorSetLayout::VulkanDescriptorSetLayout(
-        VulkanDevice& ptDevice,
+        VulkanDevice& device,
         std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings
     )
-        : m_Device{ptDevice}, m_Bindings{bindings} {
+        : m_Device{device}, m_Bindings{bindings} {
         std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings{};
+        setLayoutBindings.reserve(bindings.size());
         for (auto kv : bindings) {
             setLayoutBindings.push_back(kv.second);
         }
@@ -46,7 +60,7 @@ namespace PalmTree {
         descriptorSetLayoutInfo.pBindings = setLayoutBindings.data();
 
         if (vkCreateDescriptorSetLayout(
-            ptDevice.GetDevice(),
+            device.GetDevice(),
             &descriptorSetLayoutInfo,
             nullptr,
             &m_DescriptorSetLayout

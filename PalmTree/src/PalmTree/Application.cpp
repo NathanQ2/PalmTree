@@ -98,31 +98,6 @@ namespace PalmTree {
         // PT_CORE_TRACE("EVENT: {0}", event.ToString());
     }
 
-#ifdef PT_DEBUG
-    void Application::DebugPrintLayerStack() {
-        std::stringstream ss;
-
-        for (auto it = m_LayerStack.End(); it != m_LayerStack.Begin();) {
-            const std::string& name = (*--it)->GetName();
-            if (it + 1 == m_LayerStack.End()) {
-                ss << "TOP    " << name;
-            }
-            else if (it == m_LayerStack.Begin()) {
-                ss << "BOTTOM " << name;
-            }
-            else {
-                ss << "       " << name;
-            }
-
-            ss << "\n";
-        }
-
-        PT_CORE_TRACE("LayerStack:\n{}", ss.str());
-    }
-#else
-    void Application::PrintLayerStack() {}
-#endif
-
     bool Application::OnWindowClosed(WindowClosedEvent&) {
         m_Running = false;
 

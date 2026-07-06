@@ -2,6 +2,7 @@
 
 #include "PalmTree/Platform/Vulkan/VulkanVertexBuffer.h"
 #include "PalmTree/Platform/Vulkan/VulkanIndexBuffer.h"
+#include "PalmTree/Platform/Vulkan/VulkanUniformBuffer.h"
 
 namespace PalmTree {
     VertexBuffer* VertexBuffer::Create(const std::vector<Vertex>& vertices) {

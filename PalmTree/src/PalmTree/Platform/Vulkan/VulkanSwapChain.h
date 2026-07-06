@@ -22,16 +22,16 @@ namespace PalmTree {
         VulkanSwapChain(const VulkanSwapChain&) = delete;
         VulkanSwapChain& operator=(const VulkanSwapChain&) = delete;
 
-        VkFramebuffer GetFrameBuffer(int index) { return m_SwapChainFramebuffers[index]; }
-        VkRenderPass GetRenderPass() { return m_RenderPass; }
-        VkImageView GetImageView(int index) { return m_SwapChainImageViews[index]; }
+        VkFramebuffer GetFrameBuffer(int index) const { return m_SwapChainFramebuffers[index]; }
+        VkRenderPass GetRenderPass() const { return m_RenderPass; }
+        VkImageView GetImageView(int index) const { return m_SwapChainImageViews[index]; }
         void RecreateSwapChain();
         void CleanupSwapChain();
-        size_t ImageCount() { return m_SwapChainImages.size(); }
-        VkFormat GetSwapChainImageFormat() { return m_SwapChainImageFormat; }
-        VkExtent2D GetSwapChainExtent() { return m_SwapChainExtent; }
-        uint32_t GetWidth() { return m_SwapChainExtent.width; }
-        uint32_t GetHeight() { return m_SwapChainExtent.height; }
+        size_t GetImageCount() const { return m_SwapChainImages.size(); }
+        VkFormat GetSwapChainImageFormat() const { return m_SwapChainImageFormat; }
+        VkExtent2D GetSwapChainExtent() const { return m_SwapChainExtent; }
+        uint32_t GetWidth() const { return m_SwapChainExtent.width; }
+        uint32_t GetHeight() const { return m_SwapChainExtent.height; }
 
         float ExtentAspectRatio() {
             return static_cast<float>(m_SwapChainExtent.width) / static_cast<float>(m_SwapChainExtent.height);

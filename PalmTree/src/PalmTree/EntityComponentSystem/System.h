@@ -8,8 +8,9 @@ namespace PalmTree {
     class EntityComponentSystem;
 
     class System {
-    public:
         friend class SystemManager;
+    public:
+        virtual ~System() = default;
     protected:
         std::set<Id> m_Ids;
 

@@ -6,7 +6,7 @@ namespace PalmTree {
     VulkanIndexBuffer::VulkanIndexBuffer(const std::vector<uint32_t>& indices) {
         VkDeviceSize indexSize = sizeof(indices[0]);
         size_t indexCount = indices.size();
-        size_t bufferSize = indexSize * indexCount;
+        uint64_t bufferSize = indexSize * indexCount;
 
 
         VulkanDevice& device = RendererBackend::GetVulkan()->GetDevice();

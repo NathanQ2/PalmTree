@@ -25,9 +25,9 @@ namespace PalmTree {
 
         std::unique_ptr<VulkanDescriptorPool> m_DescriptorPool;
         std::vector<VkDescriptorSet> m_DescriptorSets{VulkanSwapChain::MAX_FRAMES_IN_FLIGHT};
-        std::unique_ptr<VulkanDescriptorSetLayout> m_DescriptorSetLayout;
+        std::unique_ptr<DescriptorSetLayout> m_DescriptorSetLayout;
 
-        std::vector<std::unique_ptr<VulkanBuffer>> m_UboBuffers{VulkanSwapChain::MAX_FRAMES_IN_FLIGHT};
+        std::unique_ptr<UniformBuffer<GlobalUBO>> m_UboBuffers;
 
         std::shared_ptr<PointLightSystem> m_PointLightSystem;
         std::shared_ptr<SimpleRenderSystem> m_SimpleRenderSystem;

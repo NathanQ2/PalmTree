@@ -7,16 +7,72 @@
 #include <iostream>
 #include <stdexcept>
 
+#include "VulkanRendererBackend.h"
 #include "VulkanVertexBuffer.h"
 #include "../../Log.h"
+#include "PalmTree/Renderer/Descriptors.h"
 
 namespace PalmTree {
+    Pipeline* Pipeline::CreateVulkan(CreateInfo& createInfo) {
+        VulkanRendererBackend* renderer = RendererBackend::GetVulkan();
+
+        std::vector<VkPushConstantRange> pushConstantRanges{};
+        pushConstantRanges.reserve(createInfo.PushConstants.size());
+        for (CreateInfo::PushConstant& push : createInfo.PushConstants) {
+            pushConstantRanges.emplace_back(
+                VkPushConstantRange{
+                    .stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+                    .offset = push.Offset,
+                    .size = push.Size
+                }
+            );
+        }
+
+        VulkanDescriptorSetLayout& descriptorSetLayout = dynamic_cast<VulkanDescriptorSetLayout&>(createInfo.
+            DescriptorSetLayout);
+        std::vector<VkDescriptorSetLayout> descriptorSetLayouts{descriptorSetLayout.GetDescriptorSetLayout()};
+
+        VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+        pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+        pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
+        pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
+        pipelineLayoutInfo.pushConstantRangeCount = pushConstantRanges.size();
+        pipelineLayoutInfo.pPushConstantRanges = pushConstantRanges.data();
+
+        VkPipelineLayout pipelineLayout;
+
+        if (vkCreatePipelineLayout(
+            renderer->GetDevice().GetDevice(),
+            &pipelineLayoutInfo,
+            nullptr,
+            &pipelineLayout
+        ) != VK_SUCCESS) {
+            PT_CORE_ERROR("Failed to create pipeline layout!");
+        }
+
+        VulkanPipelineConfig config{};
+        VulkanPipeline::DefaultPipelineConfig(config);
+        if (createInfo.EnableAlphaBlending) {
+            VulkanPipeline::EnableAlphaBlending(config);
+        }
+
+        config.RenderPass = renderer->GetSwapChainRenderPass();
+        config.PipelineLayout = pipelineLayout;
+
+        return new VulkanPipeline(
+            renderer->GetDevice(),
+            createInfo.VertexShaderPath,
+            createInfo.FragmentShaderPath,
+            config
+        );
+    }
+
     VulkanPipeline::VulkanPipeline(
         VulkanDevice& device,
         const std::string& vertPath,
         const std::string& fragPath,
         const VulkanPipelineConfig& config
-    ) : m_Device{device} {
+    ) : m_Device{device}, m_PipelineLayout(config.PipelineLayout) {
         CreateGraphicsPipeline(vertPath, fragPath, config);
     }
 
@@ -24,6 +80,7 @@ namespace PalmTree {
         vkDestroyShaderModule(m_Device.GetDevice(), m_VertShaderModule, nullptr);
         vkDestroyShaderModule(m_Device.GetDevice(), m_FragShaderModule, nullptr);
         vkDestroyPipeline(m_Device.GetDevice(), m_GraphicsPipeline, nullptr);
+        vkDestroyPipelineLayout(m_Device.GetDevice(), m_PipelineLayout, nullptr);
     }
 
     void VulkanPipeline::DefaultPipelineConfig(VulkanPipelineConfig& config) {
@@ -110,10 +167,6 @@ namespace PalmTree {
         config.ColorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
     }
 
-    void VulkanPipeline::Bind(VkCommandBuffer commandBuffer) {
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
-    }
-
     std::vector<char> VulkanPipeline::ReadFile(const std::string& path) {
         std::ifstream file(path, std::ios::ate | std::ios::binary);
 
@@ -137,11 +190,11 @@ namespace PalmTree {
     ) {
         PT_CORE_ASSERT(
             config.PipelineLayout != VK_NULL_HANDLE,
-            "Cannot create graphics pipeline:: no pipelinelayout provided in config"
+            "Cannot create graphics pipeline:: no pipeline layout provided in config"
         );
         PT_CORE_ASSERT(
             config.RenderPass != VK_NULL_HANDLE,
-            "Cannot create graphics pipeline:: no renderPass provided in config"
+            "Cannot create graphics pipeline: no renderPass provided in config"
         );
 
         auto vertCode = ReadFile(vertPath);
@@ -198,14 +251,13 @@ namespace PalmTree {
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
         if (vkCreateGraphicsPipelines(
-                m_Device.GetDevice(),
-                VK_NULL_HANDLE,
-                1,
-                &pipelineInfo,
-                nullptr,
-                &m_GraphicsPipeline
-            )
-            != VK_SUCCESS) {
+            m_Device.GetDevice(),
+            VK_NULL_HANDLE,
+            1,
+            &pipelineInfo,
+            nullptr,
+            &m_GraphicsPipeline
+        ) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create graphics pipeline!");
         }
     }
