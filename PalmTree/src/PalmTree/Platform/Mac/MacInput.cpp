@@ -9,13 +9,19 @@
 namespace PalmTree {
     Input* Input::s_Instance = new MacInput();
 
-    bool MacInput::IsKeyPressedImpl(int keycode) {
+    bool MacInput::IsKeyDownImpl(int keycode) {
         int state = glfwGetKey(GetWindow(), keycode);
 
         return state == GLFW_PRESS || state == GLFW_REPEAT;
     }
 
-    bool MacInput::IsMouseButtonPressedImpl(int button) {
+    bool MacInput::IsKeyPressedImpl(int keycode) {
+        int state = glfwGetKey(GetWindow(), keycode);
+        
+        return state == GLFW_PRESS;
+    }
+
+    bool MacInput::IsMouseButtonDownImpl(int button) {
         return glfwGetMouseButton(GetWindow(), button) == GLFW_PRESS;
     }
 

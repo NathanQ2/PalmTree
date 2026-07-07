@@ -6,8 +6,11 @@
 namespace PalmTree {
     class MacInput : public Input {
     protected:
+        bool IsKeyDownImpl(int keycode) override;
         bool IsKeyPressedImpl(int keycode) override;
-        bool IsMouseButtonPressedImpl(int button) override;
+        
+        bool IsMouseButtonDownImpl(int button) override;
+        
         glm::vec2 GetMousePositionImpl() override;
         float GetMousePositionXImpl() override;
         float GetMousePositionYImpl() override;

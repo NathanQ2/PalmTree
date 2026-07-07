@@ -37,6 +37,8 @@ namespace PalmTree {
         Layer* GetLayer(int index) { return m_LayerStack.GetLayer(index); }
 
         Window& GetWindow() const { return *m_Window; }
+        EntityComponentSystem& GetEntityComponentSystem() { return m_Ecs; }
+        Camera& GetCamera() { return m_Camera; }
     protected:
         bool OnWindowClosed(WindowClosedEvent& event);
 
