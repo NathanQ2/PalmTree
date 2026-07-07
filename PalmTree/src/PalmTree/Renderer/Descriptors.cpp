@@ -19,4 +19,13 @@ namespace PalmTree {
 
         return nullptr;
     }
+
+    DescriptorSet* DescriptorSet::Create(DescriptorSetLayout& layout) {
+        switch (RendererBackend::GetAPI()) {
+            case RendererBackend::API::VULKAN: return CreateVulkan(layout);
+            default: PT_CORE_ASSERT(false, "Current RendererBackend does not support DescriptorSet!");
+        }
+
+        return nullptr;
+    }
 }

@@ -10,6 +10,8 @@
 
 #include "Log.h"
 
+#include "PalmTree/Renderer/Buffer.h"
+
 
 namespace std {
     template<>
@@ -95,6 +97,9 @@ namespace PalmTree {
 
         return std::make_unique<Model>(builder);
     }
+
+    uint32_t Model::GetVertexCount() const { return m_VertexBuffer->GetCount(); }
+    uint32_t Model::GetIndexCount() const { return m_IndexBuffer->GetCount(); }
 
     void Model::CreateVertexBuffers(const std::vector<Vertex>& vertices) {
         PT_CORE_ASSERT(vertices.size() >= 3, "Vertex count must be at least 3");

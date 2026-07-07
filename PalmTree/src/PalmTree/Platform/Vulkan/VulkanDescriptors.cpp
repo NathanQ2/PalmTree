@@ -156,18 +156,27 @@ namespace PalmTree {
         vkResetDescriptorPool(m_Device.GetDevice(), m_DescriptorPool, 0);
     }
 
-    // *************** Descriptor Writer *********************
+    VulkanDescriptorSet::VulkanDescriptorSet(VulkanDescriptorSetLayout& layout) : m_Layout(layout) {
+        VulkanDescriptorPool& pool = VulkanRendererBackend::Get()->GetDescriptorPool();
 
-    VulkanDescriptorWriter::VulkanDescriptorWriter(VulkanDescriptorSetLayout& setLayout, VulkanDescriptorPool& pool)
-        : m_SetLayout{setLayout}, m_Pool{pool} {}
+        bool result = pool.AllocateDescriptor(m_Layout.GetDescriptorSetLayout(), m_DescriptorSet);
+        PT_CORE_ASSERT(result, "Failed to allocate descriptor!");
+    }
 
-    VulkanDescriptorWriter& VulkanDescriptorWriter::WriteBuffer(
-        uint32_t binding,
-        VkDescriptorBufferInfo* bufferInfo
+    void VulkanDescriptorSet::WriteBuffer(
+        int binding,
+        const UniformBufferBase& uniform,
+        uint64_t size,
+        uint64_t offset
     ) {
-        PT_CORE_ASSERT(m_SetLayout.m_Bindings.count(binding) == 1, "Layout does not contain specified binding");
+        VkDescriptorBufferInfo info{};
+        info.buffer = (VkBuffer)uniform.GetPlatformBufferHandle();
+        info.offset = offset;
+        info.range = size;
 
-        auto& bindingDescription = m_SetLayout.m_Bindings[binding];
+        PT_CORE_ASSERT(m_Layout.m_Bindings.count(binding) == 1, "Layout does not contain specified binding");
+
+        auto& bindingDescription = m_Layout.m_Bindings[binding];
 
         PT_CORE_ASSERT(
             bindingDescription.descriptorCount == 1,
@@ -178,50 +187,17 @@ namespace PalmTree {
         write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         write.descriptorType = bindingDescription.descriptorType;
         write.dstBinding = binding;
-        write.pBufferInfo = bufferInfo;
+        write.pBufferInfo = &info;
         write.descriptorCount = 1;
+        write.dstSet = m_DescriptorSet;
 
-        m_Writes.push_back(write);
-        return *this;
+        VulkanDevice& device = VulkanRendererBackend::Get()->GetDevice();
+
+        vkUpdateDescriptorSets(device.GetDevice(), 1, &write, 0, nullptr);
     }
 
-    VulkanDescriptorWriter& VulkanDescriptorWriter::WriteImage(
-        uint32_t binding,
-        VkDescriptorImageInfo* imageInfo
-    ) {
-        PT_CORE_ASSERT(m_SetLayout.m_Bindings.count(binding) == 1, "Layout does not contain specified binding");
-
-        auto& bindingDescription = m_SetLayout.m_Bindings[binding];
-
-        PT_CORE_ASSERT(
-            bindingDescription.descriptorCount == 1,
-            "Binding single descriptor info, but binding expects multiple"
-        );
-
-        VkWriteDescriptorSet write{};
-        write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        write.descriptorType = bindingDescription.descriptorType;
-        write.dstBinding = binding;
-        write.pImageInfo = imageInfo;
-        write.descriptorCount = 1;
-
-        m_Writes.push_back(write);
-        return *this;
-    }
-
-    bool VulkanDescriptorWriter::Build(VkDescriptorSet& set) {
-        bool success = m_Pool.AllocateDescriptor(m_SetLayout.GetDescriptorSetLayout(), set);
-        if (!success) {
-            return false;
-        }
-        Overwrite(set);
-        return true;
-    }
-
-    void VulkanDescriptorWriter::Overwrite(VkDescriptorSet& set) {
-        for (auto& write : m_Writes) {
-            write.dstSet = set;
-        }
-        vkUpdateDescriptorSets(m_Pool.m_Device.GetDevice(), m_Writes.size(), m_Writes.data(), 0, nullptr);
+    DescriptorSet* DescriptorSet::CreateVulkan(DescriptorSetLayout& layout) {
+        VulkanDescriptorSetLayout& vulkanLayout = dynamic_cast<VulkanDescriptorSetLayout&>(layout);
+        return new VulkanDescriptorSet(vulkanLayout);
     }
 }

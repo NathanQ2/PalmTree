@@ -20,10 +20,11 @@ namespace PalmTree {
 
         static Window* Create(WindowProps props = WindowProps());
 
+        Window() = default;
         virtual ~Window() {}
 
-        // Window(const Window&) = delete;
-        // Window& operator=(const Window&) = delete;
+        Window(const Window&) = delete;
+        Window& operator=(const Window&) = delete;
 
         virtual void OnUpdate() = 0;
 
@@ -32,9 +33,6 @@ namespace PalmTree {
         virtual void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface) = 0;
 
         [[nodiscard]] virtual VkExtent2D GetExtent() = 0;
-        // {
-        //     return {static_cast<uint32_t>(m_Width), static_cast<uint32_t>(m_Height)};
-        // }
 
         [[nodiscard]] virtual int GetWidth() = 0;
         [[nodiscard]] virtual int GetHeight() = 0;

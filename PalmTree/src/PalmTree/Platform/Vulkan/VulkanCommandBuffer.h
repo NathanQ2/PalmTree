@@ -1,5 +1,6 @@
 #pragma once
 #include "VulkanBuffer.h"
+#include "VulkanPipeline.h"
 #include "VulkanSwapChain.h"
 #include "PalmTree/Renderer/CommandBuffer.h"
 
@@ -15,11 +16,9 @@ namespace PalmTree {
         VulkanCommandBuffer(VulkanCommandBuffer&& other);
         VulkanCommandBuffer& operator=(VulkanCommandBuffer&&);
 
-        void BindPipeline(const Pipeline& pipeline) override;
-        void BindDescriptorSet() override;
+        void BindPipeline(std::weak_ptr<Pipeline> pipeline) override;
+        void BindDescriptorSet(const DescriptorSet& set) override;
         void PushConstants(
-            VkPipelineLayout pipelineLayout,
-            VkShaderStageFlags shaderStageFlags,
             uint32_t offset,
             uint32_t size,
             void* data
@@ -37,5 +36,7 @@ namespace PalmTree {
 
         const VulkanDevice& m_Device;
         const VulkanSwapChain& m_SwapChain;
+
+        std::weak_ptr<VulkanPipeline> m_Pipeline;
     };
 }

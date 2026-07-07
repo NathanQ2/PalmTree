@@ -9,7 +9,7 @@ namespace PalmTree {
         uint64_t bufferSize = indexSize * indexCount;
 
 
-        VulkanDevice& device = RendererBackend::GetVulkan()->GetDevice();
+        VulkanDevice& device = VulkanRendererBackend::Get()->GetDevice();
 
         VulkanBuffer staging = VulkanBuffer(
             device,

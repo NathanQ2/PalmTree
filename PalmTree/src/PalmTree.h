@@ -6,7 +6,7 @@
 #include "PalmTree/EntityComponentSystem/GameObject.h"
 
 // TODO: TEMPORARY
-#include "PalmTree/Platform/Vulkan/FrameInfo.h"
+#include "PalmTree/Renderer/FrameInfo.h"
 #include "PalmTree/Systems/SimpleRenderSystem.h"
 #include "PalmTree/Systems/PointLightSystem.h"
 

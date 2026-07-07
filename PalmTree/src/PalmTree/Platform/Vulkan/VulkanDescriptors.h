@@ -1,8 +1,8 @@
 #pragma once
 
 #include "VulkanDevice.h"
-#include "PalmTree/Renderer/Descriptors.h"
 
+#include "PalmTree/Renderer/Descriptors.h"
 
 namespace PalmTree {
     class VulkanDescriptorSetLayout : public DescriptorSetLayout {
@@ -21,7 +21,7 @@ namespace PalmTree {
         VkDescriptorSetLayout m_DescriptorSetLayout;
         std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_Bindings;
 
-        friend class VulkanDescriptorWriter;
+        friend class VulkanDescriptorSet;
     };
 
     class VulkanDescriptorPool {
@@ -64,22 +64,28 @@ namespace PalmTree {
     private:
         VulkanDevice& m_Device;
         VkDescriptorPool m_DescriptorPool;
-
-        friend class VulkanDescriptorWriter;
     };
 
-    class VulkanDescriptorWriter {
+    class VulkanDescriptorSet : public DescriptorSet {
     public:
-        VulkanDescriptorWriter(VulkanDescriptorSetLayout& setLayout, VulkanDescriptorPool& pool);
+        VulkanDescriptorSet(VulkanDescriptorSetLayout& layout);
 
-        VulkanDescriptorWriter& WriteBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo);
-        VulkanDescriptorWriter& WriteImage(uint32_t binding, VkDescriptorImageInfo* imageInfo);
+        VulkanDescriptorSet(VulkanDescriptorSet&&) = delete;
+        VulkanDescriptorSet operator=(VulkanDescriptorSet&&) = delete;
 
-        bool Build(VkDescriptorSet& set);
-        void Overwrite(VkDescriptorSet& set);
+        VulkanDescriptorSet(VulkanDescriptorSet&) = delete;
+        VulkanDescriptorSet operator=(VulkanDescriptorSet&) = delete;
+
+        void WriteBuffer(int binding, const UniformBufferBase& uniform, uint64_t size, uint64_t offset) override;
+
+        void WriteBuffer(int binding, const UniformBufferBase& uniform) override {
+            WriteBuffer(binding, uniform, VK_WHOLE_SIZE, 0);
+        };
+
+        VkDescriptorSet GetVkDescriptorSet() const { return m_DescriptorSet; }
     private:
-        VulkanDescriptorSetLayout& m_SetLayout;
-        VulkanDescriptorPool& m_Pool;
-        std::vector<VkWriteDescriptorSet> m_Writes;
+        VkDescriptorSet m_DescriptorSet;
+
+        VulkanDescriptorSetLayout& m_Layout;
     };
 }

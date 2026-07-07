@@ -1,15 +1,11 @@
 #pragma once
 
+// ReSharper disable once CppUnusedIncludeDirective
 #include <imgui_impl_vulkan.h>
 
 #include "PalmTree/Layer.h"
-#include "PalmTree/Window.h"
-#include "PalmTree/EventSystem/ApplicationEvents.h"
-#include "PalmTree/EventSystem/KeyEvents.h"
-#include "PalmTree/EventSystem/MouseEvents.h"
 #include "PalmTree/Platform/Mac/MacWindow.h"
 #include "PalmTree/Platform/Vulkan/VulkanDescriptors.h"
-#include "PalmTree/Platform/Vulkan/VulkanDevice.h"
 #include "PalmTree/Platform/Vulkan/VulkanRendererBackend.h"
 
 namespace PalmTree {

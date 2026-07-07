@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../EntityComponentSystem/System.h"
-#include "../Platform/Vulkan/FrameInfo.h"
+#include "../Renderer/FrameInfo.h"
 #include "../Platform/Vulkan/VulkanPipeline.h"
 
 
@@ -15,6 +15,6 @@ namespace PalmTree {
 
         void Render(FrameInfo& fameInfo);
     private:
-        std::unique_ptr<Pipeline> m_Pipeline;
+        std::shared_ptr<Pipeline> m_Pipeline;
     };
 }

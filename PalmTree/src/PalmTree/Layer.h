@@ -3,7 +3,7 @@
 #include <string_view>
 
 #include "EventSystem/Event.h"
-#include "Platform/Vulkan/FrameInfo.h"
+#include "Renderer/FrameInfo.h"
 
 namespace PalmTree {
     class Layer {

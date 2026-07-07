@@ -14,7 +14,7 @@
 
 namespace PalmTree {
     Pipeline* Pipeline::CreateVulkan(CreateInfo& createInfo) {
-        VulkanRendererBackend* renderer = RendererBackend::GetVulkan();
+        VulkanRendererBackend* renderer = VulkanRendererBackend::Get();
 
         std::vector<VkPushConstantRange> pushConstantRanges{};
         pushConstantRanges.reserve(createInfo.PushConstants.size());

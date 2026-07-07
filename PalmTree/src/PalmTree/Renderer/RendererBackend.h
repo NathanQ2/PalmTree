@@ -1,5 +1,7 @@
 #pragma once
+
 #include "PalmTree/Log.h"
+#include "RendererConstants.h"
 
 namespace PalmTree {
     class VulkanRendererBackend;
@@ -53,9 +55,7 @@ namespace PalmTree {
 
         static int GetFrameIndex() { return Get()->GetFrameIndexImpl(); }
 
-        // TODO: TEMPORARY until all vulkan features are abstracted
-        // Implemented in VulkanRendererBackend.cpp
-        static VulkanRendererBackend* GetVulkan();
+        static float GetAspectRatio() { return Get()->GetAspectRatioImpl(); }
 
         virtual ~RendererBackend() = default;
 
@@ -70,6 +70,8 @@ namespace PalmTree {
         virtual CommandBuffer& GetCurrentCommandBufferImpl() = 0;
 
         virtual int GetFrameIndexImpl() const = 0;
+
+        virtual float GetAspectRatioImpl() const = 0;
     private:
         static void InitVulkan();
 

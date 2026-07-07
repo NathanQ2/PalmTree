@@ -8,6 +8,8 @@
 #include <imgui_impl_vulkan.h>
 #include <GLFW/glfw3.h>
 
+#include "PalmTree/Renderer/RendererConstants.h"
+
 // Defined in imgui_impl_glfw.cpp
 ImGuiKey ImGui_ImplGlfw_KeyToImGuiKey(int keycode, int scancode);
 
@@ -16,9 +18,9 @@ namespace PalmTree {
                                                       m_Window(window) {
         PT_CORE_ASSERT(
             RendererBackend::GetAPI() == RendererBackend::API::VULKAN,
-            "ImGuiLayer requires the vulkan renderering backend!"
+            "ImGuiLayer requires the vulkan rendering backend!"
         );
-        m_Renderer = RendererBackend::GetVulkan();
+        m_Renderer = VulkanRendererBackend::Get();
     }
 
     ImGuiLayer::~ImGuiLayer() {
@@ -105,7 +107,7 @@ namespace PalmTree {
         initInfo.Queue = device.GraphicsQueue();
         initInfo.DescriptorPool = m_DescriptorPool->GetDescriptorPool();
         initInfo.MinImageCount = m_Renderer->GetImageCount();
-        initInfo.ImageCount = VulkanSwapChain::MAX_FRAMES_IN_FLIGHT;
+        initInfo.ImageCount = RendererConstants::MAX_FRAMES_IN_FLIGHT;
         // initInfo.PipelineCache = VK_NULL_HANDLE;
         // initInfo.Allocator = VK_NULL_HANDLE;
         initInfo.RenderPass = m_Renderer->GetSwapChainRenderPass();
@@ -117,7 +119,7 @@ namespace PalmTree {
 
     void ImGuiLayer::ShutdownImGui() {
         switch (RendererBackend::GetAPI()) {
-            case RendererBackend::API::VULKAN: ;
+            case RendererBackend::API::VULKAN:
                 ShutdownImGuiVulkan();
 
                 break;

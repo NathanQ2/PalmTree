@@ -1,5 +1,6 @@
 #pragma once
 
+#include <__cstddef/size_t.h>
 
 namespace PalmTree {
     // from: https://stackoverflow.com/a/57595105

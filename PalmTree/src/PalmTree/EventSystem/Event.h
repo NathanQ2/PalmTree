@@ -1,8 +1,5 @@
 #pragma once
 
-#include <bitset>
-
-#include "Event.h"
 #include "../Core.h"
 
 namespace PalmTree {

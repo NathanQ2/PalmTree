@@ -30,7 +30,7 @@ namespace PalmTree {
             .EnableAlphaBlending = true
         };
 
-        m_Pipeline = std::unique_ptr<Pipeline>(Pipeline::Create(info));
+        m_Pipeline = std::shared_ptr<Pipeline>(Pipeline::Create(info));
     }
 
     void PointLightSystem::Update(FrameInfo& frameInfo) {
@@ -65,19 +65,9 @@ namespace PalmTree {
             sorted[distSquared] = obj.GetId();
         }
 
-        cmds.BindPipeline(*m_Pipeline);
+        cmds.BindPipeline(m_Pipeline);
 
-        vkCmdBindDescriptorSets(
-            frameInfo.CommandBuffer,
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            dynamic_cast<VulkanPipeline&>(*m_Pipeline).GetPipelineLayout(),
-            0,
-            1,
-            &frameInfo.GlobalDescriptorSet,
-            0,
-            nullptr
-        );
-
+        cmds.BindDescriptorSet(frameInfo.GlobalDescriptorSet);
 
         for (auto it = sorted.rbegin(); it != sorted.rend(); ++it) {
             auto& obj = m_Ecs->GetObject(it->second);
@@ -88,13 +78,7 @@ namespace PalmTree {
             push.Color = glm::vec4(light.Color, light.LightIntensity);
             push.Radius = obj.GetTransform().Scale.x;
 
-            cmds.PushConstants(
-                dynamic_cast<VulkanPipeline&>(*m_Pipeline).GetPipelineLayout(),
-                VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-                0,
-                sizeof(PointLightPushConstants),
-                &push
-            );
+            cmds.PushConstants(0, sizeof(PointLightPushConstants), &push);
 
             cmds.Draw(6);
         }

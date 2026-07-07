@@ -28,24 +28,59 @@ namespace PalmTree {
         }
     }
 
-    void VulkanCommandBuffer::BindPipeline(const Pipeline& pipeline) {
+    void VulkanCommandBuffer::BindPipeline(const std::weak_ptr<Pipeline> pipeline) {
+        const std::shared_ptr vulkanPipeline = std::dynamic_pointer_cast<VulkanPipeline>(pipeline.lock());
+        PT_CORE_ASSERT(vulkanPipeline != nullptr, "A valid VulkanPipeline must be provided!")
+
         vkCmdBindPipeline(
             m_CommandBuffer,
             VK_PIPELINE_BIND_POINT_GRAPHICS,
-            dynamic_cast<const VulkanPipeline&>(pipeline).GetVkPipeline()
+            vulkanPipeline->GetVkPipeline()
+        );
+
+        m_Pipeline = vulkanPipeline;
+    }
+
+    void VulkanCommandBuffer::BindDescriptorSet(const DescriptorSet& set) {
+        const std::shared_ptr<VulkanPipeline> shared = m_Pipeline.lock();
+        PT_CORE_ASSERT(
+            shared != nullptr,
+            "A valid VulkanPipeline must be bound to the current VulkanCommandBuffer to bind a DescriptorSet!"
+        );
+
+
+        VkDescriptorSet vkDescriptorSet = dynamic_cast<const VulkanDescriptorSet&>(set).GetVkDescriptorSet();
+        vkCmdBindDescriptorSets(
+            m_CommandBuffer,
+            VK_PIPELINE_BIND_POINT_GRAPHICS,
+            shared->GetPipelineLayout(),
+            0,
+            1,
+            &vkDescriptorSet,
+            0,
+            nullptr
         );
     }
 
-    void VulkanCommandBuffer::BindDescriptorSet() {}
-
     void VulkanCommandBuffer::PushConstants(
-        VkPipelineLayout pipelineLayout,
-        VkShaderStageFlags shaderStageFlags,
         uint32_t offset,
         uint32_t size,
         void* data
     ) {
-        vkCmdPushConstants(m_CommandBuffer, pipelineLayout, shaderStageFlags, offset, size, data);
+        const std::shared_ptr<VulkanPipeline> shared = m_Pipeline.lock();
+        PT_CORE_ASSERT(
+            shared != nullptr,
+            "A valid VulkanPipeline must be bound to the current VulkanCommandBuffer to bind add push constants!"
+        );
+
+        vkCmdPushConstants(
+            m_CommandBuffer,
+            shared->GetPipelineLayout(),
+            VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+            offset,
+            size,
+            data
+        );
     }
 
     void VulkanCommandBuffer::BindVertexBuffer(const VertexBuffer& vertex) {

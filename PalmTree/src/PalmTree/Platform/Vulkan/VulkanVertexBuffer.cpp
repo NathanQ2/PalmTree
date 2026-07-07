@@ -28,7 +28,7 @@ namespace PalmTree {
         size_t vertexCount = vertices.size();
         size_t bufferSize = vertexSize * vertexCount;
 
-        VulkanDevice& device = RendererBackend::GetVulkan()->GetDevice();
+        VulkanDevice& device = VulkanRendererBackend::Get()->GetDevice();
 
         VulkanBuffer staging = VulkanBuffer(
             device,

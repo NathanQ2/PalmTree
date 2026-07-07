@@ -7,6 +7,8 @@
 
 #include "../../Log.h"
 
+#include "PalmTree/Renderer/RendererConstants.h"
+
 namespace PalmTree {
     void VulkanSwapChain::RecreateSwapChain() {
         while (m_Window.GetWidth() == 0 || m_Window.GetHeight() == 0) {
@@ -123,7 +125,7 @@ namespace PalmTree {
 
         auto result = vkQueuePresentKHR(m_Device.PresentQueue(), &presentInfo);
 
-        m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+        m_CurrentFrame = (m_CurrentFrame + 1) % RendererConstants::MAX_FRAMES_IN_FLIGHT;
 
         return result;
     }
@@ -138,7 +140,7 @@ namespace PalmTree {
     }
 
     void VulkanSwapChain::CleanupSyncObjects() {
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        for (size_t i = 0; i < RendererConstants::MAX_FRAMES_IN_FLIGHT; i++) {
             vkDestroySemaphore(m_Device.GetDevice(), m_RenderFinishedSemaphores[i], nullptr);
             vkDestroySemaphore(m_Device.GetDevice(), m_ImageAvailableSemaphores[i], nullptr);
             vkDestroyFence(m_Device.GetDevice(), m_InFlightFences[i], nullptr);
@@ -164,7 +166,7 @@ namespace PalmTree {
         PT_CORE_TRACE("Max Image Count: {}", swapChainSupport.Capabilities.maxImageCount);
         //uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
         // Not sure if this is really 100% correct but it works so
-        uint32_t imageCount = MAX_FRAMES_IN_FLIGHT;
+        uint32_t imageCount = RendererConstants::MAX_FRAMES_IN_FLIGHT;
         if (swapChainSupport.Capabilities.maxImageCount > 0 &&
             imageCount > swapChainSupport.Capabilities.maxImageCount) {
             imageCount = swapChainSupport.Capabilities.maxImageCount;
@@ -388,9 +390,9 @@ namespace PalmTree {
     }
 
     void VulkanSwapChain::CreateSyncObjects() {
-        m_ImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-        m_RenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-        m_InFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+        m_ImageAvailableSemaphores.resize(RendererConstants::MAX_FRAMES_IN_FLIGHT);
+        m_RenderFinishedSemaphores.resize(RendererConstants::MAX_FRAMES_IN_FLIGHT);
+        m_InFlightFences.resize(RendererConstants::MAX_FRAMES_IN_FLIGHT);
         m_ImagesInFlight.resize(GetImageCount(), VK_NULL_HANDLE);
 
         VkSemaphoreCreateInfo semaphoreInfo = {};
@@ -400,7 +402,7 @@ namespace PalmTree {
         fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        for (size_t i = 0; i < RendererConstants::MAX_FRAMES_IN_FLIGHT; i++) {
             if (vkCreateSemaphore(
                     m_Device.GetDevice(),
                     &semaphoreInfo,

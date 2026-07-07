@@ -1,10 +1,7 @@
 #include "VulkanRendererBackend.h"
 
-#include <stdexcept>
 
-#include "VulkanIndexBuffer.h"
-#include "VulkanVertexBuffer.h"
-#include "../../Log.h"
+#include "PalmTree/Log.h"
 #include "PalmTree/Application.h"
 
 namespace PalmTree {
@@ -12,11 +9,10 @@ namespace PalmTree {
         Window& window = Application::Get().GetWindow();
 
         s_Instance = new VulkanRendererBackend(window);
+        VulkanRendererBackend::s_VulkanInstance = dynamic_cast<VulkanRendererBackend*>(s_Instance);
     }
 
-    VulkanRendererBackend* RendererBackend::GetVulkan() {
-        return dynamic_cast<VulkanRendererBackend*>(Get());
-    }
+    VulkanRendererBackend* VulkanRendererBackend::s_VulkanInstance = nullptr;
 
     VulkanRendererBackend::VulkanRendererBackend(Window& window) : m_Window(window) {
         m_Device = std::make_unique<VulkanDevice>(m_Window);
@@ -25,6 +21,11 @@ namespace PalmTree {
 
         RecreateSwapChain();
         CreateCommandBuffers();
+
+        m_DescriptorPool = VulkanDescriptorPool::Builder(*m_Device)
+            .SetMaxSets(RendererConstants::MAX_FRAMES_IN_FLIGHT)
+            .AddPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, RendererConstants::MAX_FRAMES_IN_FLIGHT)
+            .Build();
     }
 
     VulkanRendererBackend::~VulkanRendererBackend() {
@@ -90,7 +91,7 @@ namespace PalmTree {
         }
 
         m_IsFrameStarted = false;
-        m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % VulkanSwapChain::MAX_FRAMES_IN_FLIGHT;
+        m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % RendererConstants::MAX_FRAMES_IN_FLIGHT;
     }
 
     void VulkanRendererBackend::BeginRenderPassImpl() {
@@ -106,8 +107,8 @@ namespace PalmTree {
     }
 
     void VulkanRendererBackend::CreateCommandBuffers() {
-        m_CommandBuffers.reserve(VulkanSwapChain::MAX_FRAMES_IN_FLIGHT);
-        for (int i = 0; i < VulkanSwapChain::MAX_FRAMES_IN_FLIGHT; i++) {
+        m_CommandBuffers.reserve(RendererConstants::MAX_FRAMES_IN_FLIGHT);
+        for (int i = 0; i < RendererConstants::MAX_FRAMES_IN_FLIGHT; i++) {
             m_CommandBuffers.emplace_back(std::make_unique<VulkanCommandBuffer>(*m_Device, *m_SwapChain));
         }
     }

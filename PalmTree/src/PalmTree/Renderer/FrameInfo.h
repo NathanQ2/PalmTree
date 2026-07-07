@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../../Camera.h"
+#include "PalmTree/Camera.h"
 
-#include <vulkan/vulkan.h>
+#include "PalmTree/Renderer/Descriptors.h"
 
 #define MAX_LIGHTS 10
 
@@ -24,9 +24,8 @@ namespace PalmTree {
     struct FrameInfo {
         int FrameIndex;
         float FrameTime;
-        VkCommandBuffer CommandBuffer;
         Camera& Camera;
-        VkDescriptorSet GlobalDescriptorSet;
+        DescriptorSet& GlobalDescriptorSet;
         GlobalUBO GlobalUBO;
     };
 }

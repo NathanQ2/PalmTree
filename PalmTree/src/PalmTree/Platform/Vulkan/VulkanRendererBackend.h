@@ -10,7 +10,16 @@
 
 namespace PalmTree {
     class VulkanRendererBackend : public RendererBackend {
+        friend class RendererBackend;
     public:
+        static VulkanRendererBackend* Get() {
+            PT_CORE_ASSERT(
+                RendererBackend::GetAPI() == RendererBackend::API::VULKAN,
+                "Vulkan is not the current RendererBackend."
+            );
+            return s_VulkanInstance;
+        }
+
         VulkanRendererBackend(Window& window);
         ~VulkanRendererBackend() override;
 
@@ -18,7 +27,7 @@ namespace PalmTree {
         VulkanRendererBackend& operator=(const VulkanRendererBackend&) = delete;
 
         [[nodiscard]] VkRenderPass GetSwapChainRenderPass() const { return m_SwapChain->GetRenderPass(); }
-        [[nodiscard]] float GetAspectRatio() const { return m_SwapChain->ExtentAspectRatio(); }
+        float GetAspectRatioImpl() const override { return m_SwapChain->ExtentAspectRatio(); }
         [[nodiscard]] bool IsFrameInProgress() const { return m_IsFrameStarted; }
 
         CommandBuffer& GetCurrentCommandBufferImpl() override {
@@ -46,7 +55,11 @@ namespace PalmTree {
         VkCommandBuffer GetCurrentVkCommandBuffer() {
             return dynamic_cast<VulkanCommandBuffer&>(GetCurrentCommandBufferImpl()).GetVkCommandBuffer();
         }
+
+        VulkanDescriptorPool& GetDescriptorPool() const { return *m_DescriptorPool; }
     private:
+        static VulkanRendererBackend* s_VulkanInstance;
+
         void CreateCommandBuffers();
         void FreeCommandBuffers();
         void RecreateSwapChain();
@@ -54,6 +67,7 @@ namespace PalmTree {
         Window& m_Window;
         std::unique_ptr<VulkanDevice> m_Device;
         std::unique_ptr<VulkanSwapChain> m_SwapChain;
+        std::unique_ptr<VulkanDescriptorPool> m_DescriptorPool;
         std::vector<std::unique_ptr<VulkanCommandBuffer>> m_CommandBuffers;
 
         uint32_t m_CurrentImageIndex;

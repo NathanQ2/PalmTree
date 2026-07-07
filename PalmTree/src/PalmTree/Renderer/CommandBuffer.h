@@ -9,11 +9,9 @@ namespace PalmTree {
 
         virtual void BeginRenderPass(int frameIndex) = 0;
         virtual void EndRenderPass() = 0;
-        virtual void BindPipeline(const Pipeline& pipeline) = 0;
-        virtual void BindDescriptorSet() = 0;
+        virtual void BindPipeline(std::weak_ptr<Pipeline> pipeline) = 0;
+        virtual void BindDescriptorSet(const DescriptorSet& set) = 0;
         virtual void PushConstants(
-            VkPipelineLayout pipelineLayout,
-            VkShaderStageFlags shaderStageFlags,
             uint32_t offset,
             uint32_t size,
             void* push

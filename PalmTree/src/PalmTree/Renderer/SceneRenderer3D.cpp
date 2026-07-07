@@ -3,24 +3,14 @@
 
 #include "RendererBackend.h"
 #include "PalmTree/Application.h"
-#include "PalmTree/Platform/Vulkan/VulkanDescriptors.h"
-#include "PalmTree/Platform/Vulkan/VulkanRendererBackend.h"
-#include "PalmTree/Platform/Vulkan/FrameInfo.h"
-#include "PalmTree/Platform/Vulkan/VulkanUniformBuffer.h"
 #include "PalmTree/Renderer/Descriptors.h"
 
 namespace PalmTree {
     SceneRenderer3D::SceneRenderer3D(Window& window, EntityComponentSystem& ecs, Camera& camera) : m_Window(window),
         m_Ecs(ecs), m_Camera(camera) {
-        VulkanRendererBackend* m_Renderer = RendererBackend::GetVulkan();
-        VulkanDevice& device = m_Renderer->GetDevice();
-
-        m_DescriptorPool = VulkanDescriptorPool::Builder(device)
-            .SetMaxSets(VulkanSwapChain::MAX_FRAMES_IN_FLIGHT)
-            .AddPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VulkanSwapChain::MAX_FRAMES_IN_FLIGHT)
-            .Build();
-
-        m_UboBuffers = std::unique_ptr<UniformBuffer<GlobalUBO>>(UniformBuffer<GlobalUBO>::Create());
+        for (int i = 0; i < m_UboBuffers.size(); i++) {
+            m_UboBuffers[i] = std::unique_ptr<UniformBuffer<GlobalUBO>>(UniformBuffer<GlobalUBO>::Create());
+        }
 
         m_DescriptorSetLayout = std::unique_ptr<DescriptorSetLayout>(
             DescriptorSetLayout::Builder()
@@ -28,12 +18,14 @@ namespace PalmTree {
             .Build()
         );
 
+        m_DescriptorSets.reserve(RendererConstants::MAX_FRAMES_IN_FLIGHT);
+        for (int i = 0; i < RendererConstants::MAX_FRAMES_IN_FLIGHT; i++) {
+            m_DescriptorSets.emplace_back(DescriptorSet::Create(*m_DescriptorSetLayout));
+        }
+
         for (int i = 0; i < m_DescriptorSets.size(); i++) {
-            auto bufferInfo = dynamic_cast<VulkanUniformBuffer<GlobalUBO>&>(*m_UboBuffers).GetVulkanBuffer(i).
-                DescriptorInfo();
-            VulkanDescriptorWriter(dynamic_cast<VulkanDescriptorSetLayout&>(*m_DescriptorSetLayout), *m_DescriptorPool)
-                .WriteBuffer(0, &bufferInfo)
-                .Build(m_DescriptorSets[i]);
+            UniformBuffer<GlobalUBO>& ubo = *m_UboBuffers[i];
+            m_DescriptorSets[i]->WriteBuffer(0, ubo);
         }
 
         m_SimpleRenderSystem = std::make_shared<SimpleRenderSystem>(*m_DescriptorSetLayout);
@@ -53,16 +45,14 @@ namespace PalmTree {
         int frameIndex = RendererBackend::GetFrameIndex();
 
         // Delete old frame info
-        if (m_FrameInfo != nullptr) {
-            delete m_FrameInfo;
-        }
+        delete m_FrameInfo;
+
 
         m_FrameInfo = new FrameInfo{
             frameIndex,
             frameTime,
-            RendererBackend::GetVulkan()->GetCurrentVkCommandBuffer(),
             m_Camera,
-            m_DescriptorSets[frameIndex],
+            *m_DescriptorSets[frameIndex],
             {
                 m_Camera.GetProjection(),
                 m_Camera.GetView(),
@@ -72,8 +62,8 @@ namespace PalmTree {
 
         m_PointLightSystem->Update(*m_FrameInfo);
 
-        m_UboBuffers->WriteToBuffer(frameIndex, &m_FrameInfo->GlobalUBO);
-        m_UboBuffers->Flush(frameIndex);
+        m_UboBuffers[frameIndex]->WriteToBuffer(&m_FrameInfo->GlobalUBO);
+        m_UboBuffers[frameIndex]->Flush();
     }
 
     void SceneRenderer3D::Render(float frameTime) {

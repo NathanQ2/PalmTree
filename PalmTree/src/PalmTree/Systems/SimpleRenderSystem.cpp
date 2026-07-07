@@ -29,23 +29,14 @@ namespace PalmTree {
             .DescriptorSetLayout = globalSetLayout
         };
 
-        m_Pipeline = std::unique_ptr<Pipeline>(Pipeline::Create(info));
+        m_Pipeline = std::shared_ptr<Pipeline>(Pipeline::Create(info));
     }
 
     void SimpleRenderSystem::Render(FrameInfo& frameInfo) {
         CommandBuffer& cmds = RendererBackend::GetCurrentCommandBuffer();
-        cmds.BindPipeline(*m_Pipeline);
+        cmds.BindPipeline(m_Pipeline);
 
-        vkCmdBindDescriptorSets(
-            frameInfo.CommandBuffer,
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            dynamic_cast<VulkanPipeline&>(*m_Pipeline).GetPipelineLayout(),
-            0,
-            1,
-            &frameInfo.GlobalDescriptorSet,
-            0,
-            nullptr
-        );
+        cmds.BindDescriptorSet(frameInfo.GlobalDescriptorSet);
 
         for (Id id : m_Ids) {
             auto& obj = m_Ecs->GetObject(id);
@@ -54,13 +45,7 @@ namespace PalmTree {
             push.ModelMatrix = obj.GetTransform().Mat4();
             push.NormalMatrix = obj.GetTransform().NormalMatrix();
 
-            cmds.PushConstants(
-                dynamic_cast<VulkanPipeline&>(*m_Pipeline).GetPipelineLayout(),
-                VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-                0,
-                sizeof(SimplePushConstantData),
-                &push
-            );
+            cmds.PushConstants(0, sizeof(SimplePushConstantData), &push);
 
             std::shared_ptr model = obj.GetComponent<ModelComponent>().Model;
 

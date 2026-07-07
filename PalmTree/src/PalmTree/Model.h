@@ -1,8 +1,10 @@
 #pragma once
 
-#include "Renderer/Buffer.h"
-
 namespace PalmTree {
+    class VertexBuffer;
+    class IndexBuffer;
+    struct Vertex;
+
     class Model {
     public:
         struct Builder {
@@ -24,8 +26,8 @@ namespace PalmTree {
         const VertexBuffer& GetVertexBuffer() const { return *m_VertexBuffer; }
         const IndexBuffer& GetIndexBuffer() const { return *m_IndexBuffer; }
 
-        uint32_t GetVertexCount() const { return m_VertexBuffer->GetCount(); }
-        uint32_t GetIndexCount() const { return m_IndexBuffer->GetCount(); }
+        uint32_t GetVertexCount() const;
+        uint32_t GetIndexCount() const;
     private:
         void CreateVertexBuffers(const std::vector<Vertex>& vertices);
         void CreateIndexBuffers(const std::vector<uint32_t>& indices);
