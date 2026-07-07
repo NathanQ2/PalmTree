@@ -3,7 +3,9 @@ project(PalmTreeEditor)
 
 set(CMAKE_CXX_STANDARD 23)
 
-add_subdirectory(../PalmTree ${CMAKE_CURRENT_BINARY_DIR}/PalmTree)
+if(NOT TARGET PalmTree)
+    add_subdirectory(../PalmTree ${CMAKE_CURRENT_BINARY_DIR}/../PalmTree)
+endif()
 
 file(GLOB_RECURSE SOURCES src/**.cpp src/**.h)
 

@@ -108,7 +108,7 @@ public:
     void LoadGameObjects() {
         // Flat Vase
         {
-            std::shared_ptr model = Model::CreateModelFromFile("../assets/models/flat_vase.obj");
+            std::shared_ptr model = Model::CreateModelFromFile("../../PalmTreeEditor/assets/models/flat_vase.obj");
 
             GameObject& obj = m_Ecs.CreateGameObject();
 
@@ -120,7 +120,7 @@ public:
 
         // Smooth Vase
         {
-            std::shared_ptr model = Model::CreateModelFromFile("../assets/models/smooth_vase.obj");
+            std::shared_ptr model = Model::CreateModelFromFile("../../PalmTreeEditor/assets/models/smooth_vase.obj");
 
             GameObject& obj = m_Ecs.CreateGameObject();
             obj.AddComponent(ModelComponent{glm::vec3(1), model});
@@ -130,7 +130,7 @@ public:
 
         // Floor
         {
-            std::shared_ptr model = Model::CreateModelFromFile("../assets/models/quad.obj");
+            std::shared_ptr model = Model::CreateModelFromFile("../../PalmTreeEditor/assets/models/quad.obj");
 
             GameObject& obj = m_Ecs.CreateGameObject();
             obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});

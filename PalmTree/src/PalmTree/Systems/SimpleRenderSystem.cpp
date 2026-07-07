@@ -18,8 +18,8 @@ namespace PalmTree {
 
     SimpleRenderSystem::SimpleRenderSystem(DescriptorSetLayout& globalSetLayout) {
         Pipeline::CreateInfo info{
-            .VertexShaderPath = "PalmTree/simpleShader.vert.spv",
-            .FragmentShaderPath = "PalmTree/simpleShader.frag.spv",
+            .VertexShaderPath = "../PalmTree/simpleShader.vert.spv",
+            .FragmentShaderPath = "../PalmTree/simpleShader.frag.spv",
             .PushConstants = {
                 {
                     .Offset = 0,

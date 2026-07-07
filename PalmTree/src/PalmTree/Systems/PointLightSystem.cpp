@@ -18,8 +18,8 @@ namespace PalmTree {
 
     PointLightSystem::PointLightSystem(DescriptorSetLayout& globalSetLayout) {
         Pipeline::CreateInfo info{
-            .VertexShaderPath = "PalmTree/pointLight.vert.spv",
-            .FragmentShaderPath = "PalmTree/pointLight.frag.spv",
+            .VertexShaderPath = "../PalmTree/pointLight.vert.spv",
+            .FragmentShaderPath = "../PalmTree/pointLight.frag.spv",
             .PushConstants = {
                 {
                     .Offset = 0,
