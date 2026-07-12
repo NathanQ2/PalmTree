@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../EntityComponentSystem/System.h"
-#include "../Renderer/FrameInfo.h"
+#include "FrameInfo.h"
 #include "../Platform/Vulkan/VulkanPipeline.h"
 
 

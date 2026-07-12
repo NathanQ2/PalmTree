@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Renderer/FrameInfo.h"
+#include "FrameInfo.h"
 
 #include "PalmTree/EntityComponentSystem/EntityComponentSystem.h"
 #include "PalmTree/Renderer/Pipeline.h"

@@ -6,6 +6,7 @@ namespace PalmTree {
         m_ComponentManager.RegisterComponent<TransformComponent>();
         m_ComponentManager.RegisterComponent<PointLightComponent>();
         m_ComponentManager.RegisterComponent<ModelComponent>();
+        m_ComponentManager.RegisterComponent<RigidBodyComponent>();
 
         m_GameObjects.reserve(MAX_GAME_OBJECTS);
     }

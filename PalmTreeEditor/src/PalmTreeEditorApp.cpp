@@ -53,7 +53,7 @@ public:
         }
         
         m_CameraController.MoveInPlaneXZ(dt, *m_ViewerObject);
-        m_Camera.SetViewYXZ(m_ViewerObject->GetTransform().Translation, m_ViewerObject->GetTransform().Rotation);
+        m_Camera.SetViewYXZ(m_ViewerObject->GetTransform().Translation, m_ViewerObject->GetTransform().EulerAngles());
 
         float aspect = RendererBackend::GetAspectRatio();
         m_Camera.SetPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
@@ -72,7 +72,7 @@ public:
         int i = 0;
         for (auto& obj : objs) {
             glm::vec3& translation = obj.GetTransform().Translation;
-            glm::vec3& rotation = obj.GetTransform().Rotation;
+            glm::vec3 rotation = obj.GetTransform().EulerAngles();
             glm::vec3& scale = obj.GetTransform().Scale;
             ImGui::PushID(i);
             
@@ -83,6 +83,8 @@ public:
             ImGui::Separator();
             
             ImGui::PopID();
+            
+            obj.GetTransform().Rotation = glm::eulerAngleYXZ(rotation.y, rotation.x, rotation.z);
             
             i++;
         }
@@ -95,7 +97,7 @@ public:
         ImGui::End();
         
         ImGui::Begin("Camera Orientation");
-        glm::vec3 rot = m_ViewerObject->GetTransform().Rotation;
+        glm::vec3 rot = m_ViewerObject->GetTransform().EulerAngles();
         glm::vec3 deg = degrees(rot);
         ImGui::DragFloat3("Rotation", &deg.x);
         ImGui::End();

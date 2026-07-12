@@ -1,6 +1,8 @@
 #include "KeyboardMovementController.h"
 
 #include <glm/gtc/constants.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/euler_angles.hpp>
 
 namespace Sandbox {
     void KeyboardMovementController::MoveInPlaneXZ(float dt, PalmTree::GameObject& gameObject) {
@@ -30,7 +32,9 @@ namespace Sandbox {
 
             // Make sure rotate is nonzero 
             if (glm::dot(mouseRotate, mouseRotate) > std::numeric_limits<float>::epsilon()) {
-                gameObject.GetTransform().Rotation += m_MouseLookSpeed * dt * mouseRotate;
+                glm::vec3 newEuler = gameObject.GetTransform().EulerAngles() + m_MouseLookSpeed * dt * mouseRotate;
+                
+                gameObject.GetTransform().SetEuler(newEuler);
             }
         }
 
@@ -44,13 +48,18 @@ namespace Sandbox {
 
         // Make sure rotate is nonzero 
         if (glm::dot(keyboardRotate, keyboardRotate) > std::numeric_limits<float>::epsilon()) {
-            gameObject.GetTransform().Rotation += m_KeyboardLookSpeed * dt * glm::normalize(keyboardRotate);
+            glm::vec3 newEuler = gameObject.GetTransform().EulerAngles() += m_KeyboardLookSpeed * dt * glm::normalize(keyboardRotate);
+            
+            gameObject.GetTransform().SetEuler(newEuler);
         }
 
-        gameObject.GetTransform().Rotation.x = glm::clamp(gameObject.GetTransform().Rotation.x, -1.5f, 1.5f);
-        gameObject.GetTransform().Rotation.y = glm::mod(gameObject.GetTransform().Rotation.y, glm::two_pi<float>());
+        gameObject.GetTransform().SetEuler({
+            glm::clamp(gameObject.GetTransform().EulerAngles().x, -1.5f, 1.5f),
+            glm::mod(gameObject.GetTransform().EulerAngles().y, glm::two_pi<float>()),
+            gameObject.GetTransform().EulerAngles().z
+        });
 
-        float yaw = gameObject.GetTransform().Rotation.y;
+        float yaw = gameObject.GetTransform().EulerAngles().y;
         const glm::vec3 forwardDir = glm::vec3(sin(yaw), 0.0f, cos(yaw));
         const glm::vec3 rightDir = glm::vec3(forwardDir.z, 0.0f, -forwardDir.x);
         const glm::vec3 upDir = glm::vec3(0.0f, -1.0f, 0.0f);

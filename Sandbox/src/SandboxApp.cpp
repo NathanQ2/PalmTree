@@ -3,6 +3,9 @@
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/constants.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include "KeyboardMovementController.h"
 #include "PalmTree/Renderer/SceneRenderer3D.h"
@@ -12,9 +15,9 @@ using namespace Sandbox;
 
 class GameLayer : public Layer {
 public:
-    GameLayer(Window& window, EntityComponentSystem& ecs, Camera& camera) :
+    GameLayer(Window& window, EntityComponentSystem& ecs, Camera& camera, PhysicsSystem& physics) :
         Layer("GameLayer"), m_Window(window), m_Ecs(ecs),
-        m_Camera(camera), m_CameraController([]() { return !ImGui::GetIO().WantCaptureMouse; }) {}
+        m_Camera(camera), m_PhysicsSystem(physics), m_CameraController([]() { return !ImGui::GetIO().WantCaptureMouse; }) {}
 
     void OnStart() override {
         LoadGameObjects();
@@ -52,7 +55,7 @@ public:
         }
         
         m_CameraController.MoveInPlaneXZ(dt, *m_ViewerObject);
-        m_Camera.SetViewYXZ(m_ViewerObject->GetTransform().Translation, m_ViewerObject->GetTransform().Rotation);
+        m_Camera.SetViewYXZ(m_ViewerObject->GetTransform().Translation, m_ViewerObject->GetTransform().EulerAngles());
 
         float aspect = RendererBackend::GetAspectRatio();
         m_Camera.SetPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
@@ -71,13 +74,13 @@ public:
         int i = 0;
         for (auto& obj : objs) {
             glm::vec3& translation = obj.GetTransform().Translation;
-            glm::vec3& rotation = obj.GetTransform().Rotation;
+            // glm::vec3& rotation = obj.GetTransform().EulerAngles();
             glm::vec3& scale = obj.GetTransform().Scale;
             ImGui::PushID(i);
             
             ImGui::Text("ID: %i", obj.GetId());
             ImGui::DragFloat3("Transform", &translation.x, 0.01);
-            ImGui::DragFloat3("Rotation", &rotation.x, 0.01);
+            // ImGui::DragFloat3("Rotation", &rotation.x, 0.01);
             ImGui::DragFloat3("Scale", &scale.x, 0.01);
             ImGui::Separator();
             
@@ -119,6 +122,10 @@ public:
             obj.AddComponent(ModelComponent{glm::vec3(1), model});
             obj.GetTransform().Translation = glm::vec3(0.5, 0.0, 0.0f);
             obj.GetTransform().Scale = glm::vec3(3, 1.5, 3);
+            
+            // obj.AddComponent(RigidBodyComponent{.AngularMomentum = glm::vec3(1.0f, -1.0f, 0.0f), .Mass = 1});
+            
+            m_PhysicsSystem.AddForce(obj, glm::vec3(0, -1, 0));
         }
 
         // Floor
@@ -129,6 +136,34 @@ public:
             obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
             obj.GetTransform().Translation = glm::vec3(0.0f, 0.0f, 0.0f);
             obj.GetTransform().Scale = glm::vec3(5);
+        }
+        
+        // Slab
+        {
+            std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/cube.obj");
+            
+            GameObject& obj = m_Ecs.CreateGameObject();
+            obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
+            obj.GetTransform().Translation = glm::vec3(0.0f, -2.0f, 0.0f);
+            obj.GetTransform().Scale = glm::vec3(1.0f, 0.1f, 2.0f);
+            
+            glm::vec3 invI0{};
+            {
+                float x = 1.0f;
+                float y = 0.1f;
+                float z = 2.0f;
+                
+                float volume = x * y * z;
+                
+                invI0 = GetDiagonal(volume * DiagonalMat(glm::vec3(y * y + z * z, x * x + z * z, x * x + y * y)) / 12.0f);
+            }
+            
+            obj.AddComponent<RigidBodyComponent>(
+                RigidBodyComponent {
+                    .InverseInitialMomentOfInertia = invI0,
+                    .AngularMomentum = glm::vec3(0.1f, 0.0f, 0.001f)
+                }
+            );
         }
 
         std::vector<glm::vec3> lightColors{
@@ -159,6 +194,7 @@ private:
 
     EntityComponentSystem& m_Ecs;
     Camera& m_Camera;
+    PhysicsSystem& m_PhysicsSystem;
 
     // Owned by ECS
     GameObject* m_ViewerObject = nullptr;
@@ -175,7 +211,7 @@ private:
 class SandboxApp : public Application {
 public:
     SandboxApp() {
-        PushLayer<GameLayer>(*m_Window, m_Ecs, m_Camera);
+        PushLayer<GameLayer>(*m_Window, m_Ecs, m_Camera, *m_PhysicsSystem);
     }
 };
 

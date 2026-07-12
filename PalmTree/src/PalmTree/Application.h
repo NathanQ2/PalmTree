@@ -6,6 +6,7 @@
 #include "Window.h"
 #include "EventSystem/ApplicationEvents.h"
 #include "ImGui/ImGuiLayer.h"
+#include "Physics/PhysicsSystem.h"
 
 
 namespace PalmTree {
@@ -51,6 +52,8 @@ namespace PalmTree {
         Camera m_Camera{};
 
         LayerStack m_LayerStack{};
+
+        std::shared_ptr<PhysicsSystem> m_PhysicsSystem;
 
         bool m_Running = true;
     private:

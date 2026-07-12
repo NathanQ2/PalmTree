@@ -6,8 +6,6 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 
-#include <stdexcept>
-
 #include "PalmTree/Renderer/CommandBuffer.h"
 
 namespace PalmTree {
@@ -42,7 +40,7 @@ namespace PalmTree {
             auto& obj = m_Ecs->GetObject(id);
 
             SimplePushConstantData push{};
-            push.ModelMatrix = obj.GetTransform().Mat4();
+            push.ModelMatrix = obj.GetTransform().TransformationMatrix();
             push.NormalMatrix = obj.GetTransform().NormalMatrix();
 
             cmds.PushConstants(0, sizeof(SimplePushConstantData), &push);

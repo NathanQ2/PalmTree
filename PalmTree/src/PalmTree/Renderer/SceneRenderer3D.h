@@ -7,8 +7,8 @@
 
 #include "PalmTree/EntityComponentSystem/EntityComponentSystem.h"
 
-#include "PalmTree/Systems/PointLightSystem.h"
-#include "PalmTree/Systems/SimpleRenderSystem.h"
+#include "PointLightSystem.h"
+#include "SimpleRenderSystem.h"
 
 #include "PalmTree/Renderer/Buffer.h"
 

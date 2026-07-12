@@ -17,7 +17,7 @@ namespace PalmTree {
 
     bool MacInput::IsKeyPressedImpl(int keycode) {
         int state = glfwGetKey(GetWindow(), keycode);
-        
+
         return state == GLFW_PRESS;
     }
 

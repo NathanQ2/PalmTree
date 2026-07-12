@@ -24,6 +24,12 @@ namespace PalmTree {
         RendererBackend::Init(RendererBackend::API::VULKAN);
 
         m_ImGuiLayer = PushOverlay<ImGuiLayer>(dynamic_cast<MacWindow&>(*m_Window));
+
+        m_PhysicsSystem = std::make_shared<PhysicsSystem>();
+        m_Ecs.RegisterSystem(
+            m_PhysicsSystem,
+            SignatureBuilder<TransformComponent, RigidBodyComponent>(m_Ecs.GetComponentManager()).Build()
+        );
     }
 
     Application::~Application() {
@@ -53,6 +59,7 @@ namespace PalmTree {
                     if (layer->IsEnabled())
                         layer->OnUpdate(frameTime);
                 }
+                m_PhysicsSystem->Update(frameTime);
 
                 // Render
                 RendererBackend::BeginRenderPass();
