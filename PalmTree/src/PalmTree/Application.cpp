@@ -24,6 +24,9 @@ namespace PalmTree {
         RendererBackend::Init(RendererBackend::API::VULKAN);
 
         m_ImGuiLayer = PushOverlay<ImGuiLayer>(dynamic_cast<MacWindow&>(*m_Window));
+        
+        m_CollisionSystem = std::make_shared<CollisionSystem>();
+        m_Ecs.RegisterSystem(m_CollisionSystem, SignatureBuilder<TransformComponent, ColliderComponent>(m_Ecs.GetComponentManager()).Build());
 
         m_PhysicsSystem = std::make_shared<PhysicsSystem>();
         m_Ecs.RegisterSystem(

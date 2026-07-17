@@ -53,6 +53,7 @@ namespace PalmTree {
 
         LayerStack m_LayerStack{};
 
+        std::shared_ptr<CollisionSystem> m_CollisionSystem;
         std::shared_ptr<PhysicsSystem> m_PhysicsSystem;
 
         bool m_Running = true;

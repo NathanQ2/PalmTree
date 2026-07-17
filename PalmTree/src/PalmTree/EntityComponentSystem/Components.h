@@ -2,6 +2,8 @@
 
 #include "../Model.h"
 
+#include <variant>
+
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_transform.hpp>
 
@@ -41,5 +43,18 @@ namespace PalmTree {
         glm::vec3 AngularMomentum = glm::vec3(0);
 
         float Mass = 1.0f;
+        bool EnableGravity = false;
+    };
+    
+    struct ColliderComponent {
+        struct BoxCollider {
+            glm::vec3 dimensions{1.0f};
+        };
+        
+        struct SphereCollider {
+            float Radius = 1.0f;
+        };
+        
+        std::variant<BoxCollider, SphereCollider> Collider;
     };
 }

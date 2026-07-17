@@ -122,48 +122,100 @@ public:
             obj.AddComponent(ModelComponent{glm::vec3(1), model});
             obj.GetTransform().Translation = glm::vec3(0.5, 0.0, 0.0f);
             obj.GetTransform().Scale = glm::vec3(3, 1.5, 3);
-            
-            // obj.AddComponent(RigidBodyComponent{.AngularMomentum = glm::vec3(1.0f, -1.0f, 0.0f), .Mass = 1});
-            
-            m_PhysicsSystem.AddForce(obj, glm::vec3(0, -1, 0));
         }
 
         // Floor
+        // {
+        //     std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/quad.obj");
+
+        //     GameObject& obj = m_Ecs.CreateGameObject();
+        //     obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
+        //     obj.GetTransform().Translation = glm::vec3(0.0f, 0.0f, 0.0f);
+        //     obj.GetTransform().Scale = glm::vec3(5);
+        // }
+        
+        // Slab
+        // {
+        //     std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/cube.obj");
+        //     
+        //     GameObject& obj = m_Ecs.CreateGameObject();
+        //     obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
+        //     obj.GetTransform().Translation = glm::vec3(0.0f, -2.0f, 0.0f);
+        //     obj.GetTransform().Scale = glm::vec3(1.0f, 0.1f, 2.0f);
+        //     
+        //     glm::vec3 invI0{};
+        //     {
+        //         float x = 1.0f;
+        //         float y = 0.1f;
+        //         float z = 2.0f;
+        //         
+        //         float volume = x * y * z;
+        //         
+        //         invI0 = GetDiagonal(volume * DiagonalMat(glm::vec3(y * y + z * z, x * x + z * z, x * x + y * y)) / 12.0f);
+        //     }
+        //     
+        //     obj.AddComponent<RigidBodyComponent>(
+        //         RigidBodyComponent {
+        //             .InverseInitialMomentOfInertia = invI0,
+        //             .AngularMomentum = glm::vec3(0.1f, 0.0f, 0.001f),
+        //         }
+        //     );
+        // }
+        
+        // Spheres
         {
-            std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/quad.obj");
+            std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/sphere.obj");
 
             GameObject& obj = m_Ecs.CreateGameObject();
             obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-            obj.GetTransform().Translation = glm::vec3(0.0f, 0.0f, 0.0f);
-            obj.GetTransform().Scale = glm::vec3(5);
+            obj.GetTransform().Translation = glm::vec3(10.0f, -1.2, 0.0f);
+            obj.GetTransform().Scale = glm::vec3(1);
+            
+            obj.AddComponent<RigidBodyComponent>(RigidBodyComponent{
+                .Velocity = glm::vec3(-5.0f, 0.0f, 0.0f),
+                .Mass = 10,
+                .EnableGravity = true
+            });
+            
+            obj.AddComponent<ColliderComponent>(ColliderComponent{.Collider = ColliderComponent::SphereCollider{.Radius = 1.0f}});
         }
         
-        // Slab
         {
-            std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/cube.obj");
-            
+            std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/sphere.obj");
+
             GameObject& obj = m_Ecs.CreateGameObject();
             obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-            obj.GetTransform().Translation = glm::vec3(0.0f, -2.0f, 0.0f);
-            obj.GetTransform().Scale = glm::vec3(1.0f, 0.1f, 2.0f);
+            obj.GetTransform().Translation = glm::vec3(-2.5f, -1.2, 0.0f);
+            obj.GetTransform().Scale = glm::vec3(1);
             
-            glm::vec3 invI0{};
-            {
-                float x = 1.0f;
-                float y = 0.1f;
-                float z = 2.0f;
-                
-                float volume = x * y * z;
-                
-                invI0 = GetDiagonal(volume * DiagonalMat(glm::vec3(y * y + z * z, x * x + z * z, x * x + y * y)) / 12.0f);
-            }
+            obj.AddComponent<RigidBodyComponent>(RigidBodyComponent{.EnableGravity = true});
             
-            obj.AddComponent<RigidBodyComponent>(
-                RigidBodyComponent {
-                    .InverseInitialMomentOfInertia = invI0,
-                    .AngularMomentum = glm::vec3(0.1f, 0.0f, 0.001f)
-                }
-            );
+            obj.AddComponent<ColliderComponent>(ColliderComponent{.Collider = ColliderComponent::SphereCollider{.Radius = 1.0f}});
+        }
+        
+        {
+            std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/sphere.obj");
+
+            GameObject& obj = m_Ecs.CreateGameObject();
+            obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
+            obj.GetTransform().Translation = glm::vec3(-5.0f, -1.2, 0.0f);
+            obj.GetTransform().Scale = glm::vec3(0.5f);
+            
+            // obj.AddComponent<RigidBodyComponent>(RigidBodyComponent{.Mass = 0.5f});
+            
+            obj.AddComponent<ColliderComponent>(ColliderComponent{.Collider = ColliderComponent::SphereCollider{.Radius = 0.5f}});
+        }
+        
+        // New Floor
+        {
+            std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/sphere.obj");
+
+            GameObject& obj = m_Ecs.CreateGameObject();
+            obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
+            obj.GetTransform().Translation = glm::vec3(0.0f, 1000.0f, 0.0f);
+            obj.GetTransform().Scale = glm::vec3(1000.0f);
+            
+            obj.AddComponent<ColliderComponent>(ColliderComponent{.Collider = ColliderComponent::SphereCollider{.Radius = 1000.0f}});
         }
 
         std::vector<glm::vec3> lightColors{

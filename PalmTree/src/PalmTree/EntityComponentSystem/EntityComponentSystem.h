@@ -53,6 +53,11 @@ namespace PalmTree {
                 m_SystemManager.InitSystemWithObject<T>(i, m_EntityManager.GetSignature(i));
             }
         }
+        
+        template<typename T>
+        std::shared_ptr<T> GetSystem() {
+            return m_SystemManager.GetSystem<T>();
+        }
 
         ComponentManager& GetComponentManager() { return m_ComponentManager; }
 

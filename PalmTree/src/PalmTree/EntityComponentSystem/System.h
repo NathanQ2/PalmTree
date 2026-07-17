@@ -11,6 +11,8 @@ namespace PalmTree {
         friend class SystemManager;
     public:
         virtual ~System() = default;
+        
+        virtual void OnRegistered() {}
     protected:
         std::set<Id> m_Ids;
 

@@ -17,6 +17,8 @@ namespace PalmTree {
 
             m_Systems[name] = system;
             m_Signatures[name] = signature;
+            
+            system->OnRegistered();
         }
 
         /**
@@ -50,6 +52,13 @@ namespace PalmTree {
                     system->m_Ids.erase(id);
                 }
             }
+        }
+        
+        template<typename T>
+        std::shared_ptr<T> GetSystem() {
+            const char* name = typeid(T).name();
+            
+            return m_Systems.contains(name) ? std::dynamic_pointer_cast<T>(m_Systems[name]) : nullptr;
         }
     private:
         std::unordered_map<const char*, std::shared_ptr<System>> m_Systems{};
