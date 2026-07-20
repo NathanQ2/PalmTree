@@ -7,8 +7,6 @@ namespace PalmTree {
         m_ComponentManager.RegisterComponent<PointLightComponent>();
         m_ComponentManager.RegisterComponent<ModelComponent>();
         m_ComponentManager.RegisterComponent<RigidBodyComponent>();
-
-        m_GameObjects.reserve(MAX_GAME_OBJECTS);
     }
 
     GameObject& EntityComponentSystem::CreateGameObject(TransformComponent transform) {
@@ -16,7 +14,7 @@ namespace PalmTree {
 
         AddComponent<TransformComponent>(id, transform);
 
-        m_GameObjects.emplace_back(id, m_EntityManager.GetSignature(id), this);
+        m_GameObjects[id] = GameObject(id, this);
 
         return m_GameObjects[id];
     }
@@ -25,7 +23,17 @@ namespace PalmTree {
         return m_GameObjects[id];
     }
 
-    std::vector<GameObject>& EntityComponentSystem::GetGameObjects() {
-        return m_GameObjects;
+    std::vector<GameObject> EntityComponentSystem::GetGameObjects() {
+        std::vector<GameObject> objs;
+        
+        // TDOO: Consider reserving only valid game objects
+        objs.reserve(m_GameObjects.size());
+
+        for (GameObject& obj : m_GameObjects) {
+            if (obj.IsValid())
+                objs.emplace_back(obj);
+        }
+        
+        return objs;
     }
 }

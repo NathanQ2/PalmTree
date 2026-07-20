@@ -12,7 +12,7 @@ namespace PalmTree {
         
         CollisionSystem();
         
-        void Step(float dt);
+        void Update(float dt);
         
         std::vector<CollisionInfo>& GetCollisionInfos(Id id) {
             return m_Collisions[id];

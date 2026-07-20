@@ -8,6 +8,8 @@
 #include <imgui_impl_vulkan.h>
 #include <GLFW/glfw3.h>
 
+#include <implot.h>
+
 #include "PalmTree/Renderer/RendererConstants.h"
 
 // Defined in imgui_impl_glfw.cpp
@@ -52,6 +54,7 @@ namespace PalmTree {
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
+        ImPlot::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
         (void)io;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
@@ -129,6 +132,7 @@ namespace PalmTree {
                 break;
         }
 
+        ImPlot::DestroyContext();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
     }
