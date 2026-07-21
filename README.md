@@ -7,4 +7,17 @@ A game engine inspired by these tutorials
 
 # Using PalmTree
 1. Clone the repository recursively ```git clone --recursive https://github.com/NathanQ2/PalmTree.git```
-2. 
+2. TODO
+
+# TODO
+- [ ] Renderer
+    - [ ] Textures
+    - [ ] PBR materials
+    - [ ] Render targets (so we can render to an ImGui Window for the editor viewport)
+- [ ] Physics
+    - [x] Sphere collider support
+    - [ ] Box collider support
+- [ ] Better API
+- [ ] Better logging / profiling
+- [ ] Windows support
+- [ ] Linux support
