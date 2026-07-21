@@ -39,7 +39,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC vendor/spdlog/include)
 target_include_directories(${PROJECT_NAME} PUBLIC vendor/imgui/ vendor/imgui/backends)
 target_include_directories(${PROJECT_NAME} PUBLIC vendor/implot)
 
-target_compile_definitions(PalmTree PRIVATE $<$<CONFIG:Debug>:PT_ENABLE_ASSERTS>)
+target_compile_definitions(PalmTree PUBLIC $<$<CONFIG:Debug>:PT_ENABLE_ASSERTS>)
 target_compile_definitions(PalmTree PUBLIC $<$<CONFIG:Debug>:PT_DEBUG>)
 target_compile_definitions(PalmTree PUBLIC $<$<CONFIG:Release>:PT_RELEASE>)
 target_compile_definitions(PalmTree PUBLIC VK_ENABLE_BETA_EXTENSIONS)

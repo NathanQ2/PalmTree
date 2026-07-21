@@ -133,13 +133,31 @@ public:
     }
 
     void LoadGameObjects() {
+        // {
+        //     std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/cube.obj");
+
+        //     GameObject& obj = m_Ecs.CreateGameObject();
+        //     obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
+        //     obj.GetTransform().Translation = glm::vec3(1.0f, -1.0f, 0.0f);
+        //     obj.GetTransform().Scale = glm::vec3(0.25f);
+        // }
+        // 
+        // {
+        //     std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/cube.obj");
+
+        //     GameObject& obj = m_Ecs.CreateGameObject();
+        //     obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
+        //     obj.GetTransform().Translation = glm::vec3(0.0f, -1.0f, 0.0f);
+        //     obj.GetTransform().Scale = glm::vec3(0.25f);
+        // }
+        
         // Smooth Vase
         {
             m_Model = Model::CreateModelFromFile("../../Sandbox/assets/models/smooth_vase.obj");
 
             GameObject& obj = m_Ecs.CreateGameObject();
             obj.AddComponent(ModelComponent{glm::vec3(1), m_Model});
-            obj.GetTransform().Translation = glm::vec3(0.5f, -1.0f, 0.0f);
+            obj.GetTransform().Translation = glm::vec3(0.5f, 0.0f, 0.0f);
             obj.GetTransform().Scale = glm::vec3(3, 1.5, 3);
         }
         
@@ -192,22 +210,22 @@ public:
         // }
         
         // Spheres
-        // {
-        //     std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/sphere.obj");
+        {
+            std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/sphere.obj");
 
-        //     GameObject& obj = m_Ecs.CreateGameObject();
-        //     obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-        //     obj.GetTransform().Translation = glm::vec3(0.05f, -2, 0.0f);
-        //     obj.GetTransform().Scale = glm::vec3(0.5);
-        //     
-        //     obj.AddComponent<RigidBodyComponent>(RigidBodyComponent{
-        //         .Velocity = glm::vec3(0.0f, 0.0f, 0.0f),
-        //         .Mass = 1.0f,
-        //         .EnableGravity = true
-        //     });
-        //     
-        //     obj.AddComponent<ColliderComponent>(ColliderComponent{.Shape = ColliderComponent::Sphere{.Radius = 0.5f}});
-        // }
+            GameObject& obj = m_Ecs.CreateGameObject();
+            obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
+            obj.GetTransform().Translation = glm::vec3(0.05f, -2, 0.0f);
+            obj.GetTransform().Scale = glm::vec3(0.5);
+            
+            obj.AddComponent<RigidBodyComponent>(RigidBodyComponent{
+                .Velocity = glm::vec3(0.0f, 0.0f, 0.0f),
+                .Mass = 1.0f,
+                .EnableGravity = true
+            });
+            
+            obj.AddComponent<ColliderComponent>(ColliderComponent{.Shape = ColliderComponent::Sphere{.Radius = 0.5f}});
+        }
         
         // {
         //     std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/sphere.obj");
