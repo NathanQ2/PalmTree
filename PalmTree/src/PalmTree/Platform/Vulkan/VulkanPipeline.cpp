@@ -1,15 +1,13 @@
 #include "ptpch.h"
 #include "VulkanPipeline.h"
 
-#include "../../Model.h"
-
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
 
 #include "VulkanRendererBackend.h"
 #include "VulkanVertexBuffer.h"
-#include "../../Log.h"
+#include "PalmTree/Log.h"
 #include "PalmTree/Renderer/Descriptors.h"
 
 namespace PalmTree {
@@ -54,6 +52,11 @@ namespace PalmTree {
         VulkanPipeline::DefaultPipelineConfig(config);
         if (createInfo.EnableAlphaBlending) {
             VulkanPipeline::EnableAlphaBlending(config);
+        }
+        
+        if (!createInfo.EnableVertexAttributes) {
+            config.AttributeDescriptions.clear();
+            config.BindingDescriptions.clear();
         }
 
         config.RenderPass = renderer->GetSwapChainRenderPass();

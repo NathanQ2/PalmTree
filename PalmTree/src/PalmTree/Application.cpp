@@ -74,6 +74,7 @@ namespace PalmTree {
                 }
 
                 m_ImGuiLayer->Begin();
+                m_PhysicsSystem->OnImGuiRender();
                 for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
                     Layer* layer = *it;
                     if (layer->IsEnabled())

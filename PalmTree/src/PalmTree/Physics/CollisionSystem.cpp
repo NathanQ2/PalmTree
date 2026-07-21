@@ -7,7 +7,7 @@ namespace PalmTree {
         }
     }
     
-    void CollisionSystem::Step(float dt) {
+    void CollisionSystem::Update(float dt) {
         for (std::vector<CollisionInfo>& collisions : m_Collisions) {
             collisions.clear();
         }
@@ -22,8 +22,8 @@ namespace PalmTree {
                 TransformComponent& t2 = m_Ecs->GetComponent<TransformComponent>(id2);
                 ColliderComponent& c2 = m_Ecs->GetComponent<ColliderComponent>(id2);
                 
-                ColliderComponent::SphereCollider* s1 = std::get_if<ColliderComponent::SphereCollider>(&c1.Collider);
-                ColliderComponent::SphereCollider* s2 = std::get_if<ColliderComponent::SphereCollider>(&c2.Collider);
+                ColliderComponent::Sphere* s1 = std::get_if<ColliderComponent::Sphere>(&c1.Shape);
+                ColliderComponent::Sphere* s2 = std::get_if<ColliderComponent::Sphere>(&c2.Shape);
                 
                 if (s1 == nullptr || s2 == nullptr) continue;
                 

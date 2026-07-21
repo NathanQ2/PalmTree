@@ -27,7 +27,8 @@ namespace PalmTree {
                 }
             },
             .DescriptorSetLayout = globalSetLayout,
-            .EnableAlphaBlending = true
+            .EnableAlphaBlending = true,
+            .EnableVertexAttributes = false
         };
 
         m_Pipeline = std::shared_ptr<Pipeline>(Pipeline::Create(info));

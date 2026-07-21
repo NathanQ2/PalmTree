@@ -55,26 +55,45 @@ namespace PalmTree {
         }
         
         template<typename T>
+        bool HasComponent(Id id) {
+            return m_EntityManager.GetSignature(id).test(m_ComponentManager.GetComponentType<T>());
+        }
+        
+        template<typename T>
         std::shared_ptr<T> GetSystem() {
             return m_SystemManager.GetSystem<T>();
         }
 
         ComponentManager& GetComponentManager() { return m_ComponentManager; }
 
-        std::vector<GameObject>& GetGameObjects();
+        std::vector<GameObject> GetGameObjects();
     private:
         EntityManager m_EntityManager{};
         ComponentManager m_ComponentManager{};
         SystemManager m_SystemManager{};
 
-        std::vector<GameObject> m_GameObjects{};
+        std::array<GameObject, MAX_GAME_OBJECTS> m_GameObjects{};
     };
 
     template<typename T>
-    T& GameObject::GetComponent() { return m_Ecs->GetComponent<T>(m_Id); }
+    T& GameObject::GetComponent() {
+        PT_CORE_ASSERT(m_IsValid, "GameObject is not valid");
+        return m_Ecs->GetComponent<T>(m_Id);
+    }
 
     template<typename T>
-    void GameObject::AddComponent(T component) { m_Ecs->AddComponent<T>(m_Id, component); }
+    void GameObject::AddComponent(T component) {
+        PT_CORE_ASSERT(m_IsValid, "GameObject is not valid");
+        m_Ecs->AddComponent<T>(m_Id, component);
+    }
 
-    inline TransformComponent& GameObject::GetTransform() { return GetComponent<TransformComponent>(); }
+    template<typename T>
+    bool GameObject::HasComponent() {
+        PT_CORE_ASSERT(m_IsValid, "GameObject is not valid");
+        return m_Ecs->HasComponent<T>(m_Id);
+    }
+
+    inline TransformComponent& GameObject::GetTransform() {
+        return GetComponent<TransformComponent>();
+    }
 }

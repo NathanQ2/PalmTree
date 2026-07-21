@@ -3,6 +3,8 @@
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/constants.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/euler_angles.hpp>
 
 #include "ViewportMovementController.h"
 #include "PalmTree/Renderer/SceneRenderer3D.h"

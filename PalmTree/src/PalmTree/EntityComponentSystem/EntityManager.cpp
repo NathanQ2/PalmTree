@@ -11,7 +11,7 @@ namespace PalmTree {
     }
 
     Id EntityManager::CreateGameObject() {
-        PT_CORE_ASSERT(m_GameObjectsCount<MAX_GAME_OBJECTS, "Too many game objects!");
+        PT_CORE_ASSERT(m_GameObjectsCount < MAX_GAME_OBJECTS, "Too many game objects!");
 
         const Id id = m_AvailableGameObjects.front();
         m_AvailableGameObjects.pop();

@@ -47,14 +47,14 @@ namespace PalmTree {
     };
     
     struct ColliderComponent {
-        struct BoxCollider {
-            glm::vec3 dimensions{1.0f};
+        struct Box {
+            glm::vec3 Dimensions{1.0f};
         };
         
-        struct SphereCollider {
+        struct Sphere {
             float Radius = 1.0f;
         };
         
-        std::variant<BoxCollider, SphereCollider> Collider;
+        std::variant<Box, Sphere> Shape;
     };
 }

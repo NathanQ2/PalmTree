@@ -19,6 +19,10 @@ namespace PalmTree {
             DescriptorSetLayout& DescriptorSetLayout;
 
             bool EnableAlphaBlending = false;
+            // The PointLightSystem does not require vertex buffer data so the vulkan validation layer throws 
+            // validation layer: vkCreateGraphicsPipelines(): pCreateInfos[0].pVertexInputState Vertex attribute at location 0 not consumed by vertex shader. 
+            // If this flag is false, the VertexBuffer binding and attribute descriptions will not be added the the VulkanPipelineConfig struct during pipeline creation
+            bool EnableVertexAttributes = true;
         };
 
         static Pipeline* Create(CreateInfo& createInfo);

@@ -19,8 +19,17 @@ file(GLOB IMGUI_SOURCES
         vendor/imgui/backends/imgui_impl_vulkan.h
 )
 
+# ImPlot
+file(GLOB IMPLOT_SOURCES
+        vendor/implot/implot.h
+        vendor/implot/implot_internal.h
+        vendor/implot/implot.cpp
+        vendor/implot/implot_items.cpp
+        vendor/implot/implot_demo.cpp
+)
+
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-add_library(PalmTree SHARED ${SOURCES} ${IMGUI_SOURCES})
+add_library(PalmTree SHARED ${SOURCES} ${IMGUI_SOURCES} ${IMPLOT_SOURCES})
 
 target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES} Vulkan::Vulkan glm::glm)
 
@@ -28,11 +37,13 @@ target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURR
 target_include_directories(${PROJECT_NAME} PRIVATE vendor/tinyobjloader)
 target_include_directories(${PROJECT_NAME} PUBLIC vendor/spdlog/include)
 target_include_directories(${PROJECT_NAME} PUBLIC vendor/imgui/ vendor/imgui/backends)
+target_include_directories(${PROJECT_NAME} PUBLIC vendor/implot)
 
-target_compile_definitions(PalmTree PRIVATE $<$<CONFIG:Debug>:PT_ENABLE_ASSERTS>)
+target_compile_definitions(PalmTree PUBLIC $<$<CONFIG:Debug>:PT_ENABLE_ASSERTS>)
 target_compile_definitions(PalmTree PUBLIC $<$<CONFIG:Debug>:PT_DEBUG>)
 target_compile_definitions(PalmTree PUBLIC $<$<CONFIG:Release>:PT_RELEASE>)
 target_compile_definitions(PalmTree PUBLIC VK_ENABLE_BETA_EXTENSIONS)
+target_compile_definitions(PalmTree PUBLIC IMGUI_USER_CONFIG="PalmTree/ImGui/ImGuiUserConfig.h")
 
 target_precompile_headers(PalmTree PUBLIC src/ptpch.h)
 
