@@ -16,6 +16,7 @@ namespace PalmTree {
         uint32_t GetCount() const override { return m_Buff->GetInstanceCount(); }
 
         VkBuffer GetVkBuffer() const { return m_Buff->GetBuffer(); }
+        VulkanBuffer& GetVulkanBuffer() const { return *m_Buff; }
     private:
         std::unique_ptr<VulkanBuffer> m_Buff;
     };

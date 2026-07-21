@@ -53,6 +53,11 @@ namespace PalmTree {
         if (createInfo.EnableAlphaBlending) {
             VulkanPipeline::EnableAlphaBlending(config);
         }
+        
+        if (!createInfo.EnableVertexAttributes) {
+            config.AttributeDescriptions.clear();
+            config.BindingDescriptions.clear();
+        }
 
         config.RenderPass = renderer->GetSwapChainRenderPass();
         config.PipelineLayout = pipelineLayout;

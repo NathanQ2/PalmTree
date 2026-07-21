@@ -135,15 +135,12 @@ public:
     void LoadGameObjects() {
         // Smooth Vase
         {
-            std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/smooth_vase.obj");
+            m_Model = Model::CreateModelFromFile("../../Sandbox/assets/models/smooth_vase.obj");
 
             GameObject& obj = m_Ecs.CreateGameObject();
-            obj.AddComponent(ModelComponent{glm::vec3(1), model});
+            obj.AddComponent(ModelComponent{glm::vec3(1), m_Model});
             obj.GetTransform().Translation = glm::vec3(0.5f, -1.0f, 0.0f);
             obj.GetTransform().Scale = glm::vec3(3, 1.5, 3);
-            
-            obj.AddComponent(RigidBodyComponent{.EnableGravity = true});
-            obj.AddComponent(ColliderComponent{.Shape = ColliderComponent::Sphere{.Radius = 0.25f}});
         }
         
         // Flat Vase
@@ -195,22 +192,22 @@ public:
         // }
         
         // Spheres
-        {
-            std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/sphere.obj");
+        // {
+        //     std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/sphere.obj");
 
-            GameObject& obj = m_Ecs.CreateGameObject();
-            obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-            obj.GetTransform().Translation = glm::vec3(0.05f, -2, 0.0f);
-            obj.GetTransform().Scale = glm::vec3(0.5);
-            
-            obj.AddComponent<RigidBodyComponent>(RigidBodyComponent{
-                .Velocity = glm::vec3(0.0f, 0.0f, 0.0f),
-                .Mass = 1.0f,
-                .EnableGravity = true
-            });
-            
-            obj.AddComponent<ColliderComponent>(ColliderComponent{.Shape = ColliderComponent::Sphere{.Radius = 0.5f}});
-        }
+        //     GameObject& obj = m_Ecs.CreateGameObject();
+        //     obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
+        //     obj.GetTransform().Translation = glm::vec3(0.05f, -2, 0.0f);
+        //     obj.GetTransform().Scale = glm::vec3(0.5);
+        //     
+        //     obj.AddComponent<RigidBodyComponent>(RigidBodyComponent{
+        //         .Velocity = glm::vec3(0.0f, 0.0f, 0.0f),
+        //         .Mass = 1.0f,
+        //         .EnableGravity = true
+        //     });
+        //     
+        //     obj.AddComponent<ColliderComponent>(ColliderComponent{.Shape = ColliderComponent::Sphere{.Radius = 0.5f}});
+        // }
         
         // {
         //     std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/sphere.obj");
@@ -286,6 +283,8 @@ private:
     KeyboardMovementController m_CameraController;
 
     std::unique_ptr<SceneRenderer3D> m_Renderer;
+    
+    std::shared_ptr<Model> m_Model;
     
     float m_DeltaTime = 0.0f;
     float m_Fps = 0.0f;

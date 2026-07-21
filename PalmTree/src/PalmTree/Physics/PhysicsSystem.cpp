@@ -191,7 +191,7 @@ namespace PalmTree {
                 glm::vec3 direction = glm::normalize(transform.Translation - info.CollisionPoint);
                 glm::vec3 impulse = impulseMag * direction;
                 
-                PT_CORE_TRACE("Impulse (Id = {}):\n    m1 = {}, v1_i = {}\n    m2 = {}, v2_i = {}\n    impulseMag = {}\n    direction = {}\n    impulse = {}", id, m1, glm::to_string(v1_i), m2, glm::to_string(v2_i), impulseMag, glm::to_string(direction), glm::to_string(impulse));
+                // PT_CORE_TRACE("Impulse (Id = {}):\n    m1 = {}, v1_i = {}\n    m2 = {}, v2_i = {}\n    impulseMag = {}\n    direction = {}\n    impulse = {}", id, m1, glm::to_string(v1_i), m2, glm::to_string(v2_i), impulseMag, glm::to_string(direction), glm::to_string(impulse));
                 AddImpulse(id, impulse);
             }
 
