@@ -1,5 +1,5 @@
 #pragma once
-#include "RendererBackend.h"
+
 #include "PalmTree/Platform/Vulkan/VulkanDescriptors.h"
 
 namespace PalmTree {
@@ -16,6 +16,7 @@ namespace PalmTree {
 
             std::vector<PushConstant> PushConstants;
 
+            // TODO: Consider changing to shared_ptr?
             DescriptorSetLayout& DescriptorSetLayout;
 
             bool EnableAlphaBlending = false;

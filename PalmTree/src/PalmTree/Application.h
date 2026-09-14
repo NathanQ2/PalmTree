@@ -2,13 +2,13 @@
 
 #include <functional>
 
-#include "Camera.h"
+#include "ApplicationInitInfo.h"
+#include "EventLoop.h"
 #include "LayerStack.h"
-#include "EntityComponentSystem/EntityComponentSystem.h"
 #include "Window.h"
 #include "EventSystem/ApplicationEvents.h"
 #include "ImGui/ImGuiLayer.h"
-#include "Physics/PhysicsSystem.h"
+#include "Logging/DataLogger.h"
 
 
 namespace PalmTree {
@@ -16,14 +16,13 @@ namespace PalmTree {
     public:
         static Application& Get() { return *s_Instance; }
 
-        Application();
+        Application(const ApplicationInitInfo& init);
         virtual ~Application();
 
         Application(const Application&) = delete;
         Application& operator=(const Application&) = delete;
 
         void Run();
-        virtual void OnUpdate(float frameTime) = 0;
 
         void OnEvent(Event& event);
 
@@ -41,8 +40,7 @@ namespace PalmTree {
         Layer* GetLayer(int index) { return m_LayerStack.GetLayer(index); }
 
         Window& GetWindow() const { return *m_Window; }
-        EntityComponentSystem& GetEntityComponentSystem() { return m_Ecs; }
-        Camera& GetCamera() { return m_Camera; }
+        EventLoop& GetEventLoop() { return m_EventLoop; }
 
         std::chrono::steady_clock::time_point GetStartTime() const { return m_ApplicationStartTime; }
     protected:
@@ -52,16 +50,11 @@ namespace PalmTree {
 
         std::unique_ptr<Window> m_Window;
 
+        EventLoop m_EventLoop;
+
         ImGuiLayer* m_ImGuiLayer = nullptr;
 
-        EntityComponentSystem m_Ecs{};
-
-        Camera m_Camera{};
-
         LayerStack m_LayerStack{};
-
-        std::shared_ptr<CollisionSystem> m_CollisionSystem;
-        std::shared_ptr<PhysicsSystem> m_PhysicsSystem;
 
         std::chrono::steady_clock::time_point m_ApplicationStartTime;
 

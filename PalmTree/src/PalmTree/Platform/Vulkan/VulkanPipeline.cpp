@@ -2,13 +2,12 @@
 #include "VulkanPipeline.h"
 
 #include <fstream>
-#include <iostream>
 #include <stdexcept>
 
 #include "VulkanRendererBackend.h"
 #include "VulkanVertexBuffer.h"
-#include "../../Logging/Log.h"
-#include "PalmTree/Renderer/Descriptors.h"
+#include "PalmTree/Logging/Log.h"
+#include "PalmTree/Renderer/LowLevel/Descriptors.h"
 
 namespace PalmTree {
     Pipeline* Pipeline::CreateVulkan(CreateInfo& createInfo) {
@@ -59,7 +58,7 @@ namespace PalmTree {
             config.BindingDescriptions.clear();
         }
 
-        config.RenderPass = dynamic_cast<VulkanSwapChain&>(renderer->GetSwapChain()).GetRenderPass();
+        config.RenderPass = std::dynamic_pointer_cast<VulkanSwapChain>(renderer->GetSwapChain())->GetRenderPass();
         config.PipelineLayout = pipelineLayout;
 
         return new VulkanPipeline(

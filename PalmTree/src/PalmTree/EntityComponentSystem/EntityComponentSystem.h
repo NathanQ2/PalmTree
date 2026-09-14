@@ -60,6 +60,11 @@ namespace PalmTree {
         }
 
         template<typename T>
+        bool HasSystem(const std::shared_ptr<T>& system) {
+            return m_SystemManager.HasSystem<T>(system);
+        }
+
+        template<typename T>
         std::shared_ptr<T> GetSystem() {
             return m_SystemManager.GetSystem<T>();
         }

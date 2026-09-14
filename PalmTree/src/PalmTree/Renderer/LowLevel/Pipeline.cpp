@@ -1,6 +1,7 @@
 #include "ptpch.h"
 #include "Pipeline.h"
 
+#include "RendererBackend.h"
 #include "PalmTree/Logging/Log.h"
 
 namespace PalmTree {

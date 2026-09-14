@@ -1,10 +1,8 @@
 #pragma once
 
-#include "VulkanBuffer.h"
 #include "VulkanFrameBuffer.h"
 #include "VulkanPipeline.h"
-#include "VulkanSwapChain.h"
-#include "PalmTree/Renderer/CommandBuffer.h"
+#include "PalmTree/Renderer/LowLevel/CommandBuffer.h"
 
 namespace PalmTree {
     class VulkanCommandBuffer : public CommandBuffer {
@@ -19,12 +17,12 @@ namespace PalmTree {
         VulkanCommandBuffer& operator=(VulkanCommandBuffer&&) = delete;
 
         void BindPipeline(std::weak_ptr<Pipeline> pipeline) override;
-        void BindDescriptorSet(const DescriptorSet& set) override;
+        void BindDescriptorSet(const std::shared_ptr<DescriptorSet>& set) override;
         void PushConstants(uint32_t offset, uint32_t size, void* data) override;
         void BindVertexBuffer(const VertexBuffer& vertex) override;
         void BindIndexBuffer(const IndexBuffer& index) override;
 
-        void BeginRenderPass(RenderTarget& target) override;
+        void BeginRenderPass(const std::shared_ptr<RenderTarget>& target) override;
         void EndRenderPass() override;
 
         void DrawIndexed(uint32_t indexCount) override;

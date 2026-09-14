@@ -42,15 +42,15 @@ namespace PalmTree {
         m_Pipeline = vulkanPipeline;
     }
 
-    void VulkanCommandBuffer::BindDescriptorSet(const DescriptorSet& set) {
+    void VulkanCommandBuffer::BindDescriptorSet(const std::shared_ptr<DescriptorSet>& set) {
         const std::shared_ptr<VulkanPipeline> pipeline = m_Pipeline.lock();
         PT_CORE_ASSERT(
             pipeline != nullptr,
             "A valid VulkanPipeline must be bound to the current VulkanCommandBuffer to bind a DescriptorSet!"
         );
 
-
-        VkDescriptorSet vkDescriptorSet = dynamic_cast<const VulkanDescriptorSet&>(set).GetVkDescriptorSet();
+        std::shared_ptr<VulkanDescriptorSet> vulkanDescriptorSet = std::dynamic_pointer_cast<VulkanDescriptorSet>(set);
+        VkDescriptorSet vkDescriptorSet = vulkanDescriptorSet->GetVkDescriptorSet();
         vkCmdBindDescriptorSets(
             m_CommandBuffer,
             VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -97,16 +97,16 @@ namespace PalmTree {
         vkCmdBindIndexBuffer(m_CommandBuffer, buffer, 0, VK_INDEX_TYPE_UINT32);
     }
 
-    void VulkanCommandBuffer::BeginRenderPass(RenderTarget& target) {
-        VulkanRenderTarget& vulkanRenderTarget = dynamic_cast<VulkanRenderTarget&>(target);
+    void VulkanCommandBuffer::BeginRenderPass(const std::shared_ptr<RenderTarget>& target) {
+        std::shared_ptr<VulkanRenderTarget> vulkanRenderTarget = std::dynamic_pointer_cast<VulkanRenderTarget>(target);
 
         VkRenderPassBeginInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass = vulkanRenderTarget.GetRenderPass();
-        renderPassInfo.framebuffer = vulkanRenderTarget.GetFrameBuffer();
+        renderPassInfo.renderPass = vulkanRenderTarget->GetRenderPass();
+        renderPassInfo.framebuffer = vulkanRenderTarget->GetFrameBuffer();
 
-        uint32_t width = target.GetWidth();
-        uint32_t height = target.GetHeight();
+        uint32_t width = target->GetWidth();
+        uint32_t height = target->GetHeight();
 
         VkOffset2D offset = {0, 0};
         VkExtent2D extent = VkExtent2D{

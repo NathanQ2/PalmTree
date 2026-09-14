@@ -1,7 +1,8 @@
 #pragma once
 
 #include "VulkanRendererBackend.h"
-#include "PalmTree/Renderer/Buffer.h"
+#include "VulkanBuffer.h"
+#include "PalmTree/Renderer/LowLevel/Buffer.h"
 
 namespace PalmTree {
     template<typename T>

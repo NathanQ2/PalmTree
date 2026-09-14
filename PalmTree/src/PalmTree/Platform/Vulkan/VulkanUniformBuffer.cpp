@@ -1,7 +1,7 @@
 #include "ptpch.h"
 #include "VulkanUniformBuffer.h"
 
-#include "../../Renderer/FrameInfo.h"
+#include "PalmTree/Renderer/LowLevel/FrameInfo.h"
 
 namespace PalmTree {
     template UniformBuffer<GlobalUBO>* UniformBuffer<GlobalUBO>::CreateVulkan();

@@ -1,13 +1,12 @@
 #include "ptpch.h"
 #include "VulkanDescriptors.h"
 
-#include "../../Logging/Log.h"
-#include "PalmTree/Renderer/Descriptors.h"
-
 #include <stdexcept>
 
+#include "PalmTree/Logging/Log.h"
+#include "PalmTree/Renderer/LowLevel/Descriptors.h"
+#include "PalmTree/Renderer/LowLevel/RendererBackend.h"
 #include "VulkanRendererBackend.h"
-#include "PalmTree/Renderer/RendererBackend.h"
 
 namespace PalmTree {
     VkDescriptorType GetVkDescriptorType(DescriptorSetBinding::Type type) {
@@ -156,10 +155,11 @@ namespace PalmTree {
         vkResetDescriptorPool(m_Device.GetDevice(), m_DescriptorPool, 0);
     }
 
-    VulkanDescriptorSet::VulkanDescriptorSet(VulkanDescriptorSetLayout& layout) : m_Layout(layout) {
+    VulkanDescriptorSet::VulkanDescriptorSet(const std::shared_ptr<VulkanDescriptorSetLayout>& layout)
+        : m_Layout(layout) {
         VulkanDescriptorPool& pool = VulkanRendererBackend::Get()->GetDescriptorPool();
 
-        bool result = pool.AllocateDescriptor(m_Layout.GetDescriptorSetLayout(), m_DescriptorSet);
+        bool result = pool.AllocateDescriptor(m_Layout->GetDescriptorSetLayout(), m_DescriptorSet);
         PT_CORE_ASSERT(result, "Failed to allocate descriptor!");
     }
 
@@ -174,9 +174,9 @@ namespace PalmTree {
         info.offset = offset;
         info.range = size;
 
-        PT_CORE_ASSERT(m_Layout.m_Bindings.count(binding) == 1, "Layout does not contain specified binding");
+        PT_CORE_ASSERT(m_Layout->m_Bindings.count(binding) == 1, "Layout does not contain specified binding");
 
-        auto& bindingDescription = m_Layout.m_Bindings[binding];
+        auto& bindingDescription = m_Layout->m_Bindings[binding];
 
         PT_CORE_ASSERT(
             bindingDescription.descriptorCount == 1,
@@ -196,8 +196,7 @@ namespace PalmTree {
         vkUpdateDescriptorSets(device.GetDevice(), 1, &write, 0, nullptr);
     }
 
-    DescriptorSet* DescriptorSet::CreateVulkan(DescriptorSetLayout& layout) {
-        VulkanDescriptorSetLayout& vulkanLayout = dynamic_cast<VulkanDescriptorSetLayout&>(layout);
-        return new VulkanDescriptorSet(vulkanLayout);
+    DescriptorSet* DescriptorSet::CreateVulkan(const std::shared_ptr<DescriptorSetLayout>& layout) {
+        return new VulkanDescriptorSet(std::dynamic_pointer_cast<VulkanDescriptorSetLayout>(layout));
     }
 }

@@ -9,8 +9,8 @@
 
 namespace PalmTree {
     struct WindowProps {
-        int Width = 1280;
-        int Height = 720;
+        uint32_t Width = 1280;
+        uint32_t Height = 720;
         std::string Title = "PalmTree Window";
     };
 

@@ -4,7 +4,7 @@
 
 #include "VulkanRenderTarget.h"
 #include "VulkanSwapChain.h"
-#include "PalmTree/Renderer/FrameBuffer.h"
+#include "PalmTree/Renderer/LowLevel/FrameBuffer.h"
 
 namespace PalmTree {
     class VulkanFrameBuffer : public FrameBuffer, public VulkanRenderTarget {

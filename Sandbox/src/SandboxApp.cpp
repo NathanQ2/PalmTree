@@ -9,31 +9,28 @@
 #include <implot.h>
 
 #include "KeyboardMovementController.h"
-#include "PalmTree/Renderer/SceneRenderer3D.h"
+#include "PalmTree/Scene.h"
+#include "PalmTree/Renderer/SceneRenderer.h"
 
 using namespace PalmTree;
 using namespace Sandbox;
 
 class GameLayer : public Layer {
 public:
-    GameLayer(Window& window, EntityComponentSystem& ecs, Camera& camera, PhysicsSystem& physics) :
-        Layer("GameLayer"), m_Window(window), m_Ecs(ecs),
-        m_Camera(camera), m_PhysicsSystem(physics), m_CameraController([]() { return !ImGui::GetIO().WantCaptureMouse; }) {}
+    GameLayer(Window& window) : Layer("GameLayer"), m_Window(window), m_CameraController([]() { return !ImGui::GetIO().WantCaptureMouse; }) {}
 
     void OnStart() override {
+        m_Scene = std::make_shared<Scene>();
+        SceneRenderer::SetScene(m_Scene);
+        SceneRenderer::SetRenderTarget(RendererBackend::GetSwapChain());
+        
         LoadGameObjects();
 
-        m_Camera.SetViewDirection(glm::vec3(0), glm::vec3(0.0, 0.0f, 1.0f));
+        m_Scene->GetCamera().SetViewDirection(glm::vec3(0), glm::vec3(0.0, 0.0f, 1.0f));
 
-        GameObject& viewer = m_Ecs.CreateGameObject();
+        GameObject& viewer = m_Scene->GetEntityComponentSystem().CreateGameObject();
         m_ViewerObjectId = viewer.GetId();
         viewer.GetTransform()->Translation.z = -2.5f;
-
-        m_Renderer = std::make_unique<SceneRenderer3D>(
-            m_Window,
-            m_Ecs,
-            m_Camera
-        );
     }
 
     void OnEnd() override {}
@@ -53,24 +50,20 @@ public:
             m_Fps = 1 / avgFrameTime;
         }
         
-        GameObject& viewerObject = m_Ecs.GetObject(m_ViewerObjectId);
+        GameObject& viewerObject = m_Scene->GetEntityComponentSystem().GetObject(m_ViewerObjectId);
         
         m_CameraController.MoveInPlaneXZ(dt, viewerObject);
-        m_Camera.SetViewYXZ(viewerObject.GetTransform()->Translation, viewerObject.GetTransform()->EulerAngles());
+        m_Scene->GetCamera().SetViewYXZ(viewerObject.GetTransform()->Translation, viewerObject.GetTransform()->EulerAngles());
 
-        float aspect = RendererBackend::GetSwapChain().GetAspectRatio();
-        m_Camera.SetPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
-
-        m_Renderer->Update(dt);
+        float aspect = RendererBackend::GetSwapChain()->GetAspectRatio();
+        m_Scene->GetCamera().SetPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
         
-        // RendererBackend::BeginSwapChainRenderPass();
-        m_Renderer->Render(dt);
-        // RendererBackend::EndSwapChainRenderPass();
+        m_Scene->OnUpdate(dt);
     }
 
     void OnImGuiRender() override {
         ImGui::Begin("Inspector");
-        std::vector<GameObject> objs = m_Ecs.GetGameObjects();
+        std::vector<GameObject> objs = m_Scene->GetEntityComponentSystem().GetGameObjects();
         
         int i = 0;
         for (auto& obj : objs) {
@@ -99,22 +92,24 @@ public:
         
         ImGui::Begin("Camera Info");
         if (ImGui::TreeNodeEx("Camera")) {
-            std::string projection = glm::to_string(m_Camera.GetProjection());
+            Camera& camera = m_Scene->GetCamera();
+            
+            std::string projection = glm::to_string(camera.GetProjection());
             ImGui::Text("Projection Matrix: %s", projection.c_str());
             
-            std::string view = glm::to_string(m_Camera.GetView());
+            std::string view = glm::to_string(camera.GetView());
             ImGui::Text("View Matrix: %s", view.c_str());
             
-            std::string inverseView = glm::to_string(m_Camera.GetInverseView());
+            std::string inverseView = glm::to_string(camera.GetInverseView());
             ImGui::Text("Inverse View Matrix: %s", inverseView.c_str());
             
-            std::string position = glm::to_string(m_Camera.GetPosition());
+            std::string position = glm::to_string(camera.GetPosition());
             ImGui::Text("Position: %s", position.c_str());
             
             ImGui::TreePop();
         }
         
-        GameObject& viewerObject = m_Ecs.GetObject(m_ViewerObjectId);
+        GameObject& viewerObject = m_Scene->GetEntityComponentSystem().GetObject(m_ViewerObjectId);
         std::string label = fmt::format("ViewerObject (ID: {})", viewerObject.GetId());
         if (ImGui::TreeNodeEx(label.c_str())) {
             TransformComponent* transform = viewerObject.GetTransform();
@@ -126,6 +121,8 @@ public:
             ImGui::TreePop();
         }
         ImGui::End();
+        
+        m_Scene->OnImGuiRender();
     }
 
     bool OnEvent(Event& event) override {
@@ -133,86 +130,10 @@ public:
     }
 
     void LoadGameObjects() {
-        // {
-        //     std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/cube.obj");
-
-        //     GameObject& obj = m_Ecs.CreateGameObject();
-        //     obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-        //     obj.GetTransform()->Translation = glm::vec3(1.0f, -1.0f, 0.0f);
-        //     obj.GetTransform()->Scale = glm::vec3(0.25f);
-        // }
-        // 
-        // {
-        //     std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/cube.obj");
-
-        //     GameObject& obj = m_Ecs.CreateGameObject();
-        //     obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-        //     obj.GetTransform()->Translation = glm::vec3(0.0f, -1.0f, 0.0f);
-        //     obj.GetTransform()->Scale = glm::vec3(0.25f);
-        // }
-        
-        // Smooth Vase
-        // {
-        //     m_Model = Model::CreateModelFromFile("../../Sandbox/assets/models/smooth_vase.obj");
-
-        //     GameObject& obj = m_Ecs.CreateGameObject();
-        //     obj.AddComponent(ModelComponent{glm::vec3(1), m_Model});
-        //     obj.GetTransform()->Translation = glm::vec3(0.5f, 0.0f, 0.0f);
-        //     obj.GetTransform()->Scale = glm::vec3(3, 1.5, 3);
-        // }
-        
-        // Flat Vase
-        // {
-        //     std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/flat_vase.obj");
-
-        //     GameObject& obj = m_Ecs.CreateGameObject();
-        //     obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-        //     obj.GetTransform()->Translation = glm::vec3(-0.5, 0.0, 0.0f);
-        //     obj.GetTransform()->Scale = glm::vec3(3, 1.5, 3);
-        // }
-
-        // Floor
-        // {
-        //     std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/quad.obj");
-
-        //     GameObject& obj = m_Ecs.CreateGameObject();
-        //     obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-        //     obj.GetTransform()->Translation = glm::vec3(0.0f, 0.0f, 0.0f);
-        //     obj.GetTransform()->Scale = glm::vec3(5);
-        // }
-        
-        // Slab
-        // {
-        //     std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/cube.obj");
-        //     
-        //     GameObject& obj = m_Ecs.CreateGameObject();
-        //     obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-        //     obj.GetTransform()->Translation = glm::vec3(0.0f, -2.0f, 0.0f);
-        //     obj.GetTransform()->Scale = glm::vec3(1.0f, 0.1f, 2.0f);
-        //     
-        //     glm::vec3 invI0{};
-        //     {
-        //         float x = 1.0f;
-        //         float y = 0.1f;
-        //         float z = 2.0f;
-        //         
-        //         float volume = x * y * z;
-        //         
-        //         invI0 = GetDiagonal(volume * DiagonalMat(glm::vec3(y * y + z * z, x * x + z * z, x * x + y * y)) / 12.0f);
-        //     }
-        //     
-        //     obj.AddComponent<RigidBodyComponent>(
-        //         RigidBodyComponent {
-        //             .InverseInitialMomentOfInertia = invI0,
-        //             .AngularMomentum = glm::vec3(0.1f, 0.0f, 0.001f),
-        //         }
-        //     );
-        // }
-        
         if (true) {
             std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/cube.obj");
             
-            GameObject& obj = m_Ecs.CreateGameObject();
+            GameObject& obj = m_Scene->GetEntityComponentSystem().CreateGameObject();
             obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1.0f), model});
             obj.GetTransform()->Translation = glm::vec3{0.0f, -0.5f, 0.0f};
             obj.GetTransform()->Scale = glm::vec3{0.25f};
@@ -231,7 +152,7 @@ public:
         {
             std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/sphere.obj");
 
-            GameObject& obj = m_Ecs.CreateGameObject();
+            GameObject& obj = m_Scene->GetEntityComponentSystem().CreateGameObject();
             obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
             obj.GetTransform()->Translation = glm::vec3(0.05f, -2, 0.0f);
             obj.GetTransform()->Scale = glm::vec3(0.5);
@@ -248,7 +169,7 @@ public:
         {
             std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/sphere.obj");
 
-            GameObject& obj = m_Ecs.CreateGameObject();
+            GameObject& obj = m_Scene->GetEntityComponentSystem().CreateGameObject();
             obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
             obj.GetTransform()->Translation = glm::vec3(0.10f, -3.0f, 0.0f);
             obj.GetTransform()->Scale = glm::vec3(0.5);
@@ -266,23 +187,13 @@ public:
         {
             std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/cube.obj");
 
-            GameObject& obj = m_Ecs.CreateGameObject();
+            GameObject& obj = m_Scene->GetEntityComponentSystem().CreateGameObject();
             obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
             obj.GetTransform()->Translation = glm::vec3(0.0f, 0.1f, 0.0f);
             obj.GetTransform()->Scale = glm::vec3(1000.0f, 0.1f, 1000.0f);
             
             obj.AddComponent<ColliderComponent>(ColliderComponent{.Shape = ColliderComponent::Box{.Dimensions = glm::vec3{2000.0f, 0.2f, 2000.0f}}});
         }
-        // {
-        //     std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/sphere.obj");
-
-        //     GameObject& obj = m_Ecs.CreateGameObject();
-        //     obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-        //     obj.GetTransform()->Translation = glm::vec3(0.0f, 1000.0f, 0.0f);
-        //     obj.GetTransform()->Scale = glm::vec3(1000.0f);
-        //     
-        //     obj.AddComponent<ColliderComponent>(ColliderComponent{.Shape = ColliderComponent::Sphere{.Radius = 1000.0f}});
-        // }
 
         std::vector<glm::vec3> lightColors{
             {1.f, .1f, .1f},
@@ -294,7 +205,7 @@ public:
         };
 
         for (int i = 0; i < lightColors.size(); i++) {
-            GameObject& light = m_Ecs.CreateGameObject();
+            GameObject& light = m_Scene->GetEntityComponentSystem().CreateGameObject();
             light.AddComponent<PointLightComponent>(PointLightComponent{0.2f, lightColors[i]});
 
             auto rotateLight = glm::rotate(
@@ -310,17 +221,12 @@ public:
 private:
     Window& m_Window;
 
-    EntityComponentSystem& m_Ecs;
-    Camera& m_Camera;
-    PhysicsSystem& m_PhysicsSystem;
-
-    // Owned by ECS
     Id m_ViewerObjectId;
 
     KeyboardMovementController m_CameraController;
-
-    std::unique_ptr<SceneRenderer3D> m_Renderer;
     
+    std::shared_ptr<Scene> m_Scene;
+
     float m_DeltaTime = 0.0f;
     float m_Fps = 0.0f;
     std::queue<float> m_FrameTimes;
@@ -328,24 +234,11 @@ private:
 
 class SandboxApp : public Application {
 public:
-    SandboxApp() {
-        PushLayer<GameLayer>(*m_Window, m_Ecs, m_Camera, *m_PhysicsSystem);
-    }
-    
-    void OnUpdate(float frameTime) override {
-        if (RendererBackend::BeginFrame()) {
-            RendererBackend::BeginSwapChainRenderPass();
-            LoopEnabledLayers([frameTime](Layer* layer) { layer->OnUpdate(frameTime); });
-            m_PhysicsSystem->Update(frameTime);
-
-            m_ImGuiLayer->Begin();
-            m_PhysicsSystem->OnImGuiRender();
-            LoopEnabledLayers([](Layer* layer) { layer->OnImGuiRender(); });
-            m_ImGuiLayer->End();
-            RendererBackend::EndSwapChainRenderPass();
-
-            RendererBackend::EndFrame();
-        }
+    SandboxApp() : Application(ApplicationInitInfo {
+        .WindowProps = WindowProps {.Title = "Sandbox Application"}, 
+        .RendererAPI = RendererBackend::API::VULKAN
+    }) {
+        PushLayer<GameLayer>(*m_Window);
     }
 };
 

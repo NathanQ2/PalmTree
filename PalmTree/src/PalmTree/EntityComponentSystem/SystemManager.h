@@ -60,6 +60,13 @@ namespace PalmTree {
 
             return m_Systems.contains(name) ? std::dynamic_pointer_cast<T>(m_Systems[name]) : nullptr;
         }
+
+        template<typename T>
+        bool HasSystem(std::shared_ptr<T> system) {
+            const char* name = typeid(T).name();
+
+            return m_Systems.contains(name) ? system == m_Systems[name] : false;
+        }
     private:
         std::unordered_map<const char*, std::shared_ptr<System>> m_Systems{};
         std::unordered_map<const char*, Signature> m_Signatures{};

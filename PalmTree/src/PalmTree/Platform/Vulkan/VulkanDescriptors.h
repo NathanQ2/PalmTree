@@ -2,7 +2,7 @@
 
 #include "VulkanDevice.h"
 
-#include "PalmTree/Renderer/Descriptors.h"
+#include "PalmTree/Renderer/LowLevel/Descriptors.h"
 
 namespace PalmTree {
     class VulkanDescriptorSetLayout : public DescriptorSetLayout {
@@ -68,7 +68,7 @@ namespace PalmTree {
 
     class VulkanDescriptorSet : public DescriptorSet {
     public:
-        VulkanDescriptorSet(VulkanDescriptorSetLayout& layout);
+        VulkanDescriptorSet(const std::shared_ptr<VulkanDescriptorSetLayout>& layout);
 
         VulkanDescriptorSet(VulkanDescriptorSet&&) = delete;
         VulkanDescriptorSet operator=(VulkanDescriptorSet&&) = delete;
@@ -86,6 +86,6 @@ namespace PalmTree {
     private:
         VkDescriptorSet m_DescriptorSet;
 
-        VulkanDescriptorSetLayout& m_Layout;
+        std::shared_ptr<VulkanDescriptorSetLayout> m_Layout;
     };
 }

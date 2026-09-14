@@ -2,12 +2,10 @@
 #include "VulkanSwapChain.h"
 
 #include <iostream>
-#include <set>
 #include <stdexcept>
 
-#include "../../Logging/Log.h"
-
-#include "PalmTree/Renderer/RendererConstants.h"
+#include "PalmTree/Logging/Log.h"
+#include "PalmTree/Renderer/LowLevel/RendererConstants.h"
 
 namespace PalmTree {
     VulkanSwapChain::VulkanSwapChain(Window& window, VulkanDevice& device) : m_Window{window}, m_Device{device} {

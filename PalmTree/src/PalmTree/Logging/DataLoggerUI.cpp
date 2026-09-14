@@ -221,10 +221,11 @@ namespace PalmTree {
                     if constexpr (std::is_same_v<T, double>) return static_cast<float>(arg);
                     if constexpr (std::is_same_v<T, uint64_t>) return static_cast<float>(arg);
                     if constexpr (std::is_same_v<T, bool>) return static_cast<float>(static_cast<bool>(arg));
-                    if constexpr (std::is_same_v<T, std::string>) PT_CORE_ASSERT(
-                        false,
-                        "String data cannot be displayed in plot."
-                    );
+                    if constexpr (std::is_same_v<T, std::string>)
+                        PT_CORE_ASSERT(
+                            false,
+                            "String data cannot be displayed in plot."
+                        );
                     if constexpr (std::is_same_v<T, glm::vec3>) return static_cast<float>(arg[data.VectorIndex]);
 
                     PT_CORE_ASSERT(false, "Unsupported plot data type");

@@ -2,7 +2,7 @@
 
 #include "PalmTree/Camera.h"
 
-#include "PalmTree/Renderer/Descriptors.h"
+#include "Descriptors.h"
 
 #define MAX_LIGHTS 10
 

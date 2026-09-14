@@ -2,7 +2,7 @@
 
 #include "PalmTree/Logging/Log.h"
 #include "PalmTree/Application.h"
-#include "PalmTree/Renderer/RendererConstants.h"
+#include "PalmTree/Renderer/LowLevel/RendererConstants.h"
 
 namespace PalmTree {
     void RendererBackend::InitVulkan() {
@@ -14,9 +14,9 @@ namespace PalmTree {
 
     VulkanRendererBackend* VulkanRendererBackend::s_VulkanInstance = nullptr;
 
-    VulkanRendererBackend::VulkanRendererBackend(Window& window) : m_Window(window),
-                                                                   m_Device(std::make_unique<VulkanDevice>()),
-                                                                   m_SwapChain(m_Window, *m_Device) {
+    VulkanRendererBackend::VulkanRendererBackend(Window& window) 
+        : m_Window(window), m_Device(std::make_unique<VulkanDevice>()),
+        m_SwapChain(std::make_shared<VulkanSwapChain>(m_Window, *m_Device)) {
         RecreateSwapChain();
         CreateCommandBuffers();
 
@@ -33,7 +33,7 @@ namespace PalmTree {
     bool VulkanRendererBackend::BeginFrameImpl() {
         PT_CORE_ASSERT(!m_IsFrameStarted, "Can't call begin frame while already in progress!");
 
-        auto result = m_SwapChain.AcquireNextImage();
+        auto result = m_SwapChain->AcquireNextImage();
 
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {
             RecreateSwapChain();
@@ -85,7 +85,7 @@ namespace PalmTree {
         //     PT_CORE_VERIFY(false, "Failed to submit draw command buffer!");
         // }
 
-        auto result = m_SwapChain.SubmitCommandBuffers(&commandBuffer);
+        auto result = m_SwapChain->SubmitCommandBuffers(&commandBuffer);
 
         // TODO: Recreate swap chain when window resized
         // if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_Window.WasWindowResized()) {
@@ -103,7 +103,7 @@ namespace PalmTree {
         m_InFlightFrameIndex = (m_InFlightFrameIndex + 1) % RendererConstants::MAX_FRAMES_IN_FLIGHT;
     }
 
-    void VulkanRendererBackend::BeginRenderPassImpl(RenderTarget& target) {
+    void VulkanRendererBackend::BeginRenderPassImpl(const std::shared_ptr<RenderTarget>& target) {
         PT_CORE_ASSERT(m_IsFrameStarted, "Can't call BeginSwapChainRenderPass if frame is not in progress!");
 
         GetCurrentCommandBufferImpl().BeginRenderPass(target);
@@ -131,8 +131,8 @@ namespace PalmTree {
     }
 
     void VulkanRendererBackend::RecreateSwapChain() {
-        m_SwapChain.RecreateSwapChain();
-        if (m_SwapChain.GetImageCount() != m_CommandBuffers.size()) {
+        m_SwapChain->RecreateSwapChain();
+        if (m_SwapChain->GetImageCount() != m_CommandBuffers.size()) {
             // Vulkan will complain if we free 0 command buffers
             if (!m_CommandBuffers.empty())
                 FreeCommandBuffers();

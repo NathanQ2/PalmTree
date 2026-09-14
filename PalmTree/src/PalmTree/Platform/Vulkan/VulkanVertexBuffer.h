@@ -1,7 +1,7 @@
 #pragma once
 
 #include "VulkanBuffer.h"
-#include "PalmTree/Renderer/Buffer.h"
+#include "PalmTree/Renderer/LowLevel/Buffer.h"
 
 namespace PalmTree {
     class VulkanVertexBuffer : public VertexBuffer {

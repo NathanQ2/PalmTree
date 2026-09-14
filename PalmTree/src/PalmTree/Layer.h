@@ -3,7 +3,7 @@
 #include <string_view>
 
 #include "EventSystem/Event.h"
-#include "Renderer/FrameInfo.h"
+#include "Renderer/LowLevel/FrameInfo.h"
 
 namespace PalmTree {
     class Layer {

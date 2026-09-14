@@ -10,7 +10,7 @@
 
 #include <implot.h>
 
-#include "PalmTree/Renderer/RendererConstants.h"
+#include "PalmTree/Renderer/LowLevel/RendererConstants.h"
 
 // Defined in imgui_impl_glfw.cpp
 ImGuiKey ImGui_ImplGlfw_KeyToImGuiKey(int keycode, int scancode);
@@ -98,7 +98,9 @@ namespace PalmTree {
             .AddPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, IMGUI_IMPL_VULKAN_MINIMUM_IMAGE_SAMPLER_POOL_SIZE)
             .Build();
 
-        VulkanSwapChain& swapChain = dynamic_cast<VulkanSwapChain&>(m_Renderer->GetSwapChain());
+        std::shared_ptr<VulkanSwapChain> swapChain = std::dynamic_pointer_cast<VulkanSwapChain>(
+            m_Renderer->GetSwapChain()
+        );
 
         ImGui_ImplVulkan_InitInfo initInfo{};
         initInfo.ApiVersion = VK_HEADER_VERSION_COMPLETE;
@@ -107,11 +109,11 @@ namespace PalmTree {
         initInfo.Device = device.GetDevice();
         initInfo.Queue = device.GraphicsQueue();
         initInfo.DescriptorPool = m_DescriptorPool->GetDescriptorPool();
-        initInfo.MinImageCount = swapChain.GetImageCount();
+        initInfo.MinImageCount = swapChain->GetImageCount();
         initInfo.ImageCount = RendererConstants::MAX_FRAMES_IN_FLIGHT;
         // initInfo.PipelineCache = VK_NULL_HANDLE;
         // initInfo.Allocator = VK_NULL_HANDLE;
-        initInfo.RenderPass = swapChain.GetRenderPass();
+        initInfo.RenderPass = swapChain->GetRenderPass();
         initInfo.Subpass = 0;
         initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
         // initInfo.CheckVkResultFn = check_vk_result;

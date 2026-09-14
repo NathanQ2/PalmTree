@@ -7,10 +7,10 @@ namespace PalmTree {
     public:
         virtual ~CommandBuffer() = default;
 
-        virtual void BeginRenderPass(RenderTarget& target) = 0;
+        virtual void BeginRenderPass(const std::shared_ptr<RenderTarget>& target) = 0;
         virtual void EndRenderPass() = 0;
         virtual void BindPipeline(std::weak_ptr<Pipeline> pipeline) = 0;
-        virtual void BindDescriptorSet(const DescriptorSet& set) = 0;
+        virtual void BindDescriptorSet(const std::shared_ptr<DescriptorSet>& set) = 0;
         virtual void PushConstants(
             uint32_t offset,
             uint32_t size,

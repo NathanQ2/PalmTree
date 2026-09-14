@@ -2,7 +2,7 @@
 
 #include "PalmTree/Logging/Log.h"
 #include "PalmTree/Window.h"
-#include "PalmTree/Renderer/RendererBackend.h"
+#include "PalmTree/Renderer/LowLevel/RendererBackend.h"
 
 #include "VulkanCommandBuffer.h"
 #include "VulkanSwapChain.h"
@@ -39,13 +39,13 @@ namespace PalmTree {
         bool BeginFrameImpl() override;
         void EndFrameImpl() override;
 
-        void BeginRenderPassImpl(RenderTarget& target) override;
+        void BeginRenderPassImpl(const std::shared_ptr<RenderTarget>& target) override;
         void EndRenderPassImpl() override;
 
         void BeginSwapChainRenderPassImpl() override;
         void EndSwapChainRenderPassImpl() override;
 
-        SwapChain& GetSwapChainImpl() override { return m_SwapChain; }
+        std::shared_ptr<SwapChain> GetSwapChainImpl() override { return m_SwapChain; }
 
         int GetInFlightFrameIndexImpl() override {
             PT_CORE_ASSERT(m_IsFrameStarted, "Cannot get command buffer when frame not in progress");
@@ -76,7 +76,7 @@ namespace PalmTree {
 
         uint32_t m_InFlightFrameIndex = 0;
 
-        VulkanSwapChain m_SwapChain;
+        std::shared_ptr<VulkanSwapChain> m_SwapChain;
         std::vector<std::unique_ptr<VulkanCommandBuffer>> m_CommandBuffers;
 
         bool m_IsFrameStarted = false;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "VulkanDevice.h"
-#include "PalmTree/Renderer/Pipeline.h"
+#include "PalmTree/Renderer/LowLevel/Pipeline.h"
 
 namespace PalmTree {
     struct VulkanPipelineConfig {

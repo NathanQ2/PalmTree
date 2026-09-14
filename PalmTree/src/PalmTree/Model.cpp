@@ -9,7 +9,7 @@
 
 #include "Logging/Log.h"
 
-#include "PalmTree/Renderer/Buffer.h"
+#include "Renderer/LowLevel/Buffer.h"
 
 
 namespace std {

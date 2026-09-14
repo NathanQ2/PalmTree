@@ -23,7 +23,7 @@ namespace PalmTree {
         static bool BeginFrame() { return Get()->BeginFrameImpl(); }
         static void EndFrame() { Get()->EndFrameImpl(); }
 
-        static void BeginRenderPass(RenderTarget& target) { Get()->BeginRenderPassImpl(target); }
+        static void BeginRenderPass(const std::shared_ptr<RenderTarget>& target) { Get()->BeginRenderPassImpl(target); }
         static void EndRenderPass() { Get()->EndRenderPassImpl(); }
 
         static void BeginSwapChainRenderPass() { Get()->BeginSwapChainRenderPassImpl(); }
@@ -31,7 +31,7 @@ namespace PalmTree {
 
         static CommandBuffer& GetCurrentCommandBuffer() { return Get()->GetCurrentCommandBufferImpl(); }
 
-        static SwapChain& GetSwapChain() { return Get()->GetSwapChainImpl(); }
+        static std::shared_ptr<SwapChain> GetSwapChain() { return Get()->GetSwapChainImpl(); }
         static int GetInFlightFrameIndex() { return Get()->GetInFlightFrameIndexImpl(); };
 
         virtual ~RendererBackend() = default;
@@ -41,7 +41,7 @@ namespace PalmTree {
         virtual bool BeginFrameImpl() = 0;
         virtual void EndFrameImpl() = 0;
 
-        virtual void BeginRenderPassImpl(RenderTarget& target) = 0;
+        virtual void BeginRenderPassImpl(const std::shared_ptr<RenderTarget>& target) = 0;
         virtual void EndRenderPassImpl() = 0;
 
         virtual void BeginSwapChainRenderPassImpl() = 0;
@@ -49,7 +49,7 @@ namespace PalmTree {
 
         virtual CommandBuffer& GetCurrentCommandBufferImpl() = 0;
 
-        virtual SwapChain& GetSwapChainImpl() = 0;
+        virtual std::shared_ptr<SwapChain> GetSwapChainImpl() = 0;
         virtual int GetInFlightFrameIndexImpl() = 0;
     private:
         static void InitVulkan();
