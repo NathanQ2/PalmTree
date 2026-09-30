@@ -130,7 +130,8 @@ public:
     }
 
     void LoadGameObjects() {
-        if (true) {
+#if false
+        {
             std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/cube.obj");
             
             GameObject& obj = m_Scene->GetEntityComponentSystem().CreateGameObject();
@@ -147,8 +148,10 @@ public:
                 .EnableGravity = false
             });
         }
+#endif
         
         // Spheres
+#if true
         {
             std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/sphere.obj");
 
@@ -165,7 +168,9 @@ public:
             
             obj.AddComponent<ColliderComponent>(ColliderComponent{.Shape = ColliderComponent::Sphere{.Radius = 0.5f}});
         }
+#endif
         
+#if true
         {
             std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/sphere.obj");
 
@@ -175,13 +180,14 @@ public:
             obj.GetTransform()->Scale = glm::vec3(0.5);
             
             obj.AddComponent<RigidBodyComponent>(RigidBodyComponent{
-                .Velocity = glm::vec3(0.0f, 0.5f, 0.0f),
+                .Velocity = glm::vec3(0.0f, 0.0f, 0.0f),
                 .Mass = 1.0f,
                 .EnableGravity = true
             });
             
             obj.AddComponent<ColliderComponent>(ColliderComponent{.Shape = ColliderComponent::Sphere{.Radius = 0.5f}});
         }
+#endif
         
         // New Floor
         {
@@ -194,6 +200,8 @@ public:
             
             obj.AddComponent<ColliderComponent>(ColliderComponent{.Shape = ColliderComponent::Box{.Dimensions = glm::vec3{2000.0f, 0.2f, 2000.0f}}});
         }
+        
+        // Lights
 
         std::vector<glm::vec3> lightColors{
             {1.f, .1f, .1f},

@@ -1,5 +1,6 @@
 #include "CollisionSystem.h"
 
+#include <ranges>
 #include <glm/ext/matrix_projection.hpp>
 
 namespace PalmTree {
@@ -14,25 +15,23 @@ namespace PalmTree {
             collisions.clear();
         }
 
-        for (Id id1 : m_Ids) {
-            for (Id id2 : m_Ids) {
-                if (id1 == id2) continue;
+        for (auto id1 = m_Ids.begin(); id1 != m_Ids.end(); ++id1) {
+            for (auto id2 = std::next(id1); id2 != m_Ids.end(); ++id2) {
+                TransformComponent* t1 = m_Ecs->GetComponent<TransformComponent>(*id1);
+                ColliderComponent* c1 = m_Ecs->GetComponent<ColliderComponent>(*id1);
 
-                TransformComponent* t1 = m_Ecs->GetComponent<TransformComponent>(id1);
-                ColliderComponent* c1 = m_Ecs->GetComponent<ColliderComponent>(id1);
-
-                TransformComponent* t2 = m_Ecs->GetComponent<TransformComponent>(id2);
-                ColliderComponent* c2 = m_Ecs->GetComponent<ColliderComponent>(id2);
+                TransformComponent* t2 = m_Ecs->GetComponent<TransformComponent>(*id2);
+                ColliderComponent* c2 = m_Ecs->GetComponent<ColliderComponent>(*id2);
 
                 std::visit(
                     [id1, &t1, &c1, id2, &t2, &c2, this](auto&& arg) {
                         using T = std::decay_t<decltype(arg)>;
 
                         if constexpr (std::is_same_v<T, ColliderComponent::Sphere>)
-                            SphereCollision(id1, t1, c1, id2, t2, c2);
+                            SphereCollision(*id1, t1, c1, *id2, t2, c2);
                         else if constexpr (std::is_same_v<T, ColliderComponent::Box>)
-                            BoxCollision(id1, t1, c1, id2, t2, c2);
-                        else PT_CORE_ASSERT(false, "Unsupported collision");
+                            BoxCollision(*id1, t1, c1, *id2, t2, c2);
+                        else PT_CORE_VERIFY(false, "Unsupported collision");
                     },
                     c1->Shape
                 );
@@ -148,7 +147,7 @@ namespace PalmTree {
             glm::vec3(-halfWidth, -halfHeight, -halfLength)
         };
 
-        for (glm::vec3 vertex : vertices) {
+        for (const glm::vec3& vertex : vertices) {
             float dist = glm::length(sTranslationInBox - vertex);
             if (dist < s2->Radius) {
                 glm::vec3 collisionNormal = glm::normalize(sTranslationInBox - vertex);
@@ -164,7 +163,7 @@ namespace PalmTree {
         }
 
         // Check collision with box faces
-        std::array sExtremities{
+        std::array sExtremities {
             sTranslationInBox + glm::vec3(s2->Radius, 0.0f, 0.0f),
             sTranslationInBox - glm::vec3(s2->Radius, 0.0f, 0.0f),
 
@@ -175,18 +174,19 @@ namespace PalmTree {
             sTranslationInBox - glm::vec3(0.0f, 0.0f, s2->Radius),
         };
 
-        for (glm::vec3 extremity : sExtremities) {
+        for (const glm::vec3& extremity : sExtremities) {
             if (IsBetween(extremity.x, -halfWidth, halfWidth) &&
                 IsBetween(extremity.y, -halfHeight, halfHeight) &&
                 IsBetween(extremity.z, -halfLength, halfLength)) {
                 glm::vec3 collisionPoint = glm::mat3(t1->Rotation) * extremity;
                 glm::vec3 collisionNormal = glm::normalize(glm::mat3(t1->Rotation) * (sTranslationInBox - extremity));
 
-                glm::vec3 facePosition = glm::vec3(halfWidth, halfHeight, halfLength) * glm::normalize(
-                    sTranslationInBox - extremity
-                );
+                glm::vec3 facePosition = glm::vec3(halfWidth, halfHeight, halfLength)
+                    * glm::normalize(sTranslationInBox - extremity);
+
                 float overlap = 0.0f;
-                if (facePosition.x == 0.0f && facePosition.z == 0.0f) overlap = halfHeight - extremity.y;
+                // TODO: Remove -1.0f * ... when switch to positive y = up
+                if (facePosition.x == 0.0f && facePosition.z == 0.0f) overlap = halfHeight - (-1.0f * extremity.y);
                 if (facePosition.x == 0.0f && facePosition.y == 0.0f) overlap = halfLength - extremity.z;
                 if (facePosition.y == 0.0f && facePosition.z == 0.0f) overlap = halfWidth - extremity.x;
 

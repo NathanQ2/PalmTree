@@ -76,6 +76,10 @@ namespace PalmTree {
         ImGui::Text("Total Kinetic Energy: %f", totalKineticEnergy);
         ImGui::Text("Total Potential Energy: %f", totalPotentialEnergy);
         ImGui::Text("Total Energy: %f", totalEnergy);
+        
+        m_Logger.Record("TotalKineticEnergy", totalKineticEnergy);
+        m_Logger.Record("PotentialEnergy", totalPotentialEnergy);
+        m_Logger.Record("TotalEnergy", totalEnergy);
 
         ImGui::End();
     }
@@ -98,6 +102,8 @@ namespace PalmTree {
                 TransformComponent* t2 = m_Ecs->GetComponent<TransformComponent>(info.OtherId);
                 RigidBodyComponent* rb2 = m_Ecs->GetComponent<RigidBodyComponent>(info.OtherId);
 
+                // Translate the colliding object along the collision normal away from the other colliding object
+                // so they are no longer colliding
                 glm::vec3 displacement = -info.CollisionNormal * info.Overlap;
                 if (rb2) displacement /= 2.0f;
                 transform->Translation += displacement;
@@ -109,7 +115,7 @@ namespace PalmTree {
                 // e = 1 -> perfectly elastic
                 // e = 0 -> perfectly inelastic
                 // 0 < e < 1 -> inelastic
-                float e = 1.0f;
+                float e = 0.8f;
 
                 float m1 = rb->Mass;
                 glm::vec3 v1_i = rb->Velocity;
@@ -152,7 +158,7 @@ namespace PalmTree {
         }
 
         m_Logger.Record("Step", m_StepCount);
-        m_Logger.Record("Time", m_StepCount * (double)STEP_SIZE);
+        m_Logger.Record("Time", m_StepCount * (float)STEP_SIZE);
 
         m_StepCount++;
     }
