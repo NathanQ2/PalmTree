@@ -4,7 +4,7 @@
 
 #include "ComponentArray.h"
 #include "Components.h"
-#include "PalmTree/Log.h"
+#include "../Logging/Log.h"
 
 namespace PalmTree {
     class ComponentManager {
@@ -34,7 +34,7 @@ namespace PalmTree {
         }
 
         template<typename T>
-        T& GetComponent(Id id) {
+        T* GetComponent(Id id) {
             return GetComponentArray<T>()->GetComponent(id);
         }
 

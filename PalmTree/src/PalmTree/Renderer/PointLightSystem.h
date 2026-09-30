@@ -1,21 +1,21 @@
 #pragma once
 
-#include "FrameInfo.h"
+#include "LowLevel/FrameInfo.h"
 
 #include "PalmTree/EntityComponentSystem/EntityComponentSystem.h"
-#include "PalmTree/Renderer/Pipeline.h"
+#include "LowLevel/Pipeline.h"
 
 
 namespace PalmTree {
     class PointLightSystem : public System {
     public:
-        PointLightSystem(DescriptorSetLayout& globalSetLayout);
+        PointLightSystem(const std::shared_ptr<DescriptorSetLayout>& globalSetLayout);
 
         PointLightSystem(const PointLightSystem&) = delete;
         PointLightSystem& operator=(const PointLightSystem&) = delete;
 
-        void Update(FrameInfo& frameInfo);
-        void Render(FrameInfo& fameInfo);
+        void Update(float dt, GlobalUBO& globalUBO);
+        void Render(const std::shared_ptr<DescriptorSet>& descriptorSet, const Camera& camera);
     private:
         std::shared_ptr<Pipeline> m_Pipeline;
     };

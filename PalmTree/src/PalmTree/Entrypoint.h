@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-#include "Core.h"
 #include "Application.h"
 
 extern PalmTree::Application* PalmTree::CreateApplication();

@@ -1,5 +1,7 @@
 #include "ptpch.h"
 #include "VulkanCommandBuffer.h"
+
+#include "VulkanFrameBuffer.h"
 #include "VulkanIndexBuffer.h"
 #include "VulkanPipeline.h"
 #include "VulkanRendererBackend.h"
@@ -7,9 +9,8 @@
 
 namespace PalmTree {
     VulkanCommandBuffer::VulkanCommandBuffer(
-        const VulkanDevice& device,
-        const VulkanSwapChain& swapChain
-    ) : m_Device(device), m_SwapChain(swapChain) {
+        const VulkanDevice& device
+    ) : m_Device(device) {
         const VkCommandBufferAllocateInfo info{
             .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
             .commandPool = device.GetCommandPool(),
@@ -41,19 +42,19 @@ namespace PalmTree {
         m_Pipeline = vulkanPipeline;
     }
 
-    void VulkanCommandBuffer::BindDescriptorSet(const DescriptorSet& set) {
-        const std::shared_ptr<VulkanPipeline> shared = m_Pipeline.lock();
+    void VulkanCommandBuffer::BindDescriptorSet(const std::shared_ptr<DescriptorSet>& set) {
+        const std::shared_ptr<VulkanPipeline> pipeline = m_Pipeline.lock();
         PT_CORE_ASSERT(
-            shared != nullptr,
+            pipeline != nullptr,
             "A valid VulkanPipeline must be bound to the current VulkanCommandBuffer to bind a DescriptorSet!"
         );
 
-
-        VkDescriptorSet vkDescriptorSet = dynamic_cast<const VulkanDescriptorSet&>(set).GetVkDescriptorSet();
+        std::shared_ptr<VulkanDescriptorSet> vulkanDescriptorSet = std::dynamic_pointer_cast<VulkanDescriptorSet>(set);
+        VkDescriptorSet vkDescriptorSet = vulkanDescriptorSet->GetVkDescriptorSet();
         vkCmdBindDescriptorSets(
             m_CommandBuffer,
             VK_PIPELINE_BIND_POINT_GRAPHICS,
-            shared->GetPipelineLayout(),
+            pipeline->GetPipelineLayout(),
             0,
             1,
             &vkDescriptorSet,
@@ -96,32 +97,50 @@ namespace PalmTree {
         vkCmdBindIndexBuffer(m_CommandBuffer, buffer, 0, VK_INDEX_TYPE_UINT32);
     }
 
-    void VulkanCommandBuffer::BeginRenderPass(int imageIndex) {
+    void VulkanCommandBuffer::BeginRenderPass(const std::shared_ptr<RenderTarget>& target) {
+        std::shared_ptr<VulkanRenderTarget> vulkanRenderTarget = std::dynamic_pointer_cast<VulkanRenderTarget>(target);
+
         VkRenderPassBeginInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass = m_SwapChain.GetRenderPass();
-        renderPassInfo.framebuffer = m_SwapChain.GetFrameBuffer(imageIndex);
+        renderPassInfo.renderPass = vulkanRenderTarget->GetRenderPass();
+        renderPassInfo.framebuffer = vulkanRenderTarget->GetFrameBuffer();
 
-        renderPassInfo.renderArea.offset = {0, 0};
-        renderPassInfo.renderArea.extent = m_SwapChain.GetSwapChainExtent();
+        uint32_t width = target->GetWidth();
+        uint32_t height = target->GetHeight();
 
-        std::array<VkClearValue, 2> clearValues{};
-        clearValues[0].color = {0.01f, 0.01f, 0.01f, 1.0f};
-        clearValues[1].depthStencil = {1.0f, 0};
+        VkOffset2D offset = {0, 0};
+        VkExtent2D extent = VkExtent2D{
+            .width = width,
+            .height = height
+        };
+
+        renderPassInfo.renderArea.offset = offset;
+        renderPassInfo.renderArea.extent = extent;
+
+        std::array<VkClearValue, 2> clearValues{
+            VkClearValue{.color = VkClearColorValue{0.01f, 0.01f, 0.01f, 1.0f}},
+            VkClearValue{.depthStencil = VkClearDepthStencilValue{1.0f, 0}}
+        };
 
         renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
         renderPassInfo.pClearValues = clearValues.data();
 
         vkCmdBeginRenderPass(m_CommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        VkViewport viewport{};
-        viewport.x = 0.0f;
-        viewport.y = 0.0f;
-        viewport.width = static_cast<float>(m_SwapChain.GetSwapChainExtent().width);
-        viewport.height = static_cast<float>(m_SwapChain.GetSwapChainExtent().height);
-        viewport.minDepth = 0.0f;
-        viewport.maxDepth = 1.0f;
-        VkRect2D scissor{{0, 0}, m_SwapChain.GetSwapChainExtent()};
+        VkViewport viewport{
+            .x = 0.0f,
+            .y = 0.0f,
+            .width = static_cast<float>(width),
+            .height = static_cast<float>(height),
+            .minDepth = 0.0f,
+            .maxDepth = 1.0f,
+        };
+
+        VkRect2D scissor{
+            .offset = VkOffset2D{0, 0},
+            .extent = extent
+        };
+
         vkCmdSetViewport(m_CommandBuffer, 0, 1, &viewport);
         vkCmdSetScissor(m_CommandBuffer, 0, 1, &scissor);
     }

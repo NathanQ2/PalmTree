@@ -7,7 +7,8 @@
 #include <set>
 #include <unordered_set>
 
-#include "../../Log.h"
+#include "../../Logging/Log.h"
+#include "PalmTree/Application.h"
 
 namespace PalmTree {
     // local callback functions
@@ -55,7 +56,7 @@ namespace PalmTree {
     }
 
     // class member functions
-    VulkanDevice::VulkanDevice(Window& window) : m_Window{window} {
+    VulkanDevice::VulkanDevice() {
         CreateInstance();
         SetupDebugMessenger();
         CreateSurface();
@@ -87,7 +88,7 @@ namespace PalmTree {
             }
         }
 
-        throw std::runtime_error("failed to find suitable memory type!");
+        PT_CORE_VERIFY(false, "failed to find suitable memory type!");
     }
 
     VkFormat VulkanDevice::FindSupportedFormat(
@@ -298,7 +299,9 @@ namespace PalmTree {
         }
     }
 
-    void VulkanDevice::CreateSurface() { m_Window.CreateWindowSurface(m_Instance, &m_Surface); }
+    void VulkanDevice::CreateSurface() {
+        Application::Get().GetWindow().CreateWindowSurface(m_Instance, &m_Surface);
+    }
 
     void VulkanDevice::PickPhysicalDevice() {
         uint32_t deviceCount = 0;

@@ -1,12 +1,14 @@
 #pragma once
 
-#include "Camera.h"
+#include <functional>
+
+#include "ApplicationInitInfo.h"
+#include "EventLoop.h"
 #include "LayerStack.h"
-#include "EntityComponentSystem/EntityComponentSystem.h"
 #include "Window.h"
 #include "EventSystem/ApplicationEvents.h"
 #include "ImGui/ImGuiLayer.h"
-#include "Physics/PhysicsSystem.h"
+#include "Logging/DataLogger.h"
 
 
 namespace PalmTree {
@@ -14,8 +16,8 @@ namespace PalmTree {
     public:
         static Application& Get() { return *s_Instance; }
 
-        Application();
-        ~Application();
+        Application(const ApplicationInitInfo& init);
+        virtual ~Application();
 
         Application(const Application&) = delete;
         Application& operator=(const Application&) = delete;
@@ -38,23 +40,25 @@ namespace PalmTree {
         Layer* GetLayer(int index) { return m_LayerStack.GetLayer(index); }
 
         Window& GetWindow() const { return *m_Window; }
-        EntityComponentSystem& GetEntityComponentSystem() { return m_Ecs; }
-        Camera& GetCamera() { return m_Camera; }
+        EventLoop& GetEventLoop() { return m_EventLoop; }
+
+        std::chrono::steady_clock::time_point GetStartTime() const { return m_ApplicationStartTime; }
     protected:
         bool OnWindowClosed(WindowClosedEvent& event);
 
+        void LoopEnabledLayers(std::function<void(Layer*)> func);
+
         std::unique_ptr<Window> m_Window;
+
+        EventLoop m_EventLoop;
 
         ImGuiLayer* m_ImGuiLayer = nullptr;
 
-        EntityComponentSystem m_Ecs{};
-
-        Camera m_Camera{};
-
         LayerStack m_LayerStack{};
 
-        std::shared_ptr<CollisionSystem> m_CollisionSystem;
-        std::shared_ptr<PhysicsSystem> m_PhysicsSystem;
+        std::chrono::steady_clock::time_point m_ApplicationStartTime;
+
+        DataLogger m_Logger{"/Application"};
 
         bool m_Running = true;
     private:

@@ -2,7 +2,7 @@
 #include "Descriptors.h"
 
 #include "RendererBackend.h"
-#include "PalmTree/Platform/Vulkan/VulkanDescriptors.h"
+#include "PalmTree/Logging/Log.h"
 
 namespace PalmTree {
     DescriptorSetLayout::Builder& DescriptorSetLayout::Builder::AddBinding(DescriptorSetBinding binding) {
@@ -20,7 +20,7 @@ namespace PalmTree {
         return nullptr;
     }
 
-    DescriptorSet* DescriptorSet::Create(DescriptorSetLayout& layout) {
+    DescriptorSet* DescriptorSet::Create(const std::shared_ptr<DescriptorSetLayout>& layout) {
         switch (RendererBackend::GetAPI()) {
             case RendererBackend::API::VULKAN: return CreateVulkan(layout);
             default: PT_CORE_ASSERT(false, "Current RendererBackend does not support DescriptorSet!");

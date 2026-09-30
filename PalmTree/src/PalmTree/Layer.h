@@ -3,7 +3,7 @@
 #include <string_view>
 
 #include "EventSystem/Event.h"
-#include "Renderer/FrameInfo.h"
+#include "Renderer/LowLevel/FrameInfo.h"
 
 namespace PalmTree {
     class Layer {
@@ -11,7 +11,7 @@ namespace PalmTree {
 #ifdef PT_DEBUG
         explicit Layer(const std::string& name = "Layer") : m_Name(name) {}
 #else
-        explicit Layer(const std::string&) {}
+        explicit Layer(const std::string& = "") {}
 #endif
         virtual ~Layer() = default;
 
@@ -22,7 +22,6 @@ namespace PalmTree {
         virtual void OnEnd() {}
 
         virtual void OnUpdate(float dt) {}
-        virtual void OnRender(float dt) {}
 
         virtual bool OnEvent(Event& event) { return false; }
 

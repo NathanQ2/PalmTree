@@ -1,97 +1,88 @@
+#include "ptpch.h"
 #include "Application.h"
 
-#include "EntityComponentSystem/EntityComponentSystem.h"
-
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
-
 #include <chrono>
-#include <ostream>
 
-#include "Platform/Mac/MacWindow.h"
+#include "Logging/DataLogger.h"
+#include "Logging/DataLoggerUI.h"
+#include "Renderer/SceneRenderer.h"
 
 namespace PalmTree {
     Application* Application::s_Instance = nullptr;
 
-    Application::Application() {
-        PT_CORE_ASSERT(s_Instance == nullptr, "Application already exists!");
+    Application::Application(const ApplicationInitInfo& init) {
+        PT_CORE_VERIFY(s_Instance == nullptr, "Application already exists!");
         s_Instance = this;
 
-        m_Window = std::unique_ptr<Window>(Window::Create());
+        DataLogger::Init();
+
+        m_Window = std::unique_ptr<Window>(Window::Create(init.WindowProps));
         m_Window->SetEventCallback(PT_BIND_EVENT_FN(Application::OnEvent));
 
-        RendererBackend::Init(RendererBackend::API::VULKAN);
+        RendererBackend::Init(init.RendererAPI);
+        SceneRenderer::Init();
 
         m_ImGuiLayer = PushOverlay<ImGuiLayer>(dynamic_cast<MacWindow&>(*m_Window));
-        
-        m_CollisionSystem = std::make_shared<CollisionSystem>();
-        m_Ecs.RegisterSystem(m_CollisionSystem, SignatureBuilder<TransformComponent, ColliderComponent>(m_Ecs.GetComponentManager()).Build());
+        m_ImGuiLayer->InitImGui();
 
-        m_PhysicsSystem = std::make_shared<PhysicsSystem>();
-        m_Ecs.RegisterSystem(
-            m_PhysicsSystem,
-            SignatureBuilder<TransformComponent, RigidBodyComponent>(m_Ecs.GetComponentManager()).Build()
-        );
+        m_EventLoop.RegisterUpdateFn([this](float dt) {
+            LoopEnabledLayers([dt](Layer* layer) { layer->OnUpdate(dt); });
+        });
+
+        m_EventLoop.RegisterImGuiRenderFn([this]() {
+            LoopEnabledLayers([](Layer* layer) { layer->OnImGuiRender(); });
+        });
     }
 
     Application::~Application() {
+        SceneRenderer::Shutdown();
         RendererBackend::Shutdown();
     }
 
     void Application::Run() {
         auto currentTime = std::chrono::high_resolution_clock::now();
+        m_ApplicationStartTime = currentTime;
 
-        for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
-            Layer* layer = *it;
-            if (layer->IsEnabled())
-                layer->OnStart();
-        }
+        PushOverlay<DataLoggerUI>(m_ApplicationStartTime);
+
+        LoopEnabledLayers([](Layer* layer) { layer->OnStart(); });
 
         while (m_Running) {
             m_Window->OnUpdate();
 
-            auto newTime = std::chrono::high_resolution_clock::now();
-            float frameTime = std::chrono::duration<float>(newTime - currentTime).count();
+            auto newTime = std::chrono::steady_clock::now();
+            float dt = std::chrono::duration<float>(newTime - currentTime).count();
+            m_Logger.Record("DeltaTime", dt);
             currentTime = newTime;
+            DataLogger::SetTimestamp(currentTime);
 
             if (RendererBackend::BeginFrame()) {
-                // Update
-                for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
-                    Layer* layer = *it;
-                    if (layer->IsEnabled())
-                        layer->OnUpdate(frameTime);
+                m_EventLoop.OnUpdate(dt);
+
+                const bool sceneRendererReady = SceneRenderer::IsReadyToRender();
+                const bool sceneRendererSwapChainTarget = SceneRenderer::GetRenderTarget() ==
+                    RendererBackend::GetSwapChain();
+                if (sceneRendererReady && !sceneRendererSwapChainTarget) {
+                    RendererBackend::BeginRenderPass(SceneRenderer::GetRenderTarget());
+                    SceneRenderer::Render();
+                    RendererBackend::EndRenderPass();
                 }
-                m_PhysicsSystem->Update(frameTime);
 
-                // Render
-                RendererBackend::BeginRenderPass();
-
-                for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
-                    Layer* layer = *it;
-                    if (layer->IsEnabled())
-                        layer->OnRender(frameTime);
+                RendererBackend::BeginSwapChainRenderPass();
+                if (sceneRendererReady && sceneRendererSwapChainTarget) {
+                    SceneRenderer::Render();
                 }
 
                 m_ImGuiLayer->Begin();
-                m_PhysicsSystem->OnImGuiRender();
-                for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
-                    Layer* layer = *it;
-                    if (layer->IsEnabled())
-                        layer->OnImGuiRender();
-                }
+                m_EventLoop.OnImGuiRender();
                 m_ImGuiLayer->End();
+                RendererBackend::EndSwapChainRenderPass();
 
-                RendererBackend::EndRenderPass();
                 RendererBackend::EndFrame();
             }
         }
 
-        for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
-            Layer* layer = *it;
-            if (layer->IsEnabled())
-                layer->OnEnd();
-        }
+        LoopEnabledLayers([](Layer* layer) { layer->OnEnd(); });
     }
 
     void Application::OnEvent(Event& event) {
@@ -105,13 +96,19 @@ namespace PalmTree {
                 if (handled) break;
             }
         }
-
-        // PT_CORE_TRACE("EVENT: {0}", event.ToString());
     }
 
     bool Application::OnWindowClosed(WindowClosedEvent&) {
         m_Running = false;
 
         return true;
+    }
+
+    void Application::LoopEnabledLayers(std::function<void(Layer*)> func) {
+        for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
+            Layer* layer = *it;
+
+            if (layer->IsEnabled()) func(layer);
+        }
     }
 }

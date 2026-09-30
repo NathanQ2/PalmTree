@@ -2,15 +2,14 @@
 #include "Model.h"
 
 #include "Utils.h"
-#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
-#include "Log.h"
+#include "Logging/Log.h"
 
-#include "PalmTree/Renderer/Buffer.h"
+#include "Renderer/LowLevel/Buffer.h"
 
 
 namespace std {
@@ -33,7 +32,7 @@ namespace PalmTree {
         std::string warn, error;
 
         if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &error, path.c_str())) {
-            throw std::runtime_error(warn + error);
+            PT_CORE_VERIFY(false, warn + error);
         }
 
         Vertices.clear();

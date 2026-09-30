@@ -35,8 +35,8 @@ namespace PalmTree {
         }
 
         template<typename T>
-        T& GetComponent(Id id) {
-            return m_ComponentManager.GetComponent<T>(id);
+        T* GetComponent(Id id) {
+            return HasComponent<T>(id) ? m_ComponentManager.GetComponent<T>(id) : nullptr;
         }
 
         template<typename T>
@@ -53,12 +53,17 @@ namespace PalmTree {
                 m_SystemManager.InitSystemWithObject<T>(i, m_EntityManager.GetSignature(i));
             }
         }
-        
+
         template<typename T>
         bool HasComponent(Id id) {
             return m_EntityManager.GetSignature(id).test(m_ComponentManager.GetComponentType<T>());
         }
-        
+
+        template<typename T>
+        bool HasSystem(const std::shared_ptr<T>& system) {
+            return m_SystemManager.HasSystem<T>(system);
+        }
+
         template<typename T>
         std::shared_ptr<T> GetSystem() {
             return m_SystemManager.GetSystem<T>();
@@ -76,7 +81,7 @@ namespace PalmTree {
     };
 
     template<typename T>
-    T& GameObject::GetComponent() {
+    T* GameObject::GetComponent() {
         PT_CORE_ASSERT(m_IsValid, "GameObject is not valid");
         return m_Ecs->GetComponent<T>(m_Id);
     }
@@ -93,7 +98,7 @@ namespace PalmTree {
         return m_Ecs->HasComponent<T>(m_Id);
     }
 
-    inline TransformComponent& GameObject::GetTransform() {
+    inline TransformComponent* GameObject::GetTransform() {
         return GetComponent<TransformComponent>();
     }
 }

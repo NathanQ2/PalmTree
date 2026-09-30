@@ -16,8 +16,10 @@ A game engine inspired by these tutorials
     - [ ] Render targets (so we can render to an ImGui Window for the editor viewport)
 - [ ] Physics
     - [x] Sphere collider support
-    - [ ] Box collider support
+    - [x] Box collider support
+    - [ ] Make collisions apply an angular impulse to the rigidbody 
 - [ ] Better API
 - [ ] Better logging / profiling
+  - [ ] Stream log data into a file
 - [ ] Windows support
 - [ ] Linux support

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PalmTree/Renderer/Buffer.h"
+#include "PalmTree/Renderer/LowLevel/Buffer.h"
 #include "VulkanBuffer.h"
 
 namespace PalmTree {
